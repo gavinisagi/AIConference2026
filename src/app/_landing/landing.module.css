@@ -1,0 +1,157 @@
+/* 落地页外壳（design-spec §4.5 / §5）——与 /catalog 同一视觉语言，移动优先。 */
+
+.page {
+  background: var(--paper);
+  min-height: 100vh;
+  padding: var(--space-32) var(--page-margin-mobile) var(--space-64);
+}
+@media (min-width: 768px) {
+  .page {
+    padding: var(--space-48) var(--page-margin-desktop) var(--space-96);
+  }
+}
+
+.inner {
+  max-width: var(--content-max);
+  margin: 0 auto;
+}
+
+.head {
+  margin-bottom: var(--space-32);
+}
+.h1 {
+  margin: 0 0 var(--space-12);
+  font-family: var(--font-serif);
+  font-size: var(--fs-display);
+  line-height: var(--lh-display);
+  font-weight: var(--fw-display);
+  letter-spacing: var(--tracking-display);
+  color: var(--ink);
+}
+.kicker {
+  display: block;
+  margin-bottom: var(--space-8);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+.lede {
+  margin: 0;
+  max-width: var(--reading-max);
+  font-size: var(--fs-body-l);
+  line-height: var(--lh-body-l);
+  color: var(--ink-secondary);
+}
+
+/* 计数 / 元信息条：等宽体，报告感（§5.1）。 */
+.metaLine {
+  margin: var(--space-16) 0 0;
+  padding: var(--space-12) 0 0;
+  border-top: 1px solid var(--hairline);
+  font-family: var(--font-mono);
+  font-size: var(--fs-body-s);
+  letter-spacing: 0.01em;
+  color: var(--ink);
+}
+
+/* 视频卡网格：手机 1 列，桌面 2 列（design-spec §5.3）。 */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-16);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-24);
+  }
+}
+
+/* 空态（design-spec §7.1：没有匹配项，给出诚实出口而非编造清单）。 */
+.empty {
+  margin-top: var(--space-24);
+  padding: var(--space-48) var(--space-24);
+  border: 1px dashed var(--hairline-strong);
+  border-radius: var(--radius-card);
+  background: var(--surface-sunken);
+  text-align: center;
+}
+.emptyTitle {
+  margin: 0 0 var(--space-8);
+  font-size: var(--fs-body-l);
+  color: var(--ink);
+}
+.emptyHint {
+  margin: 0 0 var(--space-16);
+  font-size: var(--fs-body-m);
+  color: var(--ink-secondary);
+}
+.emptyActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-16);
+  justify-content: center;
+}
+.emptyLink {
+  font-size: var(--fs-body-m);
+  color: var(--accent);
+  text-decoration: none;
+}
+.emptyLink:hover {
+  text-decoration: underline;
+}
+
+/* 页脚出口：回到完整目录。 */
+.outro {
+  margin-top: var(--space-32);
+  padding-top: var(--space-24);
+  border-top: 1px solid var(--hairline);
+}
+.outroLink {
+  font-size: var(--fs-body-m);
+  color: var(--accent);
+  text-decoration: none;
+}
+.outroLink:hover {
+  text-decoration: underline;
+}
+
+/* ---- 时间预算「歌单」进度（design-spec §8.2） ---- */
+.playlistItem {
+  position: relative;
+}
+.cumRow {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-8);
+  margin: var(--space-8) 0 0 var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  color: var(--ink-muted);
+}
+.cumBarTrack {
+  flex: 1;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--hairline);
+  overflow: hidden;
+}
+.cumBarFill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+.playlistSummary {
+  margin: 0 0 var(--space-16);
+  padding: var(--space-12) var(--space-16);
+  border-radius: var(--radius-card);
+  background: var(--accent-tint);
+  font-family: var(--font-mono);
+  font-size: var(--fs-body-s);
+  color: var(--accent);
+}

@@ -1,0 +1,30 @@
+/* 面包屑（design-spec §4.4 / §6.2）——与 catalog 面包屑同一视觉语言。 */
+
+.crumb {
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
+  color: var(--ink-muted);
+  margin-bottom: var(--space-24);
+}
+
+.seg {
+  white-space: nowrap;
+}
+
+.crumb a {
+  color: var(--ink-secondary);
+  text-decoration: none;
+}
+.crumb a:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.sep {
+  color: var(--hairline-strong);
+}
+
+.crumb [aria-current='page'] {
+  color: var(--ink);
+}
