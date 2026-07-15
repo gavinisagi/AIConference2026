@@ -1,0 +1,125 @@
+/* VideoCard — 目录列表项（design-spec §5.2 / §5.3） */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+
+/* 三态视觉重量分级（§5.3）：不隐藏、不置灰到不可读，但对比度与饱和分级。 */
+.indexed {
+  /* 常规权重，沿用 Card 默认。 */
+}
+.analyzing {
+  /* 解读中：低饱和沉底表面，弱化与推荐争夺注意力。 */
+  background: var(--surface-sunken);
+}
+.analyzing .title {
+  color: var(--ink-secondary);
+}
+/* recommended 的左强调条由 Card recommended 变体提供；此处仅微加重标题对比。 */
+.recommended .title {
+  color: var(--ink);
+}
+
+.topRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-12);
+  flex-wrap: wrap;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
+  font-weight: var(--fw-h3);
+  color: var(--ink);
+}
+
+/* 标题 stretched-link：::after 覆盖整卡，实现「整卡点击进详情」（§8.3）。 */
+.titleLink {
+  color: inherit;
+  text-decoration: none;
+}
+.titleLink::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-card);
+}
+.titleLink:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.card:focus-within .titleLink {
+  outline: none;
+}
+.titleLink:focus-visible::after {
+  outline: var(--focus-ring) solid var(--accent);
+  outline-offset: 2px;
+}
+
+.whyWatch {
+  margin: 0;
+  font-size: var(--fs-body-m);
+  line-height: var(--lh-body-m);
+  color: var(--ink-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+/* 编辑解读缺失占位：更弱对比 + 斜体，明确「非编造内容」。 */
+.whyWatchPending {
+  margin: 0;
+  font-size: var(--fs-body-s);
+  line-height: var(--lh-body-s);
+  color: var(--ink-muted);
+  font-style: italic;
+}
+
+.topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+}
+
+.meta {
+  margin-top: auto;
+}
+.durMissing {
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+}
+
+/* 官方来源链接：z-index 抬到 stretched-link 之上，才能独立点击（§8.3）。 */
+.officialLink {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  font-weight: 500;
+  color: var(--accent);
+  text-decoration: none;
+  padding: var(--space-4) 0;
+}
+.officialLink:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.officialLink:focus-visible {
+  outline: var(--focus-ring) solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
