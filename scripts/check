@@ -28,7 +28,11 @@ npm run lint
 echo "[check] 2/3 typecheck"
 npm run typecheck
 
+# 清理上一轮构建产物：next build 的 build-traces 收集在复用 .next 时会偶发
+# ENOENT(*.nft.json)（Windows 尤甚），导致 check 重复运行时假失败。清空后从
+# 干净态构建，保证本脚本幂等——评审复用工作区多次运行 check 不受影响。
 echo "[check] 3/3 build (static export)"
+rm -rf .next out
 npm run build
 
 echo "[check] all checks passed."
