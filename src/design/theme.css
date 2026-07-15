@@ -1,0 +1,124 @@
+/*
+ * theme.css — Compass 设计系统主题变量（CSS 自定义属性）
+ *
+ * 唯一事实来源：design-spec.md §3.2 / §3.3 / §3.4。
+ * 本文件是「CSS 侧」的 token 权威声明；src/design/tokens.ts 为「TS 侧」的镜像，
+ * 供组件逻辑（如大会 -> 色标映射）取用。二者数值必须保持一致（见 docs/design-system.md）。
+ *
+ * 严格约束：
+ *  - 仅使用 design-spec §3.2 已定义的颜色，不新增未定义色值。
+ *  - 圆角 / 阴影 / 间距遵守 4px 刻度。
+ *  - 深色模式为 v1 非目标，仅在文末预留 token 命名，不实装。
+ */
+
+:root {
+  /* ---- 中性 / 纸面（§3.2） ---- */
+  --paper: #FBFAF8;            /* 页面底色（暖白纸面） */
+  --surface: #FFFFFF;          /* 卡片 / 浮层表面 */
+  --surface-sunken: #F4F2ED;   /* 次级块、筛选栏底 */
+  --ink: #1C1B19;              /* 主文本（近黑，微暖） */
+  --ink-secondary: #57534E;    /* 次级文本 */
+  --ink-muted: #8A857D;        /* 元信息 / 占位 */
+  --hairline: #E7E4DE;         /* 分隔线 / 卡片描边 */
+  --hairline-strong: #D8D4CC;  /* 输入框 / 强分隔 */
+
+  /* ---- 主强调 Editorial Ink Blue（§3.2） ---- */
+  --accent: #1B3A5B;           /* 主 CTA、链接、选中态 */
+  --accent-hover: #142C46;     /* 主色 hover */
+  --accent-tint: #E9EEF4;      /* 主题 chip / 选中背景 */
+
+  /* ---- 状态色 三态（§3.2） ---- */
+  --status-recommended-ink: #8A5200;   /* 暖金字 */
+  --status-recommended-bg: #FBEFD6;    /* 暖金底 */
+  --status-indexed-ink: #57534E;       /* 中性字 */
+  --status-indexed-bg: #F0EEE9;        /* 中性底 */
+  --status-analyzing-ink: #2F5D50;     /* 深绿字 */
+  --status-analyzing-bg: #E4EFE9;      /* 深绿底 */
+
+  /* ---- 大会色标（§3.2，仅识别，禁止大面积铺色） ---- */
+  --conf-ai-engineer: #2F5D50;    /* AI Engineer World's Fair — 森林绿 */
+  --conf-cursor-compile: #3A3A3A; /* Cursor Compile — 石墨黑 */
+  --conf-figma-config: #6B4E9E;   /* Figma Config — 低饱和紫 */
+
+  /* ---- 反馈色（§3.2） ---- */
+  --feedback-error-ink: #9B2C2C;
+  --feedback-error-bg: #F7E9E7;
+  --feedback-success-ink: #2F5D50;
+  --feedback-success-bg: #E4EFE9;
+
+  /* ---- 字族 中英文混排（§3.3） ---- */
+  --font-serif: "Source Serif 4", "Noto Serif SC", Georgia, "Songti SC", serif;
+  --font-sans: "Inter", "Noto Sans SC", system-ui, -apple-system, "PingFang SC", sans-serif;
+  --font-mono: "IBM Plex Mono", "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  /* ---- 字阶 桌面基准（§3.3，size / line / weight / tracking） ---- */
+  --fs-display: 56px;   --lh-display: 1.08;  --fw-display: 600;  --tracking-display: -0.02em;
+  --fs-h2: 32px;        --lh-h2: 1.2;        --fw-h2: 600;
+  --fs-h3: 20px;        --lh-h3: 1.35;       --fw-h3: 600;
+  --fs-body-l: 18px;    --lh-body-l: 1.65;   --fw-body-l: 400;
+  --fs-body-m: 16px;    --lh-body-m: 1.6;    --fw-body-m: 400;
+  --fs-body-s: 14px;    --lh-body-s: 1.5;    --fw-body-s: 400;
+  --fs-label: 13px;     --lh-label: 1.4;     --fw-label: 500;  --tracking-label: 0.06em;
+  --fs-meta: 13px;      --lh-meta: 1.4;      --fw-meta: 500;
+
+  /* ---- 间距刻度 4px 基（§3.4） ---- */
+  --space-4: 4px;
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --space-48: 48px;
+  --space-64: 64px;
+  --space-96: 96px;
+
+  /* ---- 圆角（4px 刻度，卡片不超 8，§3.5/§3.6/§3.7） ---- */
+  --radius-chip: 4px;   /* 主题 chip / 状态徽章 */
+  --radius-btn: 6px;    /* 按钮 / 输入控件 */
+  --radius-card: 8px;   /* 卡片（上限） */
+
+  /* ---- 阴影（§3.5） ---- */
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-card-hover: 0 6px 20px rgba(0, 0, 0, 0.08);
+
+  /* ---- 栅格与阅读列宽（§3.3/§3.4） ---- */
+  --content-max: 1200px;   /* 内容最大宽 */
+  --reading-max: 720px;    /* 正文阅读列宽上限 68–72 字符 */
+  --gutter: 24px;          /* 桌面列间距 */
+  --page-margin-desktop: 32px;
+  --page-margin-mobile: 16px;
+
+  /* ---- 强调条 / 焦点环（§3.5/§8.1） ---- */
+  --accent-bar: 3px;       /* 推荐先看卡左侧强调条 */
+  --focus-ring: 2px;       /* 键盘焦点环 */
+
+  /* ---- 动效基调（§8.1，150–200ms ease-out，无弹跳） ---- */
+  --motion-fast: 150ms;
+  --motion-base: 200ms;
+  --easing: ease-out;
+
+  /* ---- 触控最小可点区（§3.7） ---- */
+  --tap-min: 44px;
+}
+
+/*
+ * 手机字阶（§3.3，375–430px 主要设计基准）。仅覆盖字号 / 行高，字族与字重沿用。
+ */
+@media (max-width: 640px) {
+  :root {
+    --fs-display: 34px;   --lh-display: 1.12;
+    --fs-h2: 24px;        --lh-h2: 1.25;
+    --fs-h3: 18px;        --lh-h3: 1.35;
+    --fs-body-l: 16px;    --lh-body-l: 1.6;
+    --fs-body-m: 15px;    --lh-body-m: 1.6;
+    --fs-body-s: 13px;    --lh-body-s: 1.5;
+    --fs-label: 12px;
+    --fs-meta: 12px;
+  }
+}
+
+/*
+ * 深色模式：v1 非目标（design-spec §9）。此处仅预留命名，不启用任何规则。
+ * 若 Elon 要求纳入 v1，再补一版反相纸面覆盖：
+ *   [data-theme="dark"] { --paper: #171614; --ink: #EDEAE3; ... }
+ */

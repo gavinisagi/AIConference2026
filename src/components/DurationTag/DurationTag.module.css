@@ -1,0 +1,22 @@
+/* DurationTag — 时长标，design-spec §3.6（等宽体 + 时钟微图标） */
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
+  font-weight: var(--fw-meta);
+  font-variant-numeric: tabular-nums; /* 数字不跳动（§7.2） */
+  color: var(--ink-secondary);
+}
+
+.icon {
+  width: 12px;
+  height: 12px;
+  flex: none;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.5; /* 线性图标 1.5px（§3.8） */
+}

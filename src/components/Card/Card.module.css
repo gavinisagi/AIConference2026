@@ -1,0 +1,31 @@
+/* Card — design-spec §3.5 */
+
+.card {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-card); /* 8px，克制不超 8 */
+  padding: var(--space-24); /* 20–24px 内边距 */
+  box-shadow: var(--shadow-card);
+  transition:
+    box-shadow var(--motion-fast) var(--easing),
+    transform var(--motion-fast) var(--easing);
+}
+
+/* 交互卡：hover 上移 2px + 阴影加重（§3.5） */
+.interactive {
+  cursor: pointer;
+}
+.interactive:hover {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-2px);
+}
+
+/*
+ * 推荐先看卡：左侧 3px 强调条（暖金），是列表视觉锚点（§3.5）。
+ * 用暖金（recommended ink）与三态徽章一致，强化「全站锚点」语义。
+ */
+.recommended {
+  border-left: var(--accent-bar) solid var(--status-recommended-ink);
+  padding-left: calc(var(--space-24) - var(--accent-bar));
+}

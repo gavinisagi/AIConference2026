@@ -1,0 +1,110 @@
+/* styleguide 页布局 —— 仅本页私有排版，组件本身样式在各自 module.css */
+
+.page {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: var(--space-64) var(--page-margin-desktop) var(--space-96);
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  padding-bottom: var(--space-32);
+  border-bottom: 1px solid var(--hairline);
+}
+
+.lead {
+  color: var(--ink-secondary);
+}
+
+.code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--surface-sunken);
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+.section {
+  padding: var(--space-48) 0;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.sectionHead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-bottom: var(--space-24);
+}
+
+.sectionHead .t-meta,
+.sectionHead p {
+  color: var(--ink-muted);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-16);
+}
+
+.statusCell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-8);
+}
+
+/* 色板网格 */
+.swatchGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--space-16);
+}
+
+.swatch {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.swatchChip {
+  height: 56px;
+  border-radius: var(--radius-btn);
+  border: 1px solid var(--hairline);
+}
+
+.swatchHex {
+  color: var(--ink-muted);
+}
+
+/* 字阶纵向堆叠 */
+.typeStack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+}
+
+/* 卡片网格：桌面 3 列，手机 1 列 */
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-24);
+  align-items: start;
+}
+
+.foot {
+  padding-top: var(--space-32);
+  color: var(--ink-muted);
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: var(--space-48) var(--page-margin-mobile) var(--space-64);
+  }
+  .cardGrid {
+    grid-template-columns: 1fr;
+  }
+}

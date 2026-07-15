@@ -1,0 +1,55 @@
+/* TakeawayCard — 观点卡，design-spec §6.1 */
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+
+/* 序号 / 来源行：榜单序号 · 大会色标 · 状态徽章 */
+.sourceRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  flex-wrap: wrap;
+}
+
+/* 榜单序号（等宽，编辑榜单感，§4.1 区块 5） */
+.rank {
+  font-family: var(--font-mono);
+  font-size: var(--fs-h3);
+  font-weight: 600;
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 观点句：卡片主角（H3，1–2 行） */
+.quote {
+  font-family: var(--font-sans);
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
+  font-weight: var(--fw-h3);
+  color: var(--ink);
+  margin: 0;
+}
+
+/* 支撑说明（Body S，最多 2 行，超出省略） */
+.support {
+  font-size: var(--fs-body-s);
+  line-height: var(--lh-body-s);
+  color: var(--ink-secondary);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 行动区 */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-16);
+  margin-top: var(--space-4);
+}

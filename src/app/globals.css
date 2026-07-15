@@ -1,0 +1,135 @@
+/*
+ * globals.css — 全局基线样式。
+ *
+ * 引入顺序（见 layout.tsx）：theme.css（token 变量）先于本文件。
+ * 职责：轻量 reset + 纸面基调 + 字阶工具类 + 中英文混排规则（design-spec §7.2）。
+ * 组件内私有样式一律走 CSS Modules（*.module.css），不在此堆叠组件样式。
+ */
+
+@import '../design/theme.css';
+
+/* ---- 轻量 reset ---- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body-m);
+  line-height: var(--lh-body-m);
+  /* 中英文混排：字距微调 + 更顺滑的西文渲染（§7.2） */
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* 中英文之间自动 1/4 空格（渐进增强，仅支持浏览器生效；§7.2） */
+  text-spacing-trim: space-first;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+figure {
+  margin: 0;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* 键盘可达：所有可聚焦元素统一焦点环（§8.1） */
+:focus-visible {
+  outline: var(--focus-ring) solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* 尊重减少动效偏好（§8.1） */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---- 字阶工具类（§3.3）。语义标题 + 正文层级，供页面/组件复用 ---- */
+.t-display {
+  font-family: var(--font-serif);
+  font-size: var(--fs-display);
+  line-height: var(--lh-display);
+  font-weight: var(--fw-display);
+  letter-spacing: var(--tracking-display);
+}
+
+.t-h2 {
+  font-family: var(--font-serif);
+  font-size: var(--fs-h2);
+  line-height: var(--lh-h2);
+  font-weight: var(--fw-h2);
+}
+
+.t-h3 {
+  font-family: var(--font-sans);
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
+  font-weight: var(--fw-h3);
+}
+
+.t-body-l {
+  font-size: var(--fs-body-l);
+  line-height: var(--lh-body-l);
+}
+
+.t-body-m {
+  font-size: var(--fs-body-m);
+  line-height: var(--lh-body-m);
+}
+
+.t-body-s {
+  font-size: var(--fs-body-s);
+  line-height: var(--lh-body-s);
+  color: var(--ink-secondary);
+}
+
+/* Label：无衬线，EN 大写 + tracking（§3.3） */
+.t-label {
+  font-family: var(--font-sans);
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  font-weight: var(--fw-label);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+/* Meta：等宽体，数字/时长/计数不跳动（§3.3 / §7.2） */
+.t-meta {
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
+  font-weight: var(--fw-meta);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 正文阅读列宽上限（68–72 字符，§3.3） */
+.reading {
+  max-width: var(--reading-max);
+}

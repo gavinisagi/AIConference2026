@@ -1,0 +1,56 @@
+/* Button — design-spec §3.7 */
+
+.base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  min-height: var(--tap-min); /* 44px 触控友好 */
+  padding: 0 var(--space-24);
+  border-radius: var(--radius-btn); /* 6px */
+  font-family: var(--font-sans);
+  font-size: var(--fs-body-m);
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition:
+    background-color var(--motion-fast) var(--easing),
+    border-color var(--motion-fast) var(--easing),
+    color var(--motion-fast) var(--easing);
+}
+
+.base:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 主按钮：实心主色，白字，hover 加深（§3.7）。白字取自 --surface(#FFFFFF)，不新增未定义色值 */
+.primary {
+  background: var(--accent);
+  color: var(--surface);
+}
+.primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+/* 次按钮：描边 + 墨字 + 透明底（§3.7） */
+.secondary {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--hairline-strong);
+}
+.secondary:hover:not(:disabled) {
+  border-color: var(--ink-secondary);
+}
+
+/* 文字按钮 / 链接：主色，hover 下划线（§3.7） */
+.text {
+  background: transparent;
+  color: var(--accent);
+  min-height: auto;
+  padding: 0;
+}
+.text:hover:not(:disabled) {
+  text-decoration: underline;
+}

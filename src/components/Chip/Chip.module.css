@@ -1,0 +1,28 @@
+/* Chip — 主题 chip，design-spec §3.6 */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px var(--space-8);
+  border-radius: var(--radius-chip); /* 4px */
+  font-family: var(--font-sans);
+  font-size: var(--fs-label); /* 13px */
+  line-height: var(--lh-label);
+  background: var(--accent-tint);
+  color: var(--accent);
+  border: none;
+  white-space: nowrap;
+}
+
+/* 可点击变体：进入主题落地页（§3.6） */
+a.chip,
+button.chip {
+  cursor: pointer;
+  transition: background-color var(--motion-fast) var(--easing);
+}
+a.chip:hover,
+button.chip:hover {
+  /* 不新增未定义色值：以 brightness 微暗表达 hover，仍是 --accent-tint 本色 */
+  filter: brightness(0.96);
+  text-decoration: none;
+}
