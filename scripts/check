@@ -1,5 +1,6 @@
 #!/usr/bin/env sh
 # check — 项目唯一校验入口。单命令跑通全部校验：
+#   0) data      (scripts/build-data.mjs --verify -> 数据契约 schema 校验 + 漂移比对)
 #   1) lint      (next lint)
 #   2) typecheck (tsc --noEmit)
 #   3) build     (next build -> 静态导出 out/)
@@ -15,6 +16,11 @@ if [ ! -d node_modules ]; then
   echo "[check] ERROR: node_modules missing. Run scripts/bootstrap first." >&2
   exit 1
 fi
+
+# 构建期数据契约校验（T1 AIO-28）：逐条 schema 校验 + 与已提交 dataset.json 漂移比对。
+# 字段缺失走降级（生成侧规则），不可降级的坏记录或漂移即失败。
+echo "[check] 0/3 data contract (schema + drift)"
+node scripts/build-data.mjs --verify
 
 echo "[check] 1/3 lint"
 npm run lint
