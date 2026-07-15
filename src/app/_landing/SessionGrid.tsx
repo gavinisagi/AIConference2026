@@ -15,7 +15,7 @@ export interface SessionGridProps {
  * SessionGrid — 落地页视频卡网格（复用 T4 的 VideoCard，design-spec §5.3 / §6.2）。
  *
  * 有结果：手机 1 列 / 桌面 2 列的 VideoCard 网格。
- * 无结果：空态卡（§7.1），给出「去完整目录 / 按主题探索」的真实出口，不编造清单。
+ * 无结果：空态卡（§7.1），给出「去完整目录」的真实出口，不编造清单。
  */
 export function SessionGrid({ sessions, emptyTitle, emptyHint }: SessionGridProps) {
   if (sessions.length === 0) {
@@ -26,9 +26,6 @@ export function SessionGrid({ sessions, emptyTitle, emptyHint }: SessionGridProp
         <div className={styles.emptyActions}>
           <Link href="/catalog/" className={styles.emptyLink}>
             去完整目录 →
-          </Link>
-          <Link href="/topics/" className={styles.emptyLink}>
-            按主题探索 →
           </Link>
         </div>
       </div>

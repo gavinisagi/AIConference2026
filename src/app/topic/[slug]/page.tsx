@@ -45,7 +45,7 @@ export default async function TopicLandingPage({
     <LandingView
       crumbs={[
         { label: '目录', href: '/catalog/' },
-        { label: '主题', href: '/topics/' },
+        { label: '主题' },
         { label: preset.name },
       ]}
       kicker="主题"
