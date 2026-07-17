@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "videoId": "SQji6izodIE",
+  "generatedBy": {
+    "pipelineVersion": "0.1.0",
+    "asrProvider": "moss-asr",
+    "asrModel": "OpenMOSS-Team/MOSS-Transcribe-Diarize",
+    "llmModel": "claude-opus-4-8",
+    "dryRun": false
+  },
+  "topics": null,
+  "roles": [
+    "product-design",
+    "founder-lead",
+    "trend"
+  ],
+  "speakers": [],
+  "whyWatch": "这是 Config 2026 的收尾致辞，篇幅短、信息密度低，主要传递社区氛围与明年预告，适合快速扫过而非重点观看。",
+  "takeaways": [
+    {
+      "id": "SQji6izodIE-tk1",
+      "sessionId": "SQji6izodIE",
+      "statement": "主办方强调线下共聚的社区价值，并呼吁参会者把大会的能量带回自己所在的社区中传播。",
+      "context": "闭幕致辞的核心信息，点明 Config 作为设计社区聚会的定位。",
+      "timestampSeconds": 80.88,
+      "roles": [
+        "founder-lead",
+        "trend"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00013",
+        "seg_00016",
+        "seg_00017"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "id": "SQji6izodIE-tk2",
+      "sessionId": "SQji6izodIE",
+      "statement": "现场涌现出自发的社区文化：参会者频繁互相交换毛绒玩具（plushies），成为大会意外的社交仪式。",
+      "context": "主办方精心策划之外的意外惊喜，被作为社区活力的例证提及。",
+      "timestampSeconds": 41.52,
+      "roles": [
+        "product-design",
+        "trend"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00007",
+        "seg_00008"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "id": "SQji6izodIE-tk3",
+      "sessionId": "SQji6izodIE",
+      "statement": "满场全球顶尖设计师为数学公式 e^(πi) 集体欢呼，反映出设计社区对技术与数学之美的热情。",
+      "context": "闭幕致辞中回顾的大会现场趣事之一。",
+      "timestampSeconds": 54.72,
+      "roles": [
+        "product-design",
+        "trend"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00009",
+        "seg_00010"
+      ],
+      "confidence": 0.8
+    },
+    {
+      "id": "SQji6izodIE-tk4",
+      "sessionId": "SQji6izodIE",
+      "statement": "本届 Config 约一万人规模，会后庆祝活动持续至 18:30，主办方预告明年将继续举办 Config。",
+      "context": "大会规模与后续安排的事实性信息，合并自开场回顾与结尾预告。",
+      "timestampSeconds": 24.64,
+      "roles": [
+        "trend"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00003",
+        "seg_00004",
+        "seg_00005",
+        "seg_00020",
+        "seg_00023"
+      ],
+      "confidence": 0.85
+    }
+  ],
+  "summary": "Figma CEO Dylan Field 在 Config 2026 闭幕致辞中回顾了这场约一万人规模的大会：现场涌现出交换毛绒玩具等自发的社区仪式，设计师们甚至为数学公式集体欢呼；他强调线下共聚的社区价值，呼吁参会者把大会的能量带回各自的社区，并预告明年 Config 将继续举办。",
+  "language": "en",
+  "chapters": [
+    {
+      "index": 0,
+      "title": "闭幕致辞：社区能量与告别",
+      "startSeconds": 11.68,
+      "endSeconds": 132.8,
+      "visualDependency": false
+    }
+  ]
+}
