@@ -15,13 +15,18 @@
  * 本模块是规范化与枚举取值的“单一事实来源”；docs/data-contract.md 是人读契约，
  * src/lib/schema.ts 是站点侧的 TS 类型镜像。三者须保持一致。
  */
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, '..');
 const SOURCE_PATH = resolve(ROOT, 'data/catalog.json');
+// 三层数据（data-contract.md §4「回填层」的落地实现）：
+//   catalog(来源事实/派生缺省) < enrichments(可发布 AI 产物) < editorial(人工覆盖)。
+// 两个覆盖目录不存在或为空时，合并是空操作，输出与纯 catalog 派生字节一致。
+const ENRICH_DIR = resolve(ROOT, 'data/enrichments');
+const EDITORIAL_DIR = resolve(ROOT, 'data/editorial');
 const OUTPUT_PATH = resolve(ROOT, 'src/data/dataset.json');
 const DATASET_VERSION = 1;
 
@@ -147,6 +152,111 @@ function normalizeRecord(raw, index) {
 }
 
 // ---------------------------------------------------------------------------
+// 回填层：enrichments（AI 产物）/ editorial（人工覆盖）合并
+// ---------------------------------------------------------------------------
+
+/**
+ * 读取覆盖目录 data/{enrichments|editorial}/*.json → Map(videoId → 覆盖对象)。
+ * 目录不存在返回空 Map。文件名须为 <videoId>.json；坏 JSON 记 warning 并跳过，
+ * 不阻塞构建（单个坏文件不该拖垮整站）。
+ */
+function loadOverrides(dir, warnings) {
+  const map = new Map();
+  if (!existsSync(dir)) return map;
+  for (const name of readdirSync(dir).sort()) {
+    if (!name.endsWith('.json')) continue;
+    const videoId = name.slice(0, -'.json'.length);
+    try {
+      const obj = JSON.parse(readFileSync(resolve(dir, name), 'utf8'));
+      map.set(videoId, obj);
+    } catch (e) {
+      warnings.push(`${dir}/${name}: 无法解析 JSON，已跳过（${e.message}）`);
+    }
+  }
+  return map;
+}
+
+/** 仅保留契约合法值的数组过滤器；非数组或含非法值 → 返回 null（视为不覆盖）。 */
+function sanitizeEnumArray(v, allowed) {
+  if (!Array.isArray(v)) return null;
+  if (v.some((x) => !allowed.includes(x))) return null;
+  return v;
+}
+
+/** 规范化 speakers 覆盖 → Speaker[]（{name, org}）。非法 → null。 */
+function sanitizeSpeakers(v) {
+  if (!Array.isArray(v)) return null;
+  const out = [];
+  for (const s of v) {
+    if (!s || typeof s.name !== 'string' || s.name.trim() === '') return null;
+    out.push({ name: s.name.trim(), org: typeof s.org === 'string' && s.org.trim() ? s.org.trim() : null });
+  }
+  return out;
+}
+
+/** 规范化 takeaways 覆盖 → Takeaway[]（投影到契约字段，丢弃 evidence/confidence 等站点不消费字段）。非法 → null。 */
+function sanitizeTakeaways(v, sessionId) {
+  if (!Array.isArray(v)) return null;
+  const out = [];
+  for (const [i, tk] of v.entries()) {
+    if (!tk || typeof tk.statement !== 'string' || tk.statement.trim() === '') return null;
+    const id = typeof tk.id === 'string' && tk.id.trim() ? tk.id.trim() : `${sessionId}-tk${i + 1}`;
+    const roles = sanitizeEnumArray(tk.roles, ROLES) || [];
+    const ts =
+      typeof tk.timestampSeconds === 'number' && tk.timestampSeconds >= 0 ? tk.timestampSeconds : null;
+    out.push({
+      id,
+      sessionId,
+      statement: tk.statement.trim(),
+      context: typeof tk.context === 'string' && tk.context.trim() ? tk.context.trim() : null,
+      timestampSeconds: ts,
+      roles,
+    });
+  }
+  return out;
+}
+
+/**
+ * 将一个覆盖对象（enrichment 或 editorial）应用到 session（就地字段级覆盖）。
+ * 只认契约字段，逐字段校验；非法值忽略并记 warning，绝不让坏覆盖破坏 schema。
+ * 优先级由调用顺序保证：先 enrichment 再 editorial（后者胜出）。
+ */
+function applyOverride(session, ov, source, warnings) {
+  if (!ov || typeof ov !== 'object') return;
+  const at = `${source}/${session.id}.json`;
+
+  if ('topics' in ov) {
+    const t = sanitizeEnumArray(ov.topics, TOPICS);
+    if (t) session.topics = t;
+    else warnings.push(`${at}: topics 非法（须为契约主题数组），忽略`);
+  }
+  if ('status' in ov) {
+    if (STATUSES.includes(ov.status)) session.status = ov.status;
+    else warnings.push(`${at}: status "${ov.status}" 非法，忽略`);
+  }
+  if ('roles' in ov) {
+    const r = sanitizeEnumArray(ov.roles, ROLES);
+    if (r) session.roles = r;
+    else warnings.push(`${at}: roles 非法，忽略`);
+  }
+  if ('speakers' in ov) {
+    const s = sanitizeSpeakers(ov.speakers);
+    if (s) session.speakers = s;
+    else warnings.push(`${at}: speakers 非法，忽略`);
+  }
+  if ('whyWatch' in ov) {
+    if (ov.whyWatch === null || (typeof ov.whyWatch === 'string' && ov.whyWatch.trim())) {
+      session.whyWatch = ov.whyWatch === null ? null : ov.whyWatch.trim();
+    } else warnings.push(`${at}: whyWatch 须为非空字符串或 null，忽略`);
+  }
+  if ('takeaways' in ov) {
+    const tks = sanitizeTakeaways(ov.takeaways, session.id);
+    if (tks) session.takeaways = tks;
+    else warnings.push(`${at}: takeaways 非法，忽略`);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // 校验（构建期 schema 校验；供 --verify 全量运行）
 // ---------------------------------------------------------------------------
 function isNonEmptyString(v) {
@@ -199,13 +309,27 @@ function build() {
   const raw = JSON.parse(rawText);
   if (!Array.isArray(raw)) throw new Error('catalog.json must be a JSON array');
 
+  // 回填层：读取 enrichments / editorial 覆盖（目录不存在 → 空 Map，纯 catalog 派生）。
+  const overrideWarnings = [];
+  const enrichments = loadOverrides(ENRICH_DIR, overrideWarnings);
+  const editorial = loadOverrides(EDITORIAL_DIR, overrideWarnings);
+
   const sessions = [];
   const dropped = [];
   for (const [i, rec] of raw.entries()) {
     const { session, errors } = normalizeRecord(rec, i);
-    if (session) sessions.push(session);
-    else dropped.push({ index: i, errors });
+    if (!session) {
+      dropped.push({ index: i, errors });
+      continue;
+    }
+    // 合并优先级：catalog 派生（session 现值） < enrichment < editorial。
+    applyOverride(session, enrichments.get(session.id), 'enrichments', overrideWarnings);
+    applyOverride(session, editorial.get(session.id), 'editorial', overrideWarnings);
+    sessions.push(session);
   }
+
+  // 覆盖告警走 stderr（不进 dataset.json，避免污染漂移比对）。
+  for (const w of overrideWarnings) console.error(`[build-data] 覆盖告警: ${w}`);
 
   // 统计口径（全部派生自真实语料，不写死占位数）。
   const totalDurationSeconds = sessions.reduce((sum, s) => sum + (s.durationSeconds || 0), 0);
