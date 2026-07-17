@@ -331,6 +331,7 @@ def cmd_subtitle(args) -> int:
     written = subtitle.export(
         asr, out_dir, basename, langs=tuple(args.langs.split(",")),
         fmt=args.format, speaker=args.speaker, dry_run=dry,
+        cache_path=work / "translations.json",
     )
     for p in written:
         print(f"  写出 {p}")

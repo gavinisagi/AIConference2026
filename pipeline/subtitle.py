@@ -6,6 +6,7 @@
 """
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from . import config, llm
@@ -67,15 +68,28 @@ def export(
     fmt: str = "srt",
     speaker: bool = False,
     dry_run: bool = False,
+    cache_path: Path | None = None,
 ) -> list[str]:
-    """导出字幕。langs 子集 of {en, zh, bi}；bi/zh 需翻译（claude -p）。返回写出的文件路径。"""
+    """导出字幕。langs 子集 of {en, zh, bi}；bi/zh 需翻译（claude -p）。返回写出的文件路径。
+
+    翻译缓存：cache_path 存在且与分段数一致则复用（重出不同格式不再重复付费翻译）。
+    文件按 UTF-8 **带 BOM**(utf-8-sig)写出——否则 Windows 播放器易按 GBK 解码致中文乱码。
+    """
     out_dir.mkdir(parents=True, exist_ok=True)
     need_zh = any(l in ("zh", "bi") for l in langs)
+    segs = asr_result["segments"]
     translations = None
     if need_zh:
-        texts = [s["text"] for s in asr_result["segments"]]
-        print(f"  [subtitle] 翻译 {len(texts)} 行…")
-        translations = llm.translate_batch(texts, dry_run)
+        if cache_path and cache_path.exists():
+            cached = json.loads(cache_path.read_text(encoding="utf-8"))
+            if len(cached) == len(segs):
+                translations = cached
+                print(f"  [subtitle] 复用翻译缓存 {cache_path.name}")
+        if translations is None:
+            print(f"  [subtitle] 翻译 {len(segs)} 行…")
+            translations = llm.translate_batch([s["text"] for s in segs], dry_run)
+            if cache_path and any(translations):
+                cache_path.write_text(json.dumps(translations, ensure_ascii=False), encoding="utf-8")
 
     builder = build_vtt if fmt == "vtt" else build_srt
     ext = "vtt" if fmt == "vtt" else "srt"
@@ -95,7 +109,8 @@ def export(
         else:
             continue
         path = out_dir / name
-        path.write_text(content, encoding="utf-8")
+        # utf-8-sig = 带 BOM，Windows 播放器据此识别 UTF-8，中文不乱码。
+        path.write_text(content, encoding="utf-8-sig")
         written.append(str(path))
     return written
 
