@@ -11,6 +11,8 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
+import subprocess
 import urllib.error
 import urllib.request
 
@@ -28,8 +30,38 @@ def has_api_key() -> bool:
     return bool(os.environ.get("ANTHROPIC_API_KEY"))
 
 
+def _claude_cli() -> str | None:
+    """定位 claude CLI（headless 后端，走用户现有 Claude Code 登录，免 API key）。"""
+    return os.environ.get("CLAUDE_BIN") or shutil.which("claude")
+
+
+def resolve_backend() -> str:
+    """选择 LLM 后端：环境显式 > claude-cli（默认，零配置）> api-key > stub。
+
+    PIPELINE_LLM_BACKEND ∈ {claude-cli, api, stub} 可强制。
+    """
+    forced = os.environ.get("PIPELINE_LLM_BACKEND")
+    if forced in {"claude-cli", "api", "stub"}:
+        return forced
+    if _claude_cli():
+        return "claude-cli"
+    if has_api_key():
+        return "api"
+    return "stub"
+
+
 def _call(system: str, user: str, max_tokens: int = config.LLM_MAX_TOKENS) -> str:
-    """调 Messages API，返回文本内容。仅在有 key 时使用。"""
+    """按当前后端调 LLM，返回模型文本。stub 后端不应走到这里。"""
+    backend = resolve_backend()
+    if backend == "api":
+        return _call_api(system, user, max_tokens)
+    if backend == "claude-cli":
+        return _call_claude_cli(system, user)
+    raise LLMError(f"当前后端为 {backend}，不应调用 _call")
+
+
+def _call_api(system: str, user: str, max_tokens: int) -> str:
+    """Anthropic Messages API（urllib 直连，需 ANTHROPIC_API_KEY）。"""
     key = os.environ.get("ANTHROPIC_API_KEY")
     if not key:
         raise LLMError("未设置 ANTHROPIC_API_KEY")
@@ -48,7 +80,7 @@ def _call(system: str, user: str, max_tokens: int = config.LLM_MAX_TOKENS) -> st
         },
     )
     try:
-        with urllib.request.urlopen(req, timeout=120) as resp:
+        with urllib.request.urlopen(req, timeout=180) as resp:
             payload = json.loads(resp.read().decode("utf-8"))
     except urllib.error.HTTPError as e:
         raise LLMError(f"Anthropic API HTTP {e.code}: {e.read().decode('utf-8')[:500]}") from e
@@ -56,6 +88,38 @@ def _call(system: str, user: str, max_tokens: int = config.LLM_MAX_TOKENS) -> st
         raise LLMError(f"Anthropic API 网络错误: {e}") from e
     parts = [b.get("text", "") for b in payload.get("content", []) if b.get("type") == "text"]
     return "".join(parts).strip()
+
+
+def _call_claude_cli(system: str, user: str) -> str:
+    """headless `claude -p`：走用户 Claude Code 登录，免 API key。
+
+    system 作为附加系统提示，user 经 stdin 传入；--output-format json 取信封 .result。
+    注意：每次调用有 CC 系统提示开销，故上层按「每场一次」批处理以压低次数。
+    """
+    exe = _claude_cli()
+    if not exe:
+        raise LLMError("未找到 claude CLI（可设 CLAUDE_BIN）")
+    cmd = [
+        exe, "-p", "--output-format", "json",
+        "--append-system-prompt", system,
+        "--max-turns", "1",
+    ]
+    try:
+        proc = subprocess.run(
+            cmd, input=user, capture_output=True, text=True,
+            encoding="utf-8", timeout=600,
+        )
+    except subprocess.TimeoutExpired as e:
+        raise LLMError("claude -p 超时（>600s）") from e
+    if proc.returncode != 0:
+        raise LLMError(f"claude -p 失败（exit {proc.returncode}）：{proc.stderr[-500:]}")
+    try:
+        env = json.loads(proc.stdout)
+    except json.JSONDecodeError as e:
+        raise LLMError(f"claude -p 输出非 JSON 信封：{proc.stdout[:300]}") from e
+    if env.get("is_error"):
+        raise LLMError(f"claude -p 报错：{env.get('result', '')[:300]}")
+    return str(env.get("result", "")).strip()
 
 
 def _parse_json(text: str) -> dict:
@@ -88,10 +152,17 @@ _CHAPTER_SYS = (
 )
 
 
+def _use_stub(dry_run: bool) -> bool:
+    return dry_run or resolve_backend() == "stub"
+
+
 def extract_chapter(chapter: dict, dry_run: bool) -> dict:
-    """章节 → 结构化提取 JSON。dry_run 走确定性桩。"""
+    """单章节 → 结构化提取 JSON。dry_run/stub 走确定性桩。
+
+    注意：批量场景请用 extract_chapters_batched（整场一次调用，省 claude -p 开销）。
+    """
     seg_ids = chapter["segmentIds"]
-    if dry_run or not has_api_key():
+    if _use_stub(dry_run):
         return _stub_chapter(chapter)
 
     user = json.dumps({
@@ -101,12 +172,73 @@ def extract_chapter(chapter: dict, dry_run: bool) -> dict:
         "speakers": chapter["speakers"],
     }, ensure_ascii=False)
     out = _parse_json(_call(_CHAPTER_SYS, user))
-    # 清洗：evidence 只保留本章节存在的 segmentId。
+    return _sanitize_extract(out, seg_ids)
+
+
+def _sanitize_extract(out: dict, seg_ids) -> dict:
+    """清洗单章节提取：evidence 只保留本章节存在的 segmentId。"""
     valid = set(seg_ids)
     for c in out.get("claims", []):
         c["evidenceSegmentIds"] = [x for x in c.get("evidenceSegmentIds", []) if x in valid]
     out.setdefault("chapterTitle", None)
+    out.setdefault("claims", [])
     return out
+
+
+_BATCH_SYS = _CHAPTER_SYS + (
+    "\n\n批量模式：输入含多个章节，逐个处理，输出一个 JSON 数组，元素与单章节格式一致，"
+    "且各元素含 \"chapterIndex\" 字段对应输入章节。evidenceSegmentIds 只能引用该章节自己的 "
+    "availableSegmentIds。只输出 JSON 数组。"
+)
+
+
+def extract_chapters_batched(chapters: list[dict], dry_run: bool) -> list[dict]:
+    """整场所有章节 → 一次调用返回全部章节提取（省 claude -p 每次系统提示开销）。
+
+    stub/dry_run 逐章节走桩。真实后端一次请求，失败时回退到逐章节（保证鲁棒）。
+    """
+    if _use_stub(dry_run):
+        return [_stub_chapter(c) for c in chapters]
+    if not chapters:
+        return []
+
+    payload = {
+        "chapters": [
+            {
+                "chapterIndex": c["index"],
+                "availableSegmentIds": c["segmentIds"],
+                "transcript": c["text"][:6000],
+                "speakers": c["speakers"],
+            }
+            for c in chapters
+        ]
+    }
+    try:
+        raw = _call(_BATCH_SYS, json.dumps(payload, ensure_ascii=False))
+        arr = _parse_json_array(raw)
+        by_idx = {a.get("chapterIndex"): a for a in arr if isinstance(a, dict)}
+        out = []
+        for c in chapters:
+            ex = by_idx.get(c["index"], {"claims": []})
+            out.append(_sanitize_extract(ex, c["segmentIds"]))
+        return out
+    except LLMError:
+        # 批量失败回退逐章节（更慢但更稳）。
+        return [extract_chapter(c, dry_run) for c in chapters]
+
+
+def _parse_json_array(text: str) -> list:
+    """从模型输出提取 JSON 数组（容忍围栏/前后缀）。"""
+    t = text.strip()
+    if t.startswith("```"):
+        t = t.split("```", 2)[1]
+        if t.startswith("json"):
+            t = t[4:]
+        t = t.rsplit("```", 1)[0] if "```" in t else t
+    start, end = t.find("["), t.rfind("]")
+    if start == -1 or end == -1:
+        raise LLMError(f"模型输出无 JSON 数组：{text[:200]}")
+    return json.loads(t[start:end + 1])
 
 
 def _stub_chapter(chapter: dict) -> dict:
@@ -148,7 +280,7 @@ _REDUCE_SYS = (
 def reduce_video(chapter_extracts: list[dict], title: str, dry_run: bool) -> dict:
     """章节提取列表 → 全片 enrichment 草稿（未投影）。dry_run 走确定性桩。"""
     all_claims = [c for ex in chapter_extracts for c in ex.get("claims", [])]
-    if dry_run or not has_api_key():
+    if _use_stub(dry_run):
         return _stub_reduce(all_claims, title)
 
     user = json.dumps({

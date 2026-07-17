@@ -41,9 +41,13 @@ def _dump(work: Path, name: str, obj) -> None:
 def run_video(video_id: str, args) -> bool:
     config.ensure_dirs()
     work = config.work_dir(video_id)
-    dry = args.dry_run or not llm.has_api_key()
-    if dry and not args.dry_run:
-        print(f"[{video_id}] 无 ANTHROPIC_API_KEY → 自动 --dry-run（LLM 走桩）")
+    backend = llm.resolve_backend()
+    dry = args.dry_run or backend == "stub"
+    if not args.dry_run:
+        if backend == "stub":
+            print(f"[{video_id}] 无 claude CLI / API key → LLM 走桩（--dry-run 效果）")
+        else:
+            print(f"[{video_id}] LLM 后端：{backend}")
 
     media_path = args.media or (str(config.find_media_file(video_id) or "") or None)
 
@@ -90,9 +94,9 @@ def run_video(video_id: str, args) -> bool:
         return False
     chapters = _load(work, "chapters.json")
 
-    # 4) extract（章节级 LLM 提炼）
+    # 4) extract（章节级 LLM 提炼；整场一次批量调用，省 claude -p 开销）
     def _extract():
-        _dump(work, "extracts.json", [llm.extract_chapter(c, dry) for c in chapters])
+        _dump(work, "extracts.json", llm.extract_chapters_batched(chapters, dry))
     if not stage("extract", _extract):
         return False
     extracts = _load(work, "extracts.json")
@@ -126,9 +130,13 @@ def run_video(video_id: str, args) -> bool:
     if not stage("qc", _qc):
         return False
 
+    # 章节标题由 extract 阶段的 chapterTitle 回写（供视频导览）。
+    titles = {ex.get("chapterIndex", i): ex.get("chapterTitle") for i, ex in enumerate(extracts)}
+    titled_chapters = [{**c, "title": titles.get(c["index"]) or c["title"]} for c in chapters]
+
     # 8) emit（投影 → data/enrichments/<id>.json）
     def _emit():
-        enrichment = emit.build_enrichment(video_id, draft, seg_index, asr, chapters, dry)
+        enrichment = emit.build_enrichment(video_id, draft, seg_index, asr, titled_chapters, dry)
         path = emit.write_enrichment(video_id, enrichment)
         print(f"[{video_id}] emit → {path}  ({len(enrichment['takeaways'])} takeaways)")
     if not stage("emit", _emit):
