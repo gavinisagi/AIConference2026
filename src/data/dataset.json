@@ -28,7 +28,7 @@
     "totalDurationSeconds": 1471027,
     "totalHours": 409,
     "withDuration": 932,
-    "deepReadCount": 4,
+    "deepReadCount": 0,
     "byConference": {
       "ai-engineer": 853,
       "figma-config": 78,
@@ -37,22 +37,22 @@
     "topicCounts": [
       {
         "topic": "agent",
-        "approxCount": 265,
+        "approxCount": 264,
         "method": "title-keyword"
       },
       {
         "topic": "ai-coding",
-        "approxCount": 110,
+        "approxCount": 108,
         "method": "title-keyword"
       },
       {
         "topic": "evals",
-        "approxCount": 83,
+        "approxCount": 81,
         "method": "title-keyword"
       },
       {
         "topic": "context",
-        "approxCount": 80,
+        "approxCount": 79,
         "method": "title-keyword"
       },
       {
@@ -62,7 +62,7 @@
       },
       {
         "topic": "ai-product",
-        "approxCount": 83,
+        "approxCount": 82,
         "method": "title-keyword"
       }
     ]
@@ -1588,109 +1588,13 @@
       "publishedDate": null,
       "thumbnailUrl": null,
       "topics": [
-        "agent",
-        "evals",
-        "ai-coding"
+        "agent"
       ],
       "status": "indexed",
       "speakers": [],
-      "whyWatch": "用真实生产数字（18%→83%、67%→86%）完整演示了'编码代理自动优化 AI Agent'的可落地闭环，方法论细到 git 分支管理和护栏设计，可直接照做。",
-      "takeaways": [
-        {
-          "id": "aHhB3sjGjkI-tk1",
-          "sessionId": "aHhB3sjGjkI",
-          "statement": "既然 Agent 本质是软件而 AI 擅长写软件，就可以'用 AI 构建 AI'：AutoAgent 让编码代理在自主循环中跑 evals、修改目标 Agent 代码、尝试新 prompt 和新工具，以 eval 结果和完整执行 trace 作为反馈信号自我改进，实践证明可行。",
-          "context": "这是全片核心命题，架构上由编码代理（如 Claude Code）驱动，反馈信号包括回归/未通过项和目标 Agent 的思考轨迹。",
-          "timestampSeconds": 77.12,
-          "roles": [
-            "developer",
-            "trend",
-            "founder-lead"
-          ]
-        },
-        {
-          "id": "aHhB3sjGjkI-tk2",
-          "sessionId": "aHhB3sjGjkI",
-          "statement": "效果有真实数字支撑：极简 Agent 经约 10 次迭代从 18% 提到 83%；一个真实生产 Agent 从 67% 提到 86% 且无作弊、现已上线；对已被人类充分优化的生产 Agent 仍能再提升超 10%——机器找到了人类没发现的优化方式。",
-          "context": "改进来源是发现边界用例、优化 system prompt、改进工具描述和修复工具逻辑，而非篡改测试。",
-          "timestampSeconds": 634.64,
-          "roles": [
-            "developer",
-            "founder-lead",
-            "trend"
-          ]
-        },
-        {
-          "id": "aHhB3sjGjkI-tk3",
-          "sessionId": "aHhB3sjGjkI",
-          "statement": "一切的前提是与领域专家共建 golden dataset 并配套 scorer：期望输出不限于文本，可以是'调用某工具/带某参数/按某调用链'，跑分得出准确率数字，才能建立基线、发现回归、持续改进——本质是非确定性场景下的测试套件。",
-          "context": "没有可量化的 eval 基线，后面的自动优化循环无从谈起。",
-          "timestampSeconds": 226.24,
-          "roles": [
-            "developer"
-          ]
-        },
-        {
-          "id": "aHhB3sjGjkI-tk4",
-          "sessionId": "aHhB3sjGjkI",
-          "statement": "优化循环有明确的操作规程：先用 markdown 写任务书并跑一次 evals 生成基线报告，之后每次迭代新建 git 分支、提出一个假设、修改 Agent、重跑 evals——回归就回滚到上一个改进点再分叉，改进就保留，并把结果写进 report 和全局 memory 供后续假设参考。",
-          "context": "示例迭代序列为回归回滚、+5%、0%、+12%；全程产出完整变更日志，人类可回溯'方向对但实现错'的假设并在下轮引导。",
-          "timestampSeconds": 806.16,
-          "roles": [
-            "developer"
-          ]
-        },
-        {
-          "id": "aHhB3sjGjkI-tk5",
-          "sessionId": "aHhB3sjGjkI",
-          "statement": "线上数据形成第二个闭环：全量记录 trace（指令、工具调用、耗时、token）加最简单的'是/否有用'反馈，积累后让代理聚类负反馈归纳出 5-7 个失败模式簇，经领域专家验证后生成修复提案，已有 trace 同时充当回归测试。",
-          "context": "聚类被封装为 skill，代理能访问 Agent 源码和 trace 细节，可从'为什么这样回答'一路追到根因；频率上每个 sprint 生成一次报告比较合理。",
-          "timestampSeconds": 1159.11,
-          "roles": [
-            "developer",
-            "product-design"
-          ]
-        },
-        {
-          "id": "aHhB3sjGjkI-tk6",
-          "sessionId": "aHhB3sjGjkI",
-          "statement": "人类在环不可省略：初始要设结构与护栏（给足上下文、明确禁止代理篡改 golden dataset 或 scorer 来让 evals 虚假通过）；失败簇必须人工分诊——与专家验证、排优先级，用户反馈可能是假阳性，判断真伪离不开人。",
-          "context": "确认的失败模式沉淀进 golden dataset 并更新 eval 套件与 scorer，同一问题日后再引入会被立刻发现，形成防回归闭环。",
-          "timestampSeconds": 772.72,
-          "roles": [
-            "developer",
-            "founder-lead",
-            "product-design"
-          ]
-        },
-        {
-          "id": "aHhB3sjGjkI-tk7",
-          "sessionId": "aHhB3sjGjkI",
-          "statement": "Eval 表现差的三大常见根因是：缺少完成任务所需的工具、system prompt 缺领域指令与行为约束、上下文检索能力不足——多数优化其实只是补全 system prompt 和检索工具。",
-          "context": "演讲用无工具极简 Agent 仅 18% 通过率作为反面基线：只有 LLM 训练数据内已有的知识能答对，其余必须依赖外部上下文和工具。",
-          "timestampSeconds": 302.48,
-          "roles": [
-            "developer"
-          ]
-        },
-        {
-          "id": "aHhB3sjGjkI-tk8",
-          "sessionId": "aHhB3sjGjkI",
-          "statement": "底层支撑是 harness engineering：为编码代理构建约束、任务、反馈闭环与治理，具体构件包括 spec 驱动开发、质量门（lint/单测/evals/LLM code review）、上下文工程和可观测性——其中'能自行验证自己的变更'是最关键的一环，可观测性则是代理能修 bug 的前提。",
-          "context": "实际案例中，代理在获得足够上下文且能对回归测试自行验证后，仅用一个 prompt 就修复了一整套问题，复杂情况可让 AutoAgent 针对失败簇自动产出草稿 PR。",
-          "timestampSeconds": 1624.4,
-          "roles": [
-            "developer",
-            "trend",
-            "founder-lead"
-          ]
-        }
-      ],
-      "roles": [
-        "developer",
-        "founder-lead",
-        "trend"
-      ],
+      "whyWatch": null,
+      "takeaways": [],
+      "roles": [],
       "tour": null
     },
     {
@@ -1705,105 +1609,13 @@
       "publishedDate": null,
       "thumbnailUrl": null,
       "topics": [
-        "agent",
-        "context",
-        "evals"
+        "agent"
       ],
       "status": "indexed",
       "speakers": [],
-      "whyWatch": "用具体的 token 数字和两个对照演示，论证浏览器代理的瓶颈在环境而非模型，思路对做代理基础设施的人有直接参考价值。",
-      "takeaways": [
-        {
-          "id": "JnubYCYunk8-tk1",
-          "sessionId": "JnubYCYunk8",
-          "statement": "核心论点：模型已经足够聪明，浏览器代理的失败源于围绕模型的基础设施——代理失败时往往在盲目调试、不理解页面发生了什么，解法是给它一个能规划长序列、能定位失败原因的环境。",
-          "context": "这是整场演讲的中心假设，后续的表示压缩、状态跟踪和实测演示都在支撑这一点。",
-          "timestampSeconds": 66.06,
-          "roles": [
-            "developer",
-            "founder-lead",
-            "trend"
-          ]
-        },
-        {
-          "id": "JnubYCYunk8-tk2",
-          "sessionId": "JnubYCYunk8",
-          "statement": "token 成本对比：完整 DOM 约 20,000 token，一张只能展示页面局部的截图约 1,100 token，而讲者的压缩 markdown 表示约 1,800 token 即可呈现整个页面。",
-          "context": "这组数字是\"更好的眼睛\"这一标题的量化依据，说明表示层优化的空间远大于换更强的模型。",
-          "timestampSeconds": 204.36,
-          "roles": [
-            "developer"
-          ]
-        },
-        {
-          "id": "JnubYCYunk8-tk3",
-          "sessionId": "JnubYCYunk8",
-          "statement": "压缩表示可与截图一起低成本地提供给模型，使其能高质量推理并构建长序列的任务执行计划。",
-          "context": "说明压缩表示不是替代视觉输入，而是与截图互补，共同支撑长程规划。",
-          "timestampSeconds": 88.62,
-          "roles": [
-            "developer"
-          ]
-        },
-        {
-          "id": "JnubYCYunk8-tk4",
-          "sessionId": "JnubYCYunk8",
-          "statement": "系统端到端跟踪浏览器页面状态，向代理提供显式反馈：哪些元素新出现或消失、遮挡目标的元素是否已移除、尝试的点击是否实际生效。",
-          "context": "这是\"好环境\"的另一半——不靠模型猜测页面变化，而由基础设施直接告知动作结果。",
-          "timestampSeconds": 223.02,
-          "roles": [
-            "developer"
-          ]
-        },
-        {
-          "id": "JnubYCYunk8-tk5",
-          "sessionId": "JnubYCYunk8",
-          "statement": "两个实测对照：下载 Aadhaar 时 Claude 直接操作陷入截图-滚动循环耗时约两分钟，讲者系统用更便宜的模型几乎瞬间完成；预订加拿大徒步网站时 Claude 无法选中日期而卡住，讲者的代理顺利完成日期选择与填写。",
-          "context": "两个真实网站案例，直观展示环境改进带来的速度与可靠性差异（演示为现场对比，含视觉内容）。",
-          "timestampSeconds": 93.87,
-          "roles": [
-            "developer"
-          ]
-        },
-        {
-          "id": "JnubYCYunk8-tk6",
-          "sessionId": "JnubYCYunk8",
-          "statement": "在含 30 步长序列任务的浏览器挑战基准中，现有浏览器代理仅点击开始按钮就耗时 10-20 秒，暴露出普遍的速度瓶颈。",
-          "context": "用基准数据说明问题不是个例，为\"代理太慢导致没人用\"提供证据。",
-          "timestampSeconds": 21.75,
-          "roles": [
-            "developer",
-            "trend"
-          ]
-        },
-        {
-          "id": "JnubYCYunk8-tk7",
-          "sessionId": "JnubYCYunk8",
-          "statement": "浏览器代理虽然概念上吸引人但实际采用率很低（连讲者本人也很少用）；总体目标是让它更快、更便宜、更可靠，从而被大众普遍使用。",
-          "context": "演讲的动机与愿景：从个人使用体验出发，指向大众化采用这一终点。",
-          "timestampSeconds": 7.86,
-          "roles": [
-            "trend",
-            "founder-lead"
-          ]
-        },
-        {
-          "id": "JnubYCYunk8-tk8",
-          "sessionId": "JnubYCYunk8",
-          "statement": "后续规划：因代码本身不具防御性而考虑开源，产品形态是暴露为 API（输入 URL 和意图、返回执行结果），或做成网站/插件。",
-          "context": "对关注该方向落地的人有参考意义，也反映讲者对护城河在别处的判断。",
-          "timestampSeconds": 167.46,
-          "roles": [
-            "founder-lead",
-            "developer"
-          ]
-        }
-      ],
-      "roles": [
-        "developer",
-        "founder-lead",
-        "trend"
-      ],
+      "whyWatch": null,
+      "takeaways": [],
+      "roles": [],
       "tour": null
     },
     {
@@ -18944,57 +18756,9 @@
       ],
       "status": "indexed",
       "speakers": [],
-      "whyWatch": "这是 Config 2026 的收尾致辞，篇幅短、信息密度低，主要传递社区氛围与明年预告，适合快速扫过而非重点观看。",
-      "takeaways": [
-        {
-          "id": "SQji6izodIE-tk1",
-          "sessionId": "SQji6izodIE",
-          "statement": "主办方强调线下共聚的社区价值，并呼吁参会者把大会的能量带回自己所在的社区中传播。",
-          "context": "闭幕致辞的核心信息，点明 Config 作为设计社区聚会的定位。",
-          "timestampSeconds": 80.88,
-          "roles": [
-            "founder-lead",
-            "trend"
-          ]
-        },
-        {
-          "id": "SQji6izodIE-tk2",
-          "sessionId": "SQji6izodIE",
-          "statement": "现场涌现出自发的社区文化：参会者频繁互相交换毛绒玩具（plushies），成为大会意外的社交仪式。",
-          "context": "主办方精心策划之外的意外惊喜，被作为社区活力的例证提及。",
-          "timestampSeconds": 41.52,
-          "roles": [
-            "product-design",
-            "trend"
-          ]
-        },
-        {
-          "id": "SQji6izodIE-tk3",
-          "sessionId": "SQji6izodIE",
-          "statement": "满场全球顶尖设计师为数学公式 e^(πi) 集体欢呼，反映出设计社区对技术与数学之美的热情。",
-          "context": "闭幕致辞中回顾的大会现场趣事之一。",
-          "timestampSeconds": 54.72,
-          "roles": [
-            "product-design",
-            "trend"
-          ]
-        },
-        {
-          "id": "SQji6izodIE-tk4",
-          "sessionId": "SQji6izodIE",
-          "statement": "本届 Config 约一万人规模，会后庆祝活动持续至 18:30，主办方预告明年将继续举办 Config。",
-          "context": "大会规模与后续安排的事实性信息，合并自开场回顾与结尾预告。",
-          "timestampSeconds": 24.64,
-          "roles": [
-            "trend"
-          ]
-        }
-      ],
-      "roles": [
-        "product-design",
-        "founder-lead",
-        "trend"
-      ],
+      "whyWatch": null,
+      "takeaways": [],
+      "roles": [],
       "tour": null
     },
     {
@@ -19223,220 +18987,13 @@
       "durationMinutes": 27,
       "publishedDate": null,
       "thumbnailUrl": null,
-      "topics": [
-        "ai-coding",
-        "agent",
-        "ai-product"
-      ],
+      "topics": [],
       "status": "indexed",
-      "speakers": [
-        {
-          "name": "Michael Truell",
-          "org": null
-        },
-        {
-          "name": "Kevin",
-          "org": null
-        },
-        {
-          "name": "Tomas",
-          "org": "Graphite"
-        }
-      ],
-      "whyWatch": "Cursor CEO 用一手数据讲清编码 agent 从辅助功能变成业务主体的过程，并首次公开从零训练前沿级模型的计划，是了解 AI coding 下一阶段走向的直接材料。",
-      "takeaways": [
-        {
-          "id": "fWa7uxyhVDE-tk1",
-          "sessionId": "fWa7uxyhVDE",
-          "statement": "Cursor 正以 10-20 倍于以往的算力、完全从零（不基于开源底座）训练一个与 Opus、GPT 同级的新模型，目标超越编码走向通用智能——覆盖工程师同事的全部能力（用工程工具、长程规划、实际点按测试软件），数周内发布，背后是与 Facex 的算力合作。",
-          "context": "此前 Composer 1 到 2.5 的改进被算力硬性卡住；这次扩容被认为能触及前沿并有望反超。这是演讲中最重磅的宣布。",
-          "timestampSeconds": 1411.17,
-          "roles": [
-            "trend",
-            "founder-lead",
-            "developer"
-          ]
-        },
-        {
-          "id": "fWa7uxyhVDE-tk2",
-          "sessionId": "fWa7uxyhVDE",
-          "statement": "编码 agent 已是 Cursor 的业务主体：超过 95% 的用户以 agent 为主要使用方式，按请求量计 agent 约为 Tab 等辅助功能的 5 倍；产品也因此历时一年半从根本上重构为 agent-first，最近三个月才真正落定。",
-          "context": "这是罕见的一手使用数据，直接反映 AI coding 的主流交互方式已经从补全转向 agent。",
-          "timestampSeconds": 346.35,
-          "roles": [
-            "trend",
-            "developer",
-            "product-design"
-          ]
-        },
-        {
-          "id": "fWa7uxyhVDE-tk3",
-          "sessionId": "fWa7uxyhVDE",
-          "statement": "当前多数开发者只给 agent 分派 30 分钟到 1 小时的小块工作、本地同时跑 3-5 个互相阻塞的 agent——这不是未来形态；目标是像与同事协作一样把整个项目整体交付出去，agent 用独立计算机连续工作一天，带着完成并测试过的成果回来。",
-          "context": "这一判断是 Cursor 3 大幅升级 Cloud 性能的动机，也是评估自己 agent 工作流所处阶段的参照。",
-          "timestampSeconds": 430.14,
-          "roles": [
-            "developer",
-            "trend"
-          ]
-        },
-        {
-          "id": "fWa7uxyhVDE-tk4",
-          "sessionId": "fWa7uxyhVDE",
-          "statement": "Composer 2 有两大范式转变：在开源模型之上做数十万亿 token 的继续预训练，以及每 5 小时在线更新一次的实时 RL（从用户实际使用反馈中在线学习）；其受欢迎的关键是速度与成本，Cursor 明确把低成本可及性作为对抗'模型能力被巨额资本把持'的价值主张。",
-          "context": "每 5 小时在线 RL 更新是目前公开产品中少见的做法，值得关注其效果与风险。",
-          "timestampSeconds": 712.77,
-          "roles": [
-            "developer",
-            "trend"
-          ]
-        },
-        {
-          "id": "fWa7uxyhVDE-tk5",
-          "sessionId": "fWa7uxyhVDE",
-          "statement": "云端 agent 按自主、常驻、随处可用三原则构建：配独立开发环境（克隆仓库、依赖、构建系统与内部工具凭据）后能自测并产出可标注的截图 demo；基础设施层面过去几个月提速 3 倍、达到 99.9% 可靠性。客户案例中 Amplitude 用自建迁移 agent 在后台迁移 2 万个 React 组件，automations 上线数月已超 600 万次运行。",
-          "context": "常驻 agent 意味着从'人 prompt agent'走向 agent 系统时代——agent 被编程式启动、甚至 prompt 你比你 prompt 它更多。",
-          "timestampSeconds": 861.66,
-          "roles": [
-            "developer",
-            "product-design"
-          ]
-        },
-        {
-          "id": "fWa7uxyhVDE-tk6",
-          "sessionId": "fWa7uxyhVDE",
-          "statement": "Origin 为 agent 规模重新架构了 Git：基于云厂商原语的全新架构，负载测试模拟数千 agent 对单一仓库同时 push/pull；并用与 Cursor 同源的模型智能'让代码持续流动'——自动解决合并冲突、修复 CI 失败、推进每个 PR 的下一步，可将评审时间缩短一半以上，今年秋季向所有人开放。",
-          "context": "源自收购 Graphite 的团队，出发点是'构建软件远不止写代码'——还包括测试、评审、合并与部署。",
-          "timestampSeconds": 1279.02,
-          "roles": [
-            "developer",
-            "trend"
-          ]
-        },
-        {
-          "id": "fWa7uxyhVDE-tk7",
-          "sessionId": "fWa7uxyhVDE",
-          "statement": "Cursor 正从封闭的第一方产品转型为平台：发布 SDK 供程序和其他 agent 编程式调用，插件生态让 agent 能用工程师的同一套工具（Datadog、数据库、设计工具），CLI 完成 50 多项改进并支持 headless 模式，agent 还可从 Slack、Teams、Jira、Linear 及 webhook 直接触发。",
-          "context": "判断依据是编码 agent 已成为团队和企业的基础设施，需要在任何工作场景中可编程、可触达。",
-          "timestampSeconds": 522.87,
-          "roles": [
-            "developer",
-            "founder-lead",
-            "product-design"
-          ]
-        },
-        {
-          "id": "fWa7uxyhVDE-tk8",
-          "sessionId": "fWa7uxyhVDE",
-          "statement": "Cursor Mobile 进入 beta（iOS TestFlight 现场开放、数日内全量）：可随时查看所有 agent 的运行/阻塞状态、查看产物截图并标注后让 agent 返工，还支持远程控制本地 agent。",
-          "context": "移动端定位是'随处可用'原则的落点——监督和调度 agent，而非在手机上写代码；演示部分依赖现场画面。",
-          "timestampSeconds": 1125.75,
-          "roles": [
-            "developer",
-            "product-design",
-            "trend"
-          ]
-        }
-      ],
-      "roles": [
-        "developer",
-        "product-design",
-        "founder-lead",
-        "trend"
-      ],
-      "tour": {
-        "hook": "Cursor CEO 亲述 agent 吃掉编码工作流，并首曝从零训练前沿大模型计划",
-        "whoShouldWatch": "关注 AI coding 走向的工程师、技术负责人，以及研究 agent 产品化与自研模型策略的从业者",
-        "ifShortOnTime": "先看 17:10–18:30（1030–1110 秒）云端 agent 现场演示，这是全片唯一高强度实操段；再跳到 23:31（1411 秒）听从零训练 Opus/GPT 级新模型的重磅宣布",
-        "mustWatch": [
-          {
-            "startSeconds": 1030,
-            "endSeconds": 1110,
-            "label": "云端agent现场演示",
-            "live": false,
-            "why": "全片仅有的现场实操高运动段：展示云端 agent 自主工作、产出截图 demo 的真实交互，是三原则落地的直观证据"
-          },
-          {
-            "startSeconds": 340,
-            "endSeconds": 480,
-            "label": "agent数据图表",
-            "live": false,
-            "why": "非现场演示但值得盯屏：95% 用户以 agent 为主、请求量为 Tab 的 5 倍等一手数据图表，是全片论点的数据地基"
-          }
-        ],
-        "stops": [
-          {
-            "startSeconds": 0,
-            "endSeconds": 340,
-            "title": "Cursor 起点与 agent-first 转身",
-            "what": "Truell 回顾 Cursor 从四人两周原型起步的创业史，以及产品历时一年半从编辑器彻底重构为 agent-first 的过程。",
-            "keyPoint": "agent-first 不是加功能，而是对产品的根本性重构，最近三个月才真正落定",
-            "howTo": "listen",
-            "howToReason": "纯口头叙事回顾，画面以讲者站桩为主，通勤听即可",
-            "speaker": "Michael Truell"
-          },
-          {
-            "startSeconds": 340,
-            "endSeconds": 480,
-            "title": "一手数据：agent 已是业务主体",
-            "what": "用数据图表证明编码 agent 已从辅助变成主体：超 95% 用户以 agent 为主要使用方式，请求量约为 Tab 的 5 倍，并引出'agent 应像同事'的路线图。",
-            "keyPoint": "多数人只派 30 分钟小任务给 agent 不是未来形态，目标是整项目交付、agent 独立工作一天",
-            "howTo": "watch",
-            "howToReason": "命中 visualWatchBlocks（340–480），数据图表密集，值得看屏幕而非只听",
-            "speaker": "Michael Truell"
-          },
-          {
-            "startSeconds": 480,
-            "endSeconds": 845,
-            "title": "平台化布局与 Composer 2 自研模型",
-            "what": "宣布 SDK、插件生态、CLI headless 模式及 Slack/Jira 等触发入口，把 Cursor 从封闭产品转为平台；Composer 2 的两大范式：数十万亿 token 继续预训练 + 每 5 小时在线更新的实时 RL。",
-            "keyPoint": "Composer 走速度与低成本路线，明确对抗'模型能力被巨额资本把持'",
-            "howTo": "skim",
-            "howToReason": "以功能列举型幻灯片为主（glance 中 slide 占比最高），截图要点即可，无现场操作",
-            "speaker": "Michael Truell"
-          },
-          {
-            "startSeconds": 845,
-            "endSeconds": 1110,
-            "title": "云端 agent 三原则与现场演示",
-            "what": "提出自主、常驻、随处可用三原则：agent 配独立开发环境、能自测并产出可标注截图；基础设施提速 3 倍、99.9% 可靠；Amplitude 后台迁移 2 万个 React 组件、automations 超 600 万次运行。",
-            "keyPoint": "云端 agent 有自己的完整开发环境（仓库、依赖、凭据），能自己测试并交回 demo",
-            "howTo": "watch",
-            "howToReason": "包含全片仅有的两段 live 高运动块（1030–1040、1100–1110），是真正的现场演示，必须看画面",
-            "speaker": "Michael Truell"
-          },
-          {
-            "startSeconds": 1110,
-            "endSeconds": 1268,
-            "title": "Cursor Mobile 进入 beta",
-            "what": "发布 Cursor Mobile：随时查看所有 agent 运行/阻塞状态、对产物截图标注让 agent 返工、远程控制本地 agent；iOS TestFlight 现场开放。",
-            "keyPoint": "手机成为 agent 舰队的监控与返工入口，而不只是一个移动版编辑器",
-            "howTo": "skim",
-            "howToReason": "以产品界面截图幻灯片展示为主，无高运动实操块，快速过界面截图即可",
-            "speaker": "Michael Truell"
-          },
-          {
-            "startSeconds": 1268,
-            "endSeconds": 1410,
-            "title": "Origin：为 agent 规模重构 Git",
-            "what": "发布 Origin：基于云原语的全新 Git 架构，负载测试支撑数千 agent 同时 push/pull；用模型智能自动解合并冲突、修 CI、推进 PR，评审时间可缩短一半以上，今秋全量开放。",
-            "keyPoint": "Git 本身正被按 agent 并发规模重新设计，'让代码持续流动'是核心卖点",
-            "howTo": "skim",
-            "howToReason": "架构图与要点幻灯片为主，无现场操作，看几张关键图配合讲解即可",
-            "speaker": "Michael Truell"
-          },
-          {
-            "startSeconds": 1410,
-            "endSeconds": 1605,
-            "title": "重磅：从零训练前沿级新模型",
-            "what": "宣布正与 Facex 合作，以 10–20 倍算力、完全不基于开源底座从零训练一个对标 Opus/GPT 的新模型，目标超越编码走向通用智能（用工程工具、长程规划、实际点按测试软件），数周内发布。",
-            "keyPoint": "Cursor 从'模型应用公司'正式转为前沿模型玩家，这是全片信息量最大的宣布",
-            "howTo": "listen",
-            "howToReason": "以口头宣布与愿景论述为主，画面无演示内容，认真听比看更重要",
-            "speaker": "Michael Truell"
-          }
-        ]
-      }
+      "speakers": [],
+      "whyWatch": null,
+      "takeaways": [],
+      "roles": [],
+      "tour": null
     },
     {
       "id": "ByOF8qByGHU",

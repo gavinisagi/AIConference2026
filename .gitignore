@@ -46,6 +46,15 @@ next-env.d.ts
 # 下载 / 抓取日志
 /data/*.log
 
+# 清洗后数据 / 转录文本：不入库，后续进数据库（仅保留 README 与源 catalog）。
+# 站点消费的 dataset.json 提交「纯 catalog 基线」；enrichments 在部署时从 DB 合并。
+/data/enrichments/*.json
+/data/editorial/*.json
+/tests/*.json
+/tests/*.txt
+/tests/*.srt
+/tests/*.vtt
+
 # Paperclip 临时产物（请求、日志、临时脚本）
 /.pc_tmp/
 
