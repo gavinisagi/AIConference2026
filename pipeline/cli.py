@@ -26,7 +26,7 @@ for _stream in (sys.stdout, sys.stderr):
         except (ValueError, OSError):
             pass
 
-from . import config, emit, llm, media, qc, segment, state, transcribe, visual
+from . import config, emit, llm, media, qc, segment, state, subtitle, transcribe, visual
 
 
 def _load(work: Path, name: str):
@@ -312,6 +312,31 @@ def _review_summary(args) -> int:
     return 0
 
 
+def cmd_subtitle(args) -> int:
+    """从已转写的 asr.json 导出字幕（en / zh / bi 双语）。"""
+    vid = args.video_id
+    work = config.WORK_DIR / vid
+    asr = _load(work, "asr.json")
+    if not asr:
+        print(f"无 asr.json（先跑 transcribe）：{work/'asr.json'}", file=sys.stderr)
+        return 1
+    # 默认写到视频旁边同名（播放器自动加载）；无本地视频则写到 work 目录。
+    media_path = args.media or config.find_media_file(vid)
+    if media_path:
+        media_path = Path(media_path)
+        out_dir, basename = media_path.parent, media_path.stem
+    else:
+        out_dir, basename = work, vid
+    dry = args.dry_run or llm.resolve_backend() == "stub"
+    written = subtitle.export(
+        asr, out_dir, basename, langs=tuple(args.langs.split(",")),
+        fmt=args.format, speaker=args.speaker, dry_run=dry,
+    )
+    for p in written:
+        print(f"  写出 {p}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="pipeline.cli", description="视频清洗流水线")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -339,6 +364,15 @@ def build_parser() -> argparse.ArgumentParser:
     rv.add_argument("video_id", nargs="?")
     rv.add_argument("--max-evidence", type=int, default=3, help="每条 takeaway 展开的证据段数上限")
     rv.set_defaults(func=cmd_review)
+
+    sb = sub.add_parser("subtitle", help="从 asr.json 导出字幕(en/zh/bi 双语)，写到视频旁同名")
+    sb.add_argument("video_id")
+    sb.add_argument("--langs", default="en,bi", help="逗号分隔子集 of en,zh,bi（bi=中英双语）")
+    sb.add_argument("--format", default="srt", choices=["srt", "vtt"])
+    sb.add_argument("--speaker", action="store_true", help="每行前缀说话人标签 [S0x]")
+    sb.add_argument("--media", help="显式指定视频路径(决定字幕写到哪+同名)")
+    sb.add_argument("--dry-run", action="store_true", help="不翻译，只出英文")
+    sb.set_defaults(func=cmd_subtitle)
     return p
 
 

@@ -367,6 +367,44 @@ def infer_speakers(asr_result: dict, title: str, dry_run: bool) -> list[dict]:
     return out
 
 
+# --- 字幕翻译 ----------------------------------------------------------
+
+_TRANSLATE_SYS = (
+    "你是字幕译者。把大会演讲转录的英文字幕行逐条译成自然、口语化的简体中文。要求：\n"
+    "1) 保留技术术语、产品名、公司名的英文原文(如 agent、Cursor、Composer、Git、SDK)。\n"
+    "2) 每行是一条字幕，译文要简短适合屏幕显示，不合并不拆分。\n"
+    "3) 严格逐条对应，输入几条就输出几条。\n"
+    "4) 只输出 JSON 数组，元素 {\"i\":<输入序号>,\"zh\":\"译文\"}。"
+)
+TRANSLATE_BATCH = 40
+
+
+def translate_batch(texts: list[str], dry_run: bool) -> list[str]:
+    """把英文字幕行批量译为中文，返回与输入等长的译文列表。
+
+    dry_run/stub 或失败 → 返回空串列表(上层降级为纯英文字幕)。分批 + 对齐校验，
+    缺失/错位的条目留空串，不编造、不错位。
+    """
+    if _use_stub(dry_run) or not texts:
+        return ["" for _ in texts]
+
+    out = ["" for _ in texts]
+    for base in range(0, len(texts), TRANSLATE_BATCH):
+        chunk = texts[base:base + TRANSLATE_BATCH]
+        user = json.dumps([{"i": i, "en": t} for i, t in enumerate(chunk)], ensure_ascii=False)
+        try:
+            arr = _parse_json_array(_call(_TRANSLATE_SYS, user))
+        except LLMError as e:
+            print(f"  [translate] 批 {base} 失败，留空降级：{str(e)[:80]}")
+            continue
+        for item in arr:
+            if isinstance(item, dict) and isinstance(item.get("i"), int):
+                idx = base + item["i"]
+                if base <= idx < base + len(chunk) and isinstance(item.get("zh"), str):
+                    out[idx] = item["zh"].strip()
+    return out
+
+
 def _stub_reduce(all_claims: list[dict], title: str) -> dict:
     """确定性桩：按 confidence 取前 N 条 claim 作 takeaways。"""
     ranked = sorted(all_claims, key=lambda c: c.get("confidence", 0), reverse=True)
