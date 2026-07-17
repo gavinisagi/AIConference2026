@@ -20,6 +20,7 @@ def build_enrichment(
     dry_run: bool,
     speakers: list[dict] | None = None,
     visual: dict | None = None,
+    tour: dict | None = None,
 ) -> dict:
     takeaways = []
     for i, tk in enumerate(draft.get("takeaways", [])):
@@ -74,6 +75,8 @@ def build_enrichment(
         ],
         # 值得抽帧看图像的具体时刻（段级，带触发原文与深链秒）。
         "visualMoments": (visual or {}).get("moments", []),
+        # 观看导览（承接层核心资产；生成失败/桩不足 → null，站点走详情降级）。
+        "tour": tour,
         "chapters": [
             {"index": c["index"], "title": c["title"], "startSeconds": c["startSeconds"],
              "endSeconds": c["endSeconds"], "visualDependency": c["visualDependency"]}

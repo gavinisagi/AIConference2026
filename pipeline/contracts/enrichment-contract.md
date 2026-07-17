@@ -54,12 +54,25 @@ src/data/dataset.json      站点唯一消费快照（形状见 docs/data-contra
     }
   ],
 
+  // ---- 观看导览（承接层核心资产，站点 /video 与 /compile 消费）----
+  "tour": {
+    "hook": "一句话钩子",
+    "whoShouldWatch": "谁最该看",
+    "ifShortOnTime": "时间不够看哪段",
+    "mustWatch": [{ "startSeconds": 1030, "endSeconds": 1110, "label": "...", "live": true, "why": "..." }],
+    "stops": [{ "startSeconds": 0, "endSeconds": 340, "title": "...", "what": "...", "keyPoint": "...",
+                "howTo": "watch|skim|listen", "howToReason": "...", "speaker": "..." }]
+  },
+
   // ---- 内部富信息（站点暂不消费，保留待扩展）----
   "summary": "全片摘要",
   "chapters": [ { "title": "...", "startSeconds": 0, "summary": "..." } ],
   "language": "en"
 }
 ```
+
+**tour 投影**：`build-data` 的 `sanitizeTour` 严格校验——无 `hook` 或 `stops` 为空即整个 tour 忽略（降级 null）；
+`howTo` 非 watch/skim/listen 回落 watch。站点 `Session.tour` 有值时 `/video/<id>` 走观看导览，否则走详情降级。
 
 **投影规则**（build-data 如何取用）：
 - `topics/roles`：须为契约枚举数组，否则整字段忽略。

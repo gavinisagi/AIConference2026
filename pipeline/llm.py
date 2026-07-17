@@ -367,6 +367,58 @@ def infer_speakers(asr_result: dict, title: str, dry_run: bool) -> list[dict]:
     return out
 
 
+# --- 观看导览 ----------------------------------------------------------
+
+_TOUR_SYS = (
+    "你是资深技术内容编辑，为一场大会演讲做【观看导览】，目的是推荐给别人、帮他们决定看不看、"
+    "怎么看，不要写成流水账 summary。输入含：章节(带 visualDependency=是否有值得看的画面)、"
+    "关键观点(带时间戳)、讲者、视觉时刻(visualMoments，LLM 判定值得抽帧看的点)、whyWatch。\n"
+    "严格输出 JSON：{\n"
+    '  "hook":"一句话钩子，说清独特价值(<=40字)",\n'
+    '  "whoShouldWatch":"一句话谁最该看",\n'
+    '  "ifShortOnTime":"时间不够看哪段(给具体时间点和理由)",\n'
+    '  "mustWatch":[{"startSeconds":int,"endSeconds":int,"label":"<=12字","live":bool,"why":"为何必看"}],\n'
+    '  "stops":[{"startSeconds":int,"endSeconds":int,"title":"小标题","what":"讲了什么(1-2句)",'
+    '"keyPoint":"最该记住的一点","howTo":"watch|skim|listen","howToReason":"为何这样看(结合视觉)","speaker":"姓名或S0x"}]\n'
+    "}\n"
+    "要求：stops 覆盖全片、按时间顺序、5-8 站；howTo=watch 用于有现场演示/值得看画面的段"
+    "(参考 visualDependency 与 visualMoments)，skim 用于幻灯片图表，listen 用于纯口头论述。"
+    "mustWatch 取 1-3 个最有价值的画面/演示。只输出 JSON。"
+)
+
+
+def build_tour(payload: dict, dry_run: bool) -> dict | None:
+    """章节/观点/讲者/视觉 → 观看导览。dry_run/stub → 由章节确定性生成基础导览。"""
+    chapters = payload.get("chapters", [])
+    if _use_stub(dry_run):
+        if not chapters:
+            return None
+        stops = [{
+            "startSeconds": c.get("startSeconds", 0),
+            "endSeconds": c.get("endSeconds", 0),
+            "title": c.get("title") or f"第 {i + 1} 段",
+            "what": "", "keyPoint": "",
+            "howTo": "watch" if c.get("visualDependency") else "listen",
+            "howToReason": "", "speaker": "",
+        } for i, c in enumerate(chapters)]
+        return {
+            "hook": payload.get("whyWatch") or payload.get("title") or "",
+            "whoShouldWatch": "", "ifShortOnTime": "", "mustWatch": [], "stops": stops,
+        }
+
+    try:
+        out = _parse_json(_call(_TOUR_SYS, json.dumps(payload, ensure_ascii=False)))
+    except LLMError:
+        return None
+    if not isinstance(out.get("stops"), list) or not out["stops"]:
+        return None
+    out.setdefault("hook", payload.get("whyWatch") or "")
+    out.setdefault("whoShouldWatch", "")
+    out.setdefault("ifShortOnTime", "")
+    out.setdefault("mustWatch", [])
+    return out
+
+
 # --- 字幕翻译 ----------------------------------------------------------
 
 _TRANSLATE_SYS = (

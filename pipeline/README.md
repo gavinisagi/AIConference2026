@@ -6,9 +6,9 @@
 ## 阶段（每步独立落盘 + 断点续跑）
 
 ```
-probe → transcribe → segment → extract → aggregate → visual → qc → emit
- 媒体    ASR统一      章节切分   章节LLM    全片Reduce  按需视觉  质检   产出
- 探测    schema                 提炼       去重排序    触发                enrichment
+probe → transcribe → segment → extract → aggregate → speaker → visual → tour → qc → emit
+ 媒体    ASR统一      章节切分   章节LLM    全片Reduce  说话人    按需视觉  观看  质检  产出
+ 探测    schema                 提炼       去重排序    推断      触发     导览        enrichment
 ```
 
 - 中间产物落 `pipeline/work/<videoId>/`（gitignore），状态入 `pipeline/work/state.sqlite`。
