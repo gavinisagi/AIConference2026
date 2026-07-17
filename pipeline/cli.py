@@ -109,12 +109,25 @@ def run_video(video_id: str, args) -> bool:
         return False
     draft = _load(work, "draft.json")
 
-    # 6) visual（按需视觉：计划 + 执行/桩）
+    # 5b) speaker（说话人身份推断，带置信度与依据）
+    def _speaker():
+        title = config.load_catalog().get(video_id, {}).get("title", "")
+        _dump(work, "speakers.json", llm.infer_speakers(asr, title, dry))
+    if not stage("speaker", _speaker):
+        return False
+    speakers = _load(work, "speakers.json")
+
+    # 6) visual（按需视觉：段级抽帧时刻 + 章节计划 + 执行/桩）
     def _visual():
+        moments = visual.find_visual_moments(asr, extracts, segment.segment_index(asr))
         plan = visual.plan_visual(chapters, extracts)
-        _dump(work, "visual.json", visual.run_visual(media_path, plan, dry))
+        _dump(work, "visual.json", {
+            "moments": moments,
+            "chapterPlan": visual.run_visual(media_path, plan, dry),
+        })
     if not stage("visual", _visual):
         return False
+    visual_out = _load(work, "visual.json")
 
     # 7) qc（自动质检）
     seg_index = segment.segment_index(asr)
@@ -136,7 +149,10 @@ def run_video(video_id: str, args) -> bool:
 
     # 8) emit（投影 → data/enrichments/<id>.json）
     def _emit():
-        enrichment = emit.build_enrichment(video_id, draft, seg_index, asr, titled_chapters, dry)
+        enrichment = emit.build_enrichment(
+            video_id, draft, seg_index, asr, titled_chapters, dry,
+            speakers=speakers, visual=visual_out,
+        )
         path = emit.write_enrichment(video_id, enrichment)
         print(f"[{video_id}] emit → {path}  ({len(enrichment['takeaways'])} takeaways)")
     if not stage("emit", _emit):
@@ -225,6 +241,29 @@ def cmd_review(args) -> int:
         print("\n⚠ 质检标记（需重点核对）:")
         for it in qc_issues:
             print(f"  [{it['level']}] {it['code']}: {it['msg']}")
+
+    inferences = e.get("speakerInferences", [])
+    if inferences:
+        print("\n说话人推断（★=已上站；其余置信不足，仅供审核，不伪造）:")
+        proj = {(s["name"], s.get("org")) for s in e.get("speakers", [])}
+        for sp in inferences:
+            star = "★" if (sp.get("name"), sp.get("org")) in proj else " "
+            who = sp.get("name") or "（未能确定）"
+            org = f" @ {sp['org']}" if sp.get("org") else ""
+            print(f"  {star}{sp['speaker']}: {who}{org}  conf={sp.get('confidence')}")
+            if sp.get("basis"):
+                print(f"      依据: {sp['basis']}")
+
+    vm = e.get("visualMoments", [])
+    if vm:
+        n_llm = sum(1 for m in vm if m.get("source") == "llm")
+        print(f"\n值得抽帧看图像的时刻（{len(vm)} 处，LLM判定 {n_llm} + 关键词 {len(vm) - n_llm}）:")
+        for m in vm:
+            mm, ss = divmod(int(m["timestampSeconds"]), 60)
+            tag = "★LLM" if m.get("source") == "llm" else "kw"
+            detail = m.get("reason") or f"[{m.get('trigger')}] {m.get('quote', '')}"
+            print(f"  {mm}:{ss:02d} ?t={int(m['timestampSeconds'])} ({tag}) {detail[:80]}")
+
     print(f"\ntakeaways（{len(e.get('takeaways', []))} 条，观点 ← 原始转写证据）:")
     for i, tk in enumerate(e.get("takeaways", [])):
         print(f"\n  [{i}] t={fmt_t(tk.get('timestampSeconds'))} "

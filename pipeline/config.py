@@ -49,6 +49,14 @@ CHAPTER_BOUNDARY_GAP_SECONDS = 3.0      # 长停顿视为潜在章节边界
 MAX_TAKEAWAYS_PER_VIDEO = 8             # 全片 Reduce 后保留上限
 MIN_TAKEAWAY_CONFIDENCE = 0.5          # 低于此置信度的 claim 不进 enrichment
 
+# --- 说话人推断 --------------------------------------------------------
+# 推断均带置信度与依据；仅高置信者投影到站点 speakers(其余留内部供人工审，不伪造)。
+SPEAKER_MIN_CONFIDENCE = 0.6
+SPEAKER_SAMPLE_SEGMENTS = 6            # 每个说话人取样分段数(优先自我介绍/交接句)
+
+# --- 视觉时刻 ----------------------------------------------------------
+MAX_VISUAL_MOMENTS = 20               # enrichment 里保留的抽帧建议上限
+
 # --- LLM ----------------------------------------------------------------
 LLM_MODEL = "claude-opus-4-8"
 LLM_API_URL = "https://api.anthropic.com/v1/messages"

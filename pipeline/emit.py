@@ -18,6 +18,8 @@ def build_enrichment(
     asr_result: dict,
     chapters: list[dict],
     dry_run: bool,
+    speakers: list[dict] | None = None,
+    visual: dict | None = None,
 ) -> dict:
     takeaways = []
     for i, tk in enumerate(draft.get("takeaways", [])):
@@ -37,7 +39,13 @@ def build_enrichment(
         })
     takeaways = takeaways[: config.MAX_TAKEAWAYS_PER_VIDEO]
 
-    speakers = draft.get("speakers") or _speakers_from_diarization(asr_result)
+    speaker_inferences = speakers or []
+    # 投影到站点 speakers：仅高置信推断，形如 {name, org}（契约：不伪造姓名）。
+    projected_speakers = [
+        {"name": sp["name"], "org": sp.get("org")}
+        for sp in speaker_inferences
+        if sp.get("name") and sp.get("confidence", 0) >= config.SPEAKER_MIN_CONFIDENCE
+    ]
 
     enrichment = {
         "schemaVersion": config.ENRICHMENT_SCHEMA_VERSION,
@@ -52,12 +60,20 @@ def build_enrichment(
         # 投影字段（build-data 消费）
         "topics": draft.get("topics") or None,
         "roles": draft.get("roles") or [],
-        "speakers": speakers,
+        "speakers": projected_speakers,
         "whyWatch": draft.get("whyWatch"),
         "takeaways": takeaways,
         # 内部富信息（站点暂不消费）
         "summary": draft.get("summary"),
         "language": asr_result["asr"]["language"],
+        # 说话人推断全量（含低置信/依据），供人工审核；站点只取上面 projected。
+        "speakerInferences": [
+            {"speaker": sp["speaker"], "name": sp.get("name"), "org": sp.get("org"),
+             "confidence": sp.get("confidence"), "basis": sp.get("basis")}
+            for sp in speaker_inferences
+        ],
+        # 值得抽帧看图像的具体时刻（段级，带触发原文与深链秒）。
+        "visualMoments": (visual or {}).get("moments", []),
         "chapters": [
             {"index": c["index"], "title": c["title"], "startSeconds": c["startSeconds"],
              "endSeconds": c["endSeconds"], "visualDependency": c["visualDependency"]}
@@ -65,11 +81,6 @@ def build_enrichment(
         ],
     }
     return enrichment
-
-
-def _speakers_from_diarization(asr_result: dict) -> list:
-    """无 LLM 姓名归属时，不编造真实姓名，speakers 留空（契约：不伪造姓名）。"""
-    return []
 
 
 def write_enrichment(video_id: str, enrichment: dict) -> str:

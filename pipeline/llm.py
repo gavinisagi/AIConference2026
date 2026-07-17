@@ -311,6 +311,62 @@ def reduce_video(chapter_extracts: list[dict], title: str, dry_run: bool) -> dic
     return out
 
 
+# --- 说话人推断 --------------------------------------------------------
+
+_SPEAKER_SYS = (
+    "你是会议记录分析器。给定演讲标题和每个说话人编号(S01/S02..)的若干发言样本，"
+    "推断每人的真实姓名与所属组织。依据：自我介绍('I'm X'/'my name is')、相互交接"
+    "('let me hand to X')、标题中的人名、以及角色线索。严格要求：\n"
+    "1) 拿不准就把 name/org 置 null，不要编造；confidence 反映把握(0~1)。\n"
+    "2) basis 用一句话说明依据(引用关键线索)。\n"
+    "3) 只输出 JSON 数组，元素形如 {\"speaker\":\"S01\",\"name\":\"...\"或null,"
+    "\"org\":\"...\"或null,\"confidence\":0.0~1.0,\"basis\":\"...\"}。"
+)
+
+
+def _speaker_samples(asr_result: dict) -> dict:
+    """每个说话人取样发言：优先含自我介绍/交接线索的段，补足到上限。"""
+    cues = ("i'm ", "i am ", "my name", "name is", "hand ", "welcome ", "join me", "co-founder", "ceo", "cto")
+    by_spk: dict[str, list[str]] = {}
+    for s in asr_result["segments"]:
+        by_spk.setdefault(s["speaker"], [])
+    for sp in by_spk:
+        segs = [s for s in asr_result["segments"] if s["speaker"] == sp]
+        cued = [s["text"] for s in segs if any(c in s["text"].lower() for c in cues)]
+        head = [s["text"] for s in segs[:4]]
+        picked = list(dict.fromkeys(cued + head))[: config.SPEAKER_SAMPLE_SEGMENTS]
+        by_spk[sp] = picked
+    return by_spk
+
+
+def infer_speakers(asr_result: dict, title: str, dry_run: bool) -> list[dict]:
+    """推断各说话人身份，带置信度与依据。dry_run/stub → 全 null。"""
+    labels = sorted({s["speaker"] for s in asr_result["segments"]})
+    if _use_stub(dry_run):
+        return [{"speaker": sp, "name": None, "org": None, "confidence": 0.0, "basis": "stub"} for sp in labels]
+
+    user = json.dumps({"title": title, "speakerSamples": _speaker_samples(asr_result)}, ensure_ascii=False)
+    try:
+        arr = _parse_json_array(_call(_SPEAKER_SYS, user))
+    except LLMError:
+        return [{"speaker": sp, "name": None, "org": None, "confidence": 0.0, "basis": "推断失败"} for sp in labels]
+
+    by_label = {a.get("speaker"): a for a in arr if isinstance(a, dict)}
+    out = []
+    for sp in labels:
+        a = by_label.get(sp, {})
+        name = a.get("name") if isinstance(a.get("name"), str) and a.get("name").strip() else None
+        org = a.get("org") if isinstance(a.get("org"), str) and a.get("org").strip() else None
+        conf = a.get("confidence")
+        conf = float(conf) if isinstance(conf, (int, float)) and not isinstance(conf, bool) else 0.0
+        out.append({
+            "speaker": sp, "name": name, "org": org,
+            "confidence": round(max(0.0, min(1.0, conf)), 2),
+            "basis": a.get("basis") if isinstance(a.get("basis"), str) else None,
+        })
+    return out
+
+
 def _stub_reduce(all_claims: list[dict], title: str) -> dict:
     """确定性桩：按 confidence 取前 N 条 claim 作 takeaways。"""
     ranked = sorted(all_claims, key=lambda c: c.get("confidence", 0), reverse=True)
