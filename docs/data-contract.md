@@ -152,6 +152,6 @@ design-spec 与任务约束明确：`whyWatch` / `takeaways` / 角色标注 / �
 
 ```sh
 node scripts/build-data.mjs          # 重新生成 src/data/dataset.json（改语料或关键词后运行）
-node scripts/build-data.mjs --verify # 全量 schema 校验 + 漂移比对（scripts/check 内置调用）
-sh scripts/check                     # data verify → lint → typecheck → 静态导出
+node scripts/build-data.mjs --verify # 全量 schema 校验 + 漂移比对（check 内置调用）
+npm run check                        # 跨平台校验入口：data verify → lint → typecheck → 静态导出
 ```

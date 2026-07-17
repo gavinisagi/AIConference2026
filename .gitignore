@@ -25,3 +25,39 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# ---------------------------------------------------------------------------
+# 内容清洗流水线相关（AIO · content-pipeline）
+# ---------------------------------------------------------------------------
+
+# 原始媒体（大文件，永不入库；来源事实由 data/catalog.json 记录）
+*.mp4
+*.mkv
+*.webm
+*.m4a
+*.wav
+*.flac
+
+# yt-dlp 原始下载输出目录（媒体 + info.json + 缩略图）
+/data/ai_engineer_first_100/
+/data/cursor_compile_2026/
+/data/figma_config_2026/
+
+# 下载 / 抓取日志
+/data/*.log
+
+# Paperclip 临时产物（请求、日志、临时脚本）
+/.pc_tmp/
+
+# mockup 渲染用的浏览器 CDP profile
+/design/mockups/_cdp_profile/
+
+# 流水线运行时产物（中间件、工作区、日志 —— 全部本地，不入库）
+/pipeline/artifacts/
+/pipeline/work/
+/pipeline/logs/
+/local-data/
+
+# API keys / 本地环境
+.env
+.env.local
