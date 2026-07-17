@@ -1,0 +1,244 @@
+{
+  "schemaVersion": 1,
+  "videoId": "fWa7uxyhVDE",
+  "generatedBy": {
+    "pipelineVersion": "0.1.0",
+    "asrProvider": "moss-asr",
+    "asrModel": "OpenMOSS-Team/MOSS-Transcribe-Diarize",
+    "llmModel": "claude-opus-4-8",
+    "dryRun": false
+  },
+  "topics": [
+    "agent",
+    "ai-coding",
+    "ai-product"
+  ],
+  "roles": [
+    "developer",
+    "product-design",
+    "founder-lead",
+    "trend"
+  ],
+  "speakers": [],
+  "whyWatch": "Cursor 创始人在一场演讲里给出了 agent 优先开发的完整路线图：从云端常驻 agent、Origin 代码平台到即将发布的从零训练的前沿级模型，信息密度高且多为一手数据。",
+  "takeaways": [
+    {
+      "id": "fWa7uxyhVDE-tk1",
+      "sessionId": "fWa7uxyhVDE",
+      "statement": "Cursor 宣布正在训练规模与 Opus/GPT 相当、完全从零训练（不再基于开源底座）的新模型，算力较以往扩大 10~20 倍，将在数周内发布，背后依托与 Facex 的深度合作；此前 Composer 系列的改进被认为从根本上受算力限制。",
+      "context": "这是整场演讲最重磅的发布：Cursor 首次以前沿实验室的规模自训基础模型，目标是完全掌控模型行为并达到乃至超越前沿水平。",
+      "timestampSeconds": 1431.96,
+      "roles": [
+        "trend",
+        "founder-lead",
+        "developer"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00492",
+        "seg_00498",
+        "seg_00504",
+        "seg_00508",
+        "seg_00513",
+        "seg_00528",
+        "seg_00532"
+      ],
+      "confidence": 0.88
+    },
+    {
+      "id": "fWa7uxyhVDE-tk2",
+      "sessionId": "fWa7uxyhVDE",
+      "statement": "新模型将具备超越编码的通用智能——使用工程师的完整工具链、长程规划、实际点击测试软件，因为'让任何人能构建任何东西'的瓶颈已不只在写代码本身；这呼应了演讲收尾论点：Cursor 的独特性在于同一群人既能改产品像素、也能改模型底层能力。",
+      "context": "解释了从零训练的动机：产品与模型共设计（co-design）是 Cursor 相对大厂和'实验室转产品'公司的差异化。",
+      "timestampSeconds": 1508.43,
+      "roles": [
+        "trend",
+        "product-design",
+        "founder-lead"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00518",
+        "seg_00524",
+        "seg_00536",
+        "seg_00541",
+        "seg_00546"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "id": "fWa7uxyhVDE-tk3",
+      "sessionId": "fWa7uxyhVDE",
+      "statement": "Cursor 已彻底 agent-first：超过 95% 的用户主要把 Cursor 当作 agent 使用，按请求量计 agent 约为 Tab 等辅助功能的 5 倍；但当前开发者多在本地跑 3~5 个互相阻塞的 agent、每次只交付 30~60 分钟的工作块，这不是未来形态。",
+      "context": "用一手使用数据界定了现状与差距，为后续云端 agent 的投入做铺垫。",
+      "timestampSeconds": 359.97,
+      "roles": [
+        "trend",
+        "developer",
+        "product-design"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00125",
+        "seg_00135",
+        "seg_00142",
+        "seg_00152",
+        "seg_00158"
+      ],
+      "confidence": 0.88
+    },
+    {
+      "id": "fWa7uxyhVDE-tk4",
+      "sessionId": "fWa7uxyhVDE",
+      "statement": "目标是让与 agent 协作像与同事协作：给 agent 自己的计算机——包含克隆仓库、已装依赖和内部工具链凭证的开发环境，使其能跑测试、自验证并产出可批注的截图与 demo；云端 agent 遵循自治、常驻、随处可用三原则，过去几个月速度提升 3 倍、可靠性达 99.9%。",
+      "context": "Cursor 3 云能力升级的核心设计：agent 从辅助工具变为可整项目交接、按天工作的执行者。",
+      "timestampSeconds": 467.73,
+      "roles": [
+        "developer",
+        "product-design",
+        "trend"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00165",
+        "seg_00172",
+        "seg_00178",
+        "seg_00303",
+        "seg_00308",
+        "seg_00315",
+        "seg_00322",
+        "seg_00330",
+        "seg_00348",
+        "seg_00352"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "fWa7uxyhVDE-tk5",
+      "sessionId": "fWa7uxyhVDE",
+      "statement": "行业正从'人 prompt agent'走向'循环与 agent 系统'时代：agent 可被 Slack、Jira、Linear 或云 API/webhook 程序化触发并跨界面协作；automations 发布数月已运行超 600 万次，客户 Amplitude 正用后台 automation 把 2 万个 React 组件实例迁移到 Tailwind。",
+      "context": "以真实客户案例说明 agent 被程序化、持续化使用的落地形态，甚至 agent prompt 人的频率会高于人 prompt 它。",
+      "timestampSeconds": 961.62,
+      "roles": [
+        "developer",
+        "trend",
+        "founder-lead"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00338",
+        "seg_00343",
+        "seg_00360",
+        "seg_00366",
+        "seg_00370",
+        "seg_00378",
+        "seg_00384"
+      ],
+      "confidence": 0.88
+    },
+    {
+      "id": "fWa7uxyhVDE-tk6",
+      "sessionId": "fWa7uxyhVDE",
+      "statement": "Origin 是面向 agent 规模重新设计的代码平台：基于云原语重建 Git 架构、负载测试模拟数千 agent 同时 push/pull，用与 Cursor 同源的智能自动解决合并冲突、修复 CI、推进每个 PR 并仅在必要时 @人，可将评审时间缩短一半以上；已内部上线，今秋向所有人开放。",
+      "context": "由被收购的 Graphite 团队主导，主张软件工程远不止写代码，还包括测试、评审、合并与部署；平台提供 API、MCP 与第三方应用生态。",
+      "timestampSeconds": 1222.68,
+      "roles": [
+        "developer",
+        "product-design",
+        "trend"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00420",
+        "seg_00426",
+        "seg_00430",
+        "seg_00440",
+        "seg_00446",
+        "seg_00452",
+        "seg_00460",
+        "seg_00465",
+        "seg_00470",
+        "seg_00475",
+        "seg_00480",
+        "seg_00483",
+        "seg_00486"
+      ],
+      "confidence": 0.88
+    },
+    {
+      "id": "fWa7uxyhVDE-tk7",
+      "sessionId": "fWa7uxyhVDE",
+      "statement": "Cursor 正从封闭产品转向平台：发布 SDK 让程序和其他 agent 也能调用 Cursor，插件生态快速增长以覆盖工程师的全部工具链（Datadog、数据库、设计工具），CLI 数月内完成 50 多项打磨、可 headless 或独立交互使用；同时发布 Cursor Mobile beta，支持移动端查看、批注并继续 agent 的工作。",
+      "context": "'Cursor 应在任何用户想要的地方可用'的落地：SDK、插件、CLI、移动端四条线同时推进。",
+      "timestampSeconds": 529.08,
+      "roles": [
+        "developer",
+        "product-design",
+        "founder-lead"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00188",
+        "seg_00195",
+        "seg_00203",
+        "seg_00210",
+        "seg_00218",
+        "seg_00224",
+        "seg_00392",
+        "seg_00398",
+        "seg_00405",
+        "seg_00412"
+      ],
+      "confidence": 0.87
+    },
+    {
+      "id": "fWa7uxyhVDE-tk8",
+      "sessionId": "fWa7uxyhVDE",
+      "statement": "Cursor 自研模型路线三阶段演进：Tab 模型悄然成为最流行的编码模型之一→用小模型补足 API 大模型的工具调用短板→训练完整 agentic 基础模型；Composer 2 引入数十万亿 token 的继续预训练与每 5 小时在线更新的实时 RL，其对速度和成本的坚持源于避免模型能力被资本雄厚大公司垄断的价值观。",
+      "context": "梳理了 Cursor 从功能模型到基础模型的技术积累，是理解其为何敢从零训前沿模型的背景。",
+      "timestampSeconds": 660.09,
+      "roles": [
+        "trend",
+        "developer",
+        "founder-lead"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00235",
+        "seg_00245",
+        "seg_00253",
+        "seg_00258",
+        "seg_00265",
+        "seg_00272",
+        "seg_00278",
+        "seg_00285",
+        "seg_00292"
+      ],
+      "confidence": 0.87
+    }
+  ],
+  "summary": "Michael Truell 回顾 Cursor 从两周原型到 agent-first 产品的演进，宣布三件大事：为 agent 重建的云端工作环境与自动化体系、面向 agent 规模重新设计 Git 与代码评审的 Origin 平台、以及一个规模对标 Opus/GPT、完全从零训练并将在数周内发布的通用编码模型。核心论点是行业正从'人 prompt agent'走向'agent 系统'时代，而 Cursor 的差异化在于同时共设计产品与模型。",
+  "language": "en",
+  "chapters": [
+    {
+      "index": 0,
+      "title": "Cursor 的起源与 agent-first 转型",
+      "startSeconds": 0.75,
+      "endSeconds": 423.45,
+      "visualDependency": true
+    },
+    {
+      "index": 1,
+      "title": "从本地小任务到平台化与自研模型（Composer 系列）",
+      "startSeconds": 423.48,
+      "endSeconds": 844.86,
+      "visualDependency": false
+    },
+    {
+      "index": 2,
+      "title": "云端 agent：自治、常驻、随处可用与 Cursor Mobile",
+      "startSeconds": 844.89,
+      "endSeconds": 1268.43,
+      "visualDependency": false
+    },
+    {
+      "index": 3,
+      "title": "Origin（agent-native Git 平台）与从零训练的下一代大模型",
+      "startSeconds": 1268.46,
+      "endSeconds": 1605.3,
+      "visualDependency": true
+    }
+  ]
+}
