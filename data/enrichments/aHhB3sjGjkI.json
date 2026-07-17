@@ -1,0 +1,329 @@
+{
+  "schemaVersion": 1,
+  "videoId": "aHhB3sjGjkI",
+  "generatedBy": {
+    "pipelineVersion": "0.1.0",
+    "asrProvider": "moss-asr",
+    "asrModel": "OpenMOSS-Team/MOSS-Transcribe-Diarize",
+    "llmModel": "claude-opus-4-8",
+    "dryRun": false
+  },
+  "topics": [
+    "agent",
+    "evals",
+    "ai-coding"
+  ],
+  "roles": [
+    "developer",
+    "founder-lead",
+    "trend"
+  ],
+  "speakers": [],
+  "whyWatch": "用真实生产数字（18%→83%、67%→86%）完整演示了'编码代理自动优化 AI Agent'的可落地闭环，方法论细到 git 分支管理和护栏设计，可直接照做。",
+  "takeaways": [
+    {
+      "id": "aHhB3sjGjkI-tk1",
+      "sessionId": "aHhB3sjGjkI",
+      "statement": "既然 Agent 本质是软件而 AI 擅长写软件，就可以'用 AI 构建 AI'：AutoAgent 让编码代理在自主循环中跑 evals、修改目标 Agent 代码、尝试新 prompt 和新工具，以 eval 结果和完整执行 trace 作为反馈信号自我改进，实践证明可行。",
+      "context": "这是全片核心命题，架构上由编码代理（如 Claude Code）驱动，反馈信号包括回归/未通过项和目标 Agent 的思考轨迹。",
+      "timestampSeconds": 77.12,
+      "roles": [
+        "developer",
+        "trend",
+        "founder-lead"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00013",
+        "seg_00014",
+        "seg_00015",
+        "seg_00089",
+        "seg_00090",
+        "seg_00091",
+        "seg_00092",
+        "seg_00093",
+        "seg_00105",
+        "seg_00106",
+        "seg_00107",
+        "seg_00108",
+        "seg_00109",
+        "seg_00110"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "aHhB3sjGjkI-tk2",
+      "sessionId": "aHhB3sjGjkI",
+      "statement": "效果有真实数字支撑：极简 Agent 经约 10 次迭代从 18% 提到 83%；一个真实生产 Agent 从 67% 提到 86% 且无作弊、现已上线；对已被人类充分优化的生产 Agent 仍能再提升超 10%——机器找到了人类没发现的优化方式。",
+      "context": "改进来源是发现边界用例、优化 system prompt、改进工具描述和修复工具逻辑，而非篡改测试。",
+      "timestampSeconds": 634.64,
+      "roles": [
+        "developer",
+        "founder-lead",
+        "trend"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00095",
+        "seg_00096",
+        "seg_00097",
+        "seg_00100",
+        "seg_00101",
+        "seg_00102",
+        "seg_00103",
+        "seg_00164",
+        "seg_00165",
+        "seg_00166",
+        "seg_00167",
+        "seg_00168",
+        "seg_00169",
+        "seg_00170",
+        "seg_00172"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "id": "aHhB3sjGjkI-tk3",
+      "sessionId": "aHhB3sjGjkI",
+      "statement": "一切的前提是与领域专家共建 golden dataset 并配套 scorer：期望输出不限于文本，可以是'调用某工具/带某参数/按某调用链'，跑分得出准确率数字，才能建立基线、发现回归、持续改进——本质是非确定性场景下的测试套件。",
+      "context": "没有可量化的 eval 基线，后面的自动优化循环无从谈起。",
+      "timestampSeconds": 226.24,
+      "roles": [
+        "developer"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00033",
+        "seg_00034",
+        "seg_00036",
+        "seg_00037",
+        "seg_00039",
+        "seg_00041",
+        "seg_00042",
+        "seg_00043"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "aHhB3sjGjkI-tk4",
+      "sessionId": "aHhB3sjGjkI",
+      "statement": "优化循环有明确的操作规程：先用 markdown 写任务书并跑一次 evals 生成基线报告，之后每次迭代新建 git 分支、提出一个假设、修改 Agent、重跑 evals——回归就回滚到上一个改进点再分叉，改进就保留，并把结果写进 report 和全局 memory 供后续假设参考。",
+      "context": "示例迭代序列为回归回滚、+5%、0%、+12%；全程产出完整变更日志，人类可回溯'方向对但实现错'的假设并在下轮引导。",
+      "timestampSeconds": 806.16,
+      "roles": [
+        "developer"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00117",
+        "seg_00118",
+        "seg_00119",
+        "seg_00120",
+        "seg_00121",
+        "seg_00122",
+        "seg_00123",
+        "seg_00124",
+        "seg_00125",
+        "seg_00126",
+        "seg_00127",
+        "seg_00129",
+        "seg_00131",
+        "seg_00135",
+        "seg_00136",
+        "seg_00137",
+        "seg_00138",
+        "seg_00139",
+        "seg_00141",
+        "seg_00142",
+        "seg_00143",
+        "seg_00144",
+        "seg_00145",
+        "seg_00147",
+        "seg_00148",
+        "seg_00149",
+        "seg_00151",
+        "seg_00154",
+        "seg_00156",
+        "seg_00157",
+        "seg_00159",
+        "seg_00160",
+        "seg_00161",
+        "seg_00162"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "aHhB3sjGjkI-tk5",
+      "sessionId": "aHhB3sjGjkI",
+      "statement": "线上数据形成第二个闭环：全量记录 trace（指令、工具调用、耗时、token）加最简单的'是/否有用'反馈，积累后让代理聚类负反馈归纳出 5-7 个失败模式簇，经领域专家验证后生成修复提案，已有 trace 同时充当回归测试。",
+      "context": "聚类被封装为 skill，代理能访问 Agent 源码和 trace 细节，可从'为什么这样回答'一路追到根因；频率上每个 sprint 生成一次报告比较合理。",
+      "timestampSeconds": 1159.11,
+      "roles": [
+        "developer",
+        "product-design"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00174",
+        "seg_00175",
+        "seg_00177",
+        "seg_00179",
+        "seg_00180",
+        "seg_00182",
+        "seg_00186",
+        "seg_00188",
+        "seg_00189",
+        "seg_00194",
+        "seg_00196",
+        "seg_00197",
+        "seg_00199",
+        "seg_00202",
+        "seg_00207",
+        "seg_00208",
+        "seg_00209",
+        "seg_00210",
+        "seg_00211",
+        "seg_00214",
+        "seg_00216",
+        "seg_00221",
+        "seg_00223",
+        "seg_00224",
+        "seg_00225",
+        "seg_00226",
+        "seg_00227",
+        "seg_00228",
+        "seg_00251",
+        "seg_00252",
+        "seg_00254",
+        "seg_00256"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "aHhB3sjGjkI-tk6",
+      "sessionId": "aHhB3sjGjkI",
+      "statement": "人类在环不可省略：初始要设结构与护栏（给足上下文、明确禁止代理篡改 golden dataset 或 scorer 来让 evals 虚假通过）；失败簇必须人工分诊——与专家验证、排优先级，用户反馈可能是假阳性，判断真伪离不开人。",
+      "context": "确认的失败模式沉淀进 golden dataset 并更新 eval 套件与 scorer，同一问题日后再引入会被立刻发现，形成防回归闭环。",
+      "timestampSeconds": 772.72,
+      "roles": [
+        "developer",
+        "founder-lead",
+        "product-design"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00112",
+        "seg_00113",
+        "seg_00114",
+        "seg_00115",
+        "seg_00116",
+        "seg_00233",
+        "seg_00235",
+        "seg_00237",
+        "seg_00240",
+        "seg_00242",
+        "seg_00244",
+        "seg_00246",
+        "seg_00247",
+        "seg_00248",
+        "seg_00249"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "aHhB3sjGjkI-tk7",
+      "sessionId": "aHhB3sjGjkI",
+      "statement": "Eval 表现差的三大常见根因是：缺少完成任务所需的工具、system prompt 缺领域指令与行为约束、上下文检索能力不足——多数优化其实只是补全 system prompt 和检索工具。",
+      "context": "演讲用无工具极简 Agent 仅 18% 通过率作为反面基线：只有 LLM 训练数据内已有的知识能答对，其余必须依赖外部上下文和工具。",
+      "timestampSeconds": 302.48,
+      "roles": [
+        "developer"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00045",
+        "seg_00048",
+        "seg_00053",
+        "seg_00054",
+        "seg_00056",
+        "seg_00057",
+        "seg_00060",
+        "seg_00061",
+        "seg_00062",
+        "seg_00063",
+        "seg_00065",
+        "seg_00067",
+        "seg_00068",
+        "seg_00070",
+        "seg_00073",
+        "seg_00076"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "id": "aHhB3sjGjkI-tk8",
+      "sessionId": "aHhB3sjGjkI",
+      "statement": "底层支撑是 harness engineering：为编码代理构建约束、任务、反馈闭环与治理，具体构件包括 spec 驱动开发、质量门（lint/单测/evals/LLM code review）、上下文工程和可观测性——其中'能自行验证自己的变更'是最关键的一环，可观测性则是代理能修 bug 的前提。",
+      "context": "实际案例中，代理在获得足够上下文且能对回归测试自行验证后，仅用一个 prompt 就修复了一整套问题，复杂情况可让 AutoAgent 针对失败簇自动产出草稿 PR。",
+      "timestampSeconds": 1624.4,
+      "roles": [
+        "developer",
+        "trend",
+        "founder-lead"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00258",
+        "seg_00260",
+        "seg_00262",
+        "seg_00264",
+        "seg_00265",
+        "seg_00267",
+        "seg_00268",
+        "seg_00270",
+        "seg_00272",
+        "seg_00274",
+        "seg_00275",
+        "seg_00277",
+        "seg_00278",
+        "seg_00280",
+        "seg_00281",
+        "seg_00283",
+        "seg_00285",
+        "seg_00287"
+      ],
+      "confidence": 0.9
+    }
+  ],
+  "summary": "Nearform 的 Alfonso Graziano 提出并验证了'agents building agents'的工程方法：以 golden dataset + scorer 建立可量化的 eval 基线，让编码代理（如 Claude Code）在自主循环中提假设、改 Agent 代码、跑 evals、回归即回滚，实测将极简 Agent 从 18% 提到 83%，生产 Agent 从 67% 提到 86%；再配合全量 trace 采集与负反馈聚类，把线上失败模式经人工分诊后沉淀回 eval 套件，形成防回归闭环。底层支撑是 harness engineering：给代理约束、上下文、质量门和可观测性，核心是让它能自行验证变更。",
+  "language": "en",
+  "chapters": [
+    {
+      "index": 0,
+      "title": "开场：AI Agent 的问题类别与 Golden Dataset 基础",
+      "startSeconds": 0.96,
+      "endSeconds": 424.8,
+      "visualDependency": false
+    },
+    {
+      "index": 1,
+      "title": "AutoAgent：让编码代理自主优化 AI Agent",
+      "startSeconds": 424.96,
+      "endSeconds": 850.0,
+      "visualDependency": false
+    },
+    {
+      "index": 2,
+      "title": "优化循环机制：分支、假设、回滚与全量变更日志",
+      "startSeconds": 850.08,
+      "endSeconds": 1100.64,
+      "visualDependency": false
+    },
+    {
+      "index": 3,
+      "title": "从 evals 到线上数据：trace 采集、反馈与失败模式聚类",
+      "startSeconds": 1104.16,
+      "endSeconds": 1501.2,
+      "visualDependency": false
+    },
+    {
+      "index": 4,
+      "title": "分诊、回归沉淀与 Harness Engineering",
+      "startSeconds": 1505.32,
+      "endSeconds": 1812.64,
+      "visualDependency": false
+    }
+  ]
+}
