@@ -146,6 +146,8 @@ function normalizeRecord(raw, index) {
     whyWatch: null,
     takeaways: [],
     roles: [],
+    // 观看导览：清洗流水线产出，缺省 null（页面走详情降级）。
+    tour: null,
   };
 
   return { session, errors };
@@ -216,6 +218,50 @@ function sanitizeTakeaways(v, sessionId) {
   return out;
 }
 
+const TOUR_MODES = ['watch', 'skim', 'listen'];
+
+/** 规范化 tour 覆盖 → Tour（严格投影；任一必填缺失/非法 → 返回 null 视为不覆盖）。 */
+function sanitizeTour(v) {
+  if (!v || typeof v !== 'object') return null;
+  const str = (x) => (typeof x === 'string' && x.trim() ? x.trim() : null);
+  const num = (x) => (typeof x === 'number' && x >= 0 ? x : null);
+  const hook = str(v.hook);
+  if (!hook) return null; // 无钩子不成导览
+  const mustWatch = [];
+  for (const m of Array.isArray(v.mustWatch) ? v.mustWatch : []) {
+    if (!m || num(m.startSeconds) === null || !str(m.label)) continue;
+    mustWatch.push({
+      startSeconds: m.startSeconds,
+      endSeconds: num(m.endSeconds) ?? m.startSeconds,
+      label: str(m.label),
+      live: m.live === true,
+      why: str(m.why) ?? '',
+    });
+  }
+  const stops = [];
+  for (const s of Array.isArray(v.stops) ? v.stops : []) {
+    if (!s || num(s.startSeconds) === null || !str(s.title)) continue;
+    stops.push({
+      startSeconds: s.startSeconds,
+      endSeconds: num(s.endSeconds) ?? s.startSeconds,
+      title: str(s.title),
+      what: str(s.what) ?? '',
+      keyPoint: str(s.keyPoint) ?? '',
+      howTo: TOUR_MODES.includes(s.howTo) ? s.howTo : 'watch',
+      howToReason: str(s.howToReason) ?? '',
+      speaker: str(s.speaker) ?? '',
+    });
+  }
+  if (stops.length === 0) return null; // 无站点不成导览
+  return {
+    hook,
+    whoShouldWatch: str(v.whoShouldWatch) ?? '',
+    ifShortOnTime: str(v.ifShortOnTime) ?? '',
+    mustWatch,
+    stops,
+  };
+}
+
 /**
  * 将一个覆盖对象（enrichment 或 editorial）应用到 session（就地字段级覆盖）。
  * 只认契约字段，逐字段校验；非法值忽略并记 warning，绝不让坏覆盖破坏 schema。
@@ -254,6 +300,11 @@ function applyOverride(session, ov, source, warnings) {
     if (tks) session.takeaways = tks;
     else warnings.push(`${at}: takeaways 非法，忽略`);
   }
+  if ('tour' in ov) {
+    const tour = sanitizeTour(ov.tour);
+    if (tour) session.tour = tour;
+    else warnings.push(`${at}: tour 非法或不完整，忽略`);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -287,6 +338,12 @@ function validateSession(s, index) {
     errors.push(`${at}: roles must be array of contract roles`);
   if (!Array.isArray(s.speakers)) errors.push(`${at}: speakers must be array`);
   if (!Array.isArray(s.takeaways)) errors.push(`${at}: takeaways must be array`);
+  if (s.tour !== null) {
+    if (typeof s.tour !== 'object') errors.push(`${at}: tour must be object or null`);
+    else if (!isNonEmptyString(s.tour.hook)) errors.push(`${at}: tour.hook required`);
+    else if (!Array.isArray(s.tour.stops) || s.tour.stops.length === 0)
+      errors.push(`${at}: tour.stops must be non-empty array`);
+  }
   for (const [ti, tk] of (s.takeaways || []).entries()) {
     if (!isNonEmptyString(tk.id)) errors.push(`${at}.takeaway[${ti}]: id required`);
     if (tk.sessionId !== s.id) errors.push(`${at}.takeaway[${ti}]: sessionId must match session id`);

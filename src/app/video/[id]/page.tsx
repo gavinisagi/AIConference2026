@@ -10,7 +10,7 @@ import {
 } from '@/lib/loader';
 import type { Session } from '@/lib/schema';
 import { conferenceMeta, topicMeta } from '@/design/tokens';
-import { Button, Chip, ConfBadge, DurationTag, StatusBadge, TakeawayCard } from '@/components';
+import { Button, Chip, ConfBadge, DurationTag, StatusBadge, TakeawayCard, TourView } from '@/components';
 import { VideoCard } from '@/app/catalog/VideoCard';
 import { Breadcrumb } from '@/app/_shared/Breadcrumb';
 import { ROLE_PRESETS } from '@/app/_landing/presets';
@@ -150,7 +150,18 @@ export default async function VideoDetailPage({
               <p className={styles.watchNote}>本站不播放，跳转官方来源观看。</p>
             </section>
 
-            {/* 为什么值得看：本页核心增值；缺省走诚实占位（§6.2 / §7.1）。 */}
+            {/* 观看导览：有 tour 时作为本页核心体验（承接层）。 */}
+            {session.tour && (
+              <section className={styles.section} aria-labelledby="tour-head">
+                <h2 id="tour-head" className={styles.sectionHead}>
+                  观看导览
+                </h2>
+                <TourView tour={session.tour} officialUrl={session.officialUrl} />
+              </section>
+            )}
+
+            {/* 为什么值得看：无 tour 时的核心增值；缺省走诚实占位（§6.2 / §7.1）。 */}
+            {!session.tour && (
             <section className={styles.section} aria-labelledby="why-head">
               <h2 id="why-head" className={styles.sectionHead}>
                 为什么值得看
@@ -159,6 +170,7 @@ export default async function VideoDetailPage({
                 {whyWatchBody}
               </p>
             </section>
+            )}
 
             {/* 关键观点（§6.1 观点卡复用）：真实 takeaways 缺失时不渲染，不编造（§7.1）。 */}
             {session.takeaways.length > 0 && (

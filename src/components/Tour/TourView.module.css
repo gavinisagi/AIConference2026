@@ -1,0 +1,211 @@
+.tour {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-32);
+}
+
+.hook {
+  font-family: var(--font-serif);
+  font-size: var(--fs-body-l);
+  line-height: var(--lh-body-l);
+  color: var(--ink);
+  margin: 0;
+  max-width: var(--reading-max);
+}
+
+/* 决策带 */
+.band {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-24);
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-card);
+  padding: var(--space-24);
+}
+.bandLabel {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: var(--space-8);
+}
+.who {
+  font-size: var(--fs-body-m);
+  color: var(--ink);
+}
+
+.propbar {
+  display: flex;
+  height: 14px;
+  border-radius: var(--radius-chip);
+  overflow: hidden;
+  border: 1px solid var(--hairline-strong);
+}
+.prop_watch { background: var(--mode-watch-ink); display: block; }
+.prop_skim { background: var(--mode-skim-ink); display: block; }
+.prop_listen { background: var(--mode-listen-ink); display: block; }
+.propLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-16);
+  margin-top: var(--space-8);
+  font-family: var(--font-mono);
+  font-size: var(--fs-body-s);
+  color: var(--ink-secondary);
+}
+.propLegend span { display: inline-flex; align-items: center; gap: var(--space-8); }
+.propLegend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+
+.short {
+  background: var(--mode-watch-bg);
+  border: 1px solid var(--accent-tint);
+  border-radius: var(--radius-btn);
+  padding: var(--space-12) var(--space-16);
+  font-size: var(--fs-body-s);
+  color: var(--ink);
+}
+.shortLabel {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--mode-watch-ink);
+  font-weight: 600;
+  margin-bottom: var(--space-4);
+}
+
+.section { display: flex; flex-direction: column; gap: var(--space-16); }
+.sectionHead {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  font-weight: 600;
+  margin: 0;
+}
+
+/* 必看 */
+.mustList { display: flex; flex-direction: column; gap: var(--space-12); }
+.mustCard {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-left: var(--accent-bar) solid var(--mode-watch-ink);
+  border-radius: var(--radius-btn);
+  padding: var(--space-12) var(--space-16);
+  transition: border-color var(--motion-fast) var(--easing),
+    box-shadow var(--motion-fast) var(--easing);
+}
+.mustCard:hover { box-shadow: var(--shadow-card-hover); }
+.mustTop { display: flex; align-items: center; gap: var(--space-12); flex-wrap: wrap; }
+.mustCard b { font-size: var(--fs-body-m); font-weight: 600; }
+.mustWhy { margin: var(--space-8) 0 0; font-size: var(--fs-body-s); color: var(--ink-secondary); }
+.tc {
+  font-family: var(--font-mono);
+  font-size: var(--fs-body-s);
+  color: var(--mode-watch-ink);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.live {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--mode-watch-ink);
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 700;
+}
+
+/* 模式图例 */
+.modes { display: flex; flex-wrap: wrap; gap: var(--space-12) var(--space-24); font-size: var(--fs-body-s); }
+.modeItem { display: inline-flex; align-items: center; gap: var(--space-8); color: var(--ink-secondary); }
+.badge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 3px 9px;
+  border-radius: var(--radius-chip);
+  white-space: nowrap;
+}
+.badge_watch { color: var(--mode-watch-ink); background: var(--mode-watch-bg); }
+.badge_skim { color: var(--mode-skim-ink); background: var(--mode-skim-bg); }
+.badge_listen { color: var(--mode-listen-ink); background: var(--mode-listen-bg); }
+
+/* 时间线 */
+.stops { list-style: none; margin: 0; padding: 0; }
+.stop {
+  display: grid;
+  grid-template-columns: 76px 1fr;
+  gap: var(--space-16);
+  padding: var(--space-24) 0;
+  border-top: 1px solid var(--hairline);
+}
+.stops > .stop:first-child { border-top: none; padding-top: var(--space-8); }
+.stime {
+  font-family: var(--font-mono);
+  font-size: var(--fs-body-s);
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+  padding-top: 2px;
+}
+.to { display: block; opacity: 0.6; }
+.stbody { display: flex; flex-direction: column; gap: var(--space-8); align-items: flex-start; }
+.stTitle {
+  font-family: var(--font-serif);
+  font-size: var(--fs-h3);
+  font-weight: var(--fw-h3);
+  line-height: var(--lh-h3);
+  margin: 0;
+  text-wrap: balance;
+}
+.what {
+  font-family: var(--font-serif);
+  font-size: var(--fs-body-m);
+  line-height: var(--lh-body-m);
+  color: var(--ink-secondary);
+  margin: 0;
+  max-width: var(--reading-max);
+}
+.key {
+  display: flex;
+  gap: var(--space-8);
+  font-size: var(--fs-body-s);
+  background: var(--surface-sunken);
+  border-radius: var(--radius-btn);
+  padding: var(--space-8) var(--space-12);
+  margin: 0;
+  color: var(--ink);
+}
+.keyLabel { color: var(--mode-watch-ink); font-weight: 700; flex-shrink: 0; }
+.strow { display: flex; align-items: center; gap: var(--space-12); flex-wrap: wrap; width: 100%; }
+.reason { font-size: var(--fs-meta); color: var(--ink-muted); flex: 1; min-width: 180px; }
+.jump {
+  margin-left: auto;
+  text-decoration: none;
+  font-family: var(--font-mono);
+  font-size: var(--fs-body-s);
+  color: var(--ink);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-btn);
+  padding: 5px 11px;
+  white-space: nowrap;
+  transition: background var(--motion-fast) var(--easing), border-color var(--motion-fast) var(--easing);
+}
+.jump:hover { background: var(--mode-watch-bg); border-color: var(--mode-watch-ink); color: var(--mode-watch-ink); }
+.spk { font-family: var(--font-mono); font-size: var(--fs-meta); color: var(--ink-muted); }
+
+@media (max-width: 640px) {
+  .stop { grid-template-columns: 1fr; gap: var(--space-8); }
+  .jump { margin-left: 0; }
+}

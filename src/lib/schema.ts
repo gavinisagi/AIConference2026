@@ -76,6 +76,46 @@ export interface Speaker {
   org: string | null;
 }
 
+/** 导览的观看模式：看画面 / 略读 / 听即可（依据画面内容与运动强度判定）。 */
+export const TOUR_MODES = ['watch', 'skim', 'listen'] as const;
+export type TourMode = (typeof TOUR_MODES)[number];
+
+/** 导览的一站（章节级）：一段时间范围 + 讲了什么 + 关键点 + 怎么看。 */
+export interface TourStop {
+  startSeconds: number;
+  endSeconds: number;
+  title: string;
+  what: string;
+  keyPoint: string;
+  howTo: TourMode;
+  howToReason: string;
+  speaker: string;
+}
+
+/** 必看片段：值得优先跳看的时间块（live=现场实操）。 */
+export interface TourMustWatch {
+  startSeconds: number;
+  endSeconds: number;
+  label: string;
+  live: boolean;
+  why: string;
+}
+
+/**
+ * 观看导览（承接层核心资产）——不是 summary，是「推荐别人看」的观看指南。
+ * 由清洗流水线 tour 阶段产出，缺省为 null（页面走详情降级）。
+ */
+export interface Tour {
+  /** 一句话钩子（feed 也会复用）。 */
+  hook: string;
+  /** 谁最该看。 */
+  whoShouldWatch: string;
+  /** 时间不够看哪段。 */
+  ifShortOnTime: string;
+  mustWatch: TourMustWatch[];
+  stops: TourStop[];
+}
+
 /** Video/Session — 站点消费的核心记录（design-spec §2.3 / §5.2）。 */
 export interface Session {
   /** 稳定唯一 id（源自 YouTube video_id）。 */
@@ -110,6 +150,8 @@ export interface Session {
   takeaways: Takeaway[];
   /** 角色标注（当前为空数组，不显示编造角标）。 */
   roles: Role[];
+  /** 观看导览（清洗流水线产出；缺省 null，页面走详情降级）。 */
+  tour: Tour | null;
 }
 
 // ---------------------------------------------------------------------------

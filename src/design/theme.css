@@ -46,6 +46,14 @@
   --feedback-success-ink: #2F5D50;
   --feedback-success-bg: #E4EFE9;
 
+  /* ---- 导览观看模式（复用既有色板，不新增色值）：看/略/听 ---- */
+  --mode-watch-ink: var(--accent);           /* 看画面 → 主强调 */
+  --mode-watch-bg: var(--accent-tint);
+  --mode-skim-ink: var(--ink-secondary);     /* 略读 → 中性 */
+  --mode-skim-bg: var(--surface-sunken);
+  --mode-listen-ink: #2F5D50;                /* 听即可 → 深绿（§3.2 已有） */
+  --mode-listen-bg: #E4EFE9;
+
   /* ---- 字族 中英文混排（§3.3） ---- */
   --font-serif: "Source Serif 4", "Noto Serif SC", Georgia, "Songti SC", serif;
   --font-sans: "Inter", "Noto Sans SC", system-ui, -apple-system, "PingFang SC", sans-serif;

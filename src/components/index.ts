@@ -25,3 +25,5 @@ export type { MetaRowProps } from './MetaRow/MetaRow';
 
 export { TakeawayCard } from './TakeawayCard/TakeawayCard';
 export type { TakeawayCardProps } from './TakeawayCard/TakeawayCard';
+
+export { TourView } from './Tour/TourView';
