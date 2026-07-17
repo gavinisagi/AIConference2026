@@ -1,0 +1,125 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://aiconf2026/pipeline/contracts/moss_asr_result.schema.json",
+  "title": "Unified ASR Result (Moss / any provider)",
+  "description": "视频清洗流水线消费的统一 ASR 结果。任何 ASR provider(主用 mossASR,备用 faster-whisper)都必须产出满足本 schema 的 JSON。一次调用输出一份;长视频由流水线切块后多次调用再拼接(见 moss-asr-contract.md §4)。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "source", "asr", "segments"],
+  "properties": {
+    "schemaVersion": {
+      "type": "integer",
+      "const": 1,
+      "description": "契约版本。破坏性变更时 +1。"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["videoId", "inputPath", "durationSeconds"],
+      "properties": {
+        "videoId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "YouTube video_id,主键。可由文件名末尾 [VIDEOID] 解析(yt-dlp 约定,与 data/catalog.json 的 video_id 对齐),或 --video-id 传入。用于 ASR→catalog→enrichment 关联,绝不可编造。"
+        },
+        "inputPath": {
+          "type": "string",
+          "minLength": 1,
+          "description": "本次转写的输入文件绝对路径(整片或某个切块)。"
+        },
+        "mediaSha256": {
+          "type": ["string", "null"],
+          "description": "输入文件 SHA-256(可选;producer 可留 null,由流水线补)。"
+        },
+        "durationSeconds": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "本次输入音频真实时长(秒)。"
+        }
+      }
+    },
+    "asr": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "model", "language", "speakerScope"],
+      "properties": {
+        "provider": {
+          "type": "string",
+          "enum": ["moss-asr", "faster-whisper"],
+          "description": "ASR 实现标识。"
+        },
+        "model": {
+          "type": "string",
+          "minLength": 1,
+          "description": "模型标识,如 OpenMOSS-Team/MOSS-Transcribe-Diarize。"
+        },
+        "backend": {
+          "type": ["string", "null"],
+          "description": "运行后端说明,如 'vLLM (WSL2)'。可空。"
+        },
+        "language": {
+          "type": "string",
+          "minLength": 2,
+          "description": "识别到或指定的音频主语言(ISO 639-1,如 en / zh)。"
+        },
+        "speakerScope": {
+          "type": "string",
+          "enum": ["global", "chunk"],
+          "description": "说话人编号(S01/S02..)的一致性范围。producer 单次调用一律输出 'global'(整段内一致);流水线拼接多个切块后会改写为 'chunk',表示跨块的 S01 不保证同一人。"
+        },
+        "createdAt": {
+          "type": ["string", "null"],
+          "description": "产出时间 ISO8601。producer 可留 null(WSL 客户端有时钟则填),流水线落盘时会补。"
+        },
+        "inferenceSeconds": {
+          "type": ["number", "null"],
+          "description": "本次推理耗时(秒)。用于 RTF 与吞吐监控。可空。"
+        },
+        "rtf": {
+          "type": ["number", "null"],
+          "description": "Real-Time Factor = inferenceSeconds / durationSeconds。可空。"
+        }
+      }
+    },
+    "segments": {
+      "type": "array",
+      "minItems": 0,
+      "description": "有序转写分段。start 单调不减。空数组合法(纯静音/无语音),但流水线会据此告警。",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "start", "end", "speaker", "text"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^seg_[0-9]{5,}$",
+            "description": "稳定分段 id,零填充、按顺序,如 seg_00001。证据链回指用(evidenceSegmentIds)。在一次调用内唯一。"
+          },
+          "start": {
+            "type": "number",
+            "minimum": 0,
+            "description": "分段起始(秒,相对本次输入起点)。"
+          },
+          "end": {
+            "type": "number",
+            "minimum": 0,
+            "description": "分段结束(秒)。须 >= start。"
+          },
+          "speaker": {
+            "type": "string",
+            "pattern": "^S[0-9]{2,}$",
+            "description": "说话人标签 S01/S02..(diarization 编号,非真实姓名)。单次调用内全局一致。"
+          },
+          "text": {
+            "type": "string",
+            "description": "该段转写文本(UTF-8,可含 CJK)。空字符串合法但应尽量避免。"
+          },
+          "avgLogprob": {
+            "type": ["number", "null"],
+            "description": "平均对数概率(置信度代理)。Moss 若不暴露则 null;faster-whisper 应填。二阶段重跑用它选可疑区间。"
+          }
+        }
+      }
+    }
+  }
+}
