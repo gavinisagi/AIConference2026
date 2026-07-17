@@ -140,3 +140,22 @@ def extract_chunk(src: str | Path, chunk: Chunk, out_dir: Path) -> Path:
 
 def chunk_to_dict(c: Chunk) -> dict:
     return asdict(c)
+
+
+def extract_audio_full(src: str | Path, out_dir: Path) -> Path:
+    """用 Windows 原生 ffmpeg 把整片抽成 16kHz 单声道 FLAC。
+
+    绕开 mossASR CLI 内部的 WSL ffmpeg（跨 /mnt/c 慢 10 倍）。产出 .flac 传给 Moss，
+    因 .flac 非视频后缀，CLI 不会再做二次抽取，直接送模型。
+    """
+    out_dir.mkdir(parents=True, exist_ok=True)
+    src = Path(src)
+    dst = out_dir / f"{src.stem[:40]}_16k.flac"
+    cmd = [
+        "ffmpeg", "-y", "-loglevel", "error", "-i", str(src),
+        "-ac", "1", "-ar", "16000", "-c:a", "flac", str(dst),
+    ]
+    proc = _run(cmd)
+    if proc.returncode != 0:
+        raise RuntimeError(f"ffmpeg 抽音频失败：{proc.stderr[-500:]}")
+    return dst

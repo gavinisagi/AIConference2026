@@ -37,11 +37,20 @@ def available() -> bool:
     return MOSS_CLI.exists()
 
 
-def transcribe_file(input_path: str | Path, video_id: str, prompt: str | None = None) -> dict:
+class MossTimeout(RuntimeError):
+    """Moss CLI 超时（vLLM 偶发卡顿）。上层据此重试。"""
+
+
+def transcribe_file(
+    input_path: str | Path, video_id: str, prompt: str | None = None, timeout: float | None = None,
+) -> dict:
     """调 Moss CLI 转写单个 ≤28min 文件 → 统一 schema（已校验）。
 
     契约 §2：`moss_transcribe.py <INPUT> --out <OUT.json> [--video-id ID] [--prompt ...]`
     成功退出 0 + 写出满足 schema 的 JSON。
+
+    timeout：超时（秒）。vLLM 偶发生成卡死（吞吐→0），无超时会吊死整批；
+    超时抛 MossTimeout 让上层重试。None 时不限时。
     """
     if not available():
         raise RuntimeError(
@@ -54,7 +63,12 @@ def transcribe_file(input_path: str | Path, video_id: str, prompt: str | None = 
         cmd = [_moss_python(), str(MOSS_CLI), str(input_path), "--out", str(out), "--video-id", video_id]
         if prompt:
             cmd += ["--prompt", prompt]
-        proc = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8")
+        try:
+            proc = subprocess.run(
+                cmd, capture_output=True, text=True, encoding="utf-8", timeout=timeout,
+            )
+        except subprocess.TimeoutExpired as e:
+            raise MossTimeout(f"Moss CLI 超时（>{timeout:.0f}s，vLLM 疑似卡顿）") from e
         if proc.returncode != 0:
             raise RuntimeError(
                 f"Moss CLI 失败（exit {proc.returncode}）：\n{proc.stderr[-1000:]}"

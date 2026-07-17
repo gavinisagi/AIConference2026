@@ -11,10 +11,36 @@
 """
 from __future__ import annotations
 
+import time
 from pathlib import Path
 
 from . import config, media
 from .asr import adapter, moss, schema
+
+# ASR 重试（Moss 偶发 vLLM 卡顿/超时）。超时 = max(下限, 时长×系数)，给正常推理足够
+# 余量又能掐死卡死（正常 RTF ≤0.15，系数 0.5 留 3x+ 余量）。
+ASR_RETRIES = 3
+ASR_TIMEOUT_MIN_SECONDS = 150
+ASR_TIMEOUT_PER_AUDIO_SECOND = 0.5
+
+
+def _asr_timeout(duration: float) -> float:
+    return max(ASR_TIMEOUT_MIN_SECONDS, duration * ASR_TIMEOUT_PER_AUDIO_SECOND)
+
+
+def _transcribe_with_retry(path, video_id: str, prompt, duration: float) -> dict:
+    """调 Moss 转写单文件，超时/失败重试。持续失败则抛出（阶段失败，可断点续跑）。"""
+    timeout = _asr_timeout(duration)
+    last = None
+    for attempt in range(1, ASR_RETRIES + 1):
+        try:
+            return moss.transcribe_file(path, video_id, prompt, timeout=timeout)
+        except (moss.MossTimeout, RuntimeError) as e:
+            last = e
+            if attempt < ASR_RETRIES:
+                print(f"  [asr] 第 {attempt} 次失败，重试：{str(e)[:120]}")
+                time.sleep(5)
+    raise RuntimeError(f"Moss 转写连续 {ASR_RETRIES} 次失败：{last}")
 
 
 def transcribe_video(video_id: str, media_path, from_moss_result, work: Path, dry_run: bool) -> dict:
@@ -38,15 +64,16 @@ def transcribe_video(video_id: str, media_path, from_moss_result, work: Path, dr
 
     prompt = _hotword_prompt(video_id)
     if len(chunks) == 1:
-        result = moss.transcribe_file(media_path, video_id, prompt)
-        return result
+        # 原生 ffmpeg 预提取 FLAC（绕开 CLI 内部 WSL /mnt/c 抽取，快很多）。
+        flac = media.extract_audio_full(media_path, work / "audio")
+        return _transcribe_with_retry(flac, video_id, prompt, duration)
 
-    # 多块：抽块 → 逐块转 → 拼接。
+    # 多块：抽块（原生 ffmpeg）→ 逐块转（超时+重试）→ 拼接。
     chunk_dir = work / "chunks"
     chunk_results = []
     for ch in chunks:
         flac = media.extract_chunk(media_path, ch, chunk_dir)
-        r = moss.transcribe_file(flac, video_id, prompt)
+        r = _transcribe_with_retry(flac, video_id, prompt, ch.end - ch.start)
         chunk_results.append((ch, r))
     return _stitch(video_id, media_path, duration, chunk_results)
 
