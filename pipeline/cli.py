@@ -190,7 +190,12 @@ def cmd_reset(args) -> int:
 
 
 def cmd_review(args) -> int:
-    """人工审核辅助：把每条 takeaway 与其引用的原始转写证据并排列出，便于核对出处。"""
+    """人工审核辅助：把每条 takeaway 与其引用的原始转写证据并排列出，便于核对出处。
+
+    不带 video_id → 全部已清洗视频的审核概览（takeaway 数 / qc 标记 / whyWatch）。
+    """
+    if not args.video_id:
+        return _review_summary(args)
     vid = args.video_id
     enrich_path = config.ENRICH_DIR / f"{vid}.json"
     if not enrich_path.exists():
@@ -241,6 +246,33 @@ def cmd_review(args) -> int:
     return 0
 
 
+def _review_summary(args) -> int:
+    """全部已清洗视频的审核概览，突出有 qc 标记、需重点审的条目。"""
+    files = sorted(config.ENRICH_DIR.glob("*.json"))
+    if not files:
+        print("（data/enrichments/ 下暂无清洗产物）")
+        return 0
+    catalog = config.load_catalog()
+    print(f"{'videoId':<14} {'tk':>3} {'qc(e/w)':>8} {'why':>4}  标题")
+    print("-" * 76)
+    flagged = 0
+    for f in files:
+        e = json.loads(f.read_text(encoding="utf-8"))
+        vid = e["videoId"]
+        qc_issues = _load(config.WORK_DIR / vid, "qc.json") or []
+        errs = sum(1 for x in qc_issues if x["level"] == "error")
+        warns = sum(1 for x in qc_issues if x["level"] == "warn")
+        if errs or warns:
+            flagged += 1
+        why = "是" if e.get("whyWatch") else "—"
+        title = catalog.get(vid, {}).get("title", "")[:34]
+        mark = "⚠" if (errs or warns) else " "
+        print(f"{mark}{vid:<13} {len(e.get('takeaways', [])):>3} {f'{errs}/{warns}':>8} {why:>4}  {title}")
+    print("-" * 76)
+    print(f"共 {len(files)} 条，{flagged} 条有 qc 标记（⚠，`review <id>` 展开核对）")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="pipeline.cli", description="视频清洗流水线")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -264,8 +296,8 @@ def build_parser() -> argparse.ArgumentParser:
     rs.add_argument("--stage", help="只重置某阶段")
     rs.set_defaults(func=cmd_reset)
 
-    rv = sub.add_parser("review", help="人工审核：观点 ← 原始转写证据 并排展示")
-    rv.add_argument("video_id")
+    rv = sub.add_parser("review", help="人工审核：观点 ← 原始转写证据 并排展示（无 id 出概览）")
+    rv.add_argument("video_id", nargs="?")
     rv.add_argument("--max-evidence", type=int, default=3, help="每条 takeaway 展开的证据段数上限")
     rv.set_defaults(func=cmd_review)
     return p
