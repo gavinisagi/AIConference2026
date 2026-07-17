@@ -30,7 +30,13 @@ python -m pipeline.cli run --all
 # 状态 / 重置
 python -m pipeline.cli status [videoId]
 python -m pipeline.cli reset <videoId> [--stage STAGE]
+
+# 人工审核：每条 takeaway 与其引用的原始转写证据并排展示（核对出处 + qc 标记）
+python -m pipeline.cli review <videoId> [--max-evidence N]
 ```
+
+**人工审核纪律**：claude -p 的清洗结果上站前必须人工审核。`review` 命令把「观点 ← 原始转写证据」
+并排列出、显示深链 `?t=` 与质检标记（如 `asr-lang-anomaly` 语言幻觉），无需看视频即可核对每条观点是否有出处。
 
 - `--dry-run` 或未设 `ANTHROPIC_API_KEY`：LLM 走**确定性桩**，管道端到端可跑（质量待真实 key）。
 - `--force`：忽略已成功状态与 qc error，强制重跑/放行。

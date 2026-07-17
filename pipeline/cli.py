@@ -189,6 +189,58 @@ def cmd_reset(args) -> int:
     return 0
 
 
+def cmd_review(args) -> int:
+    """人工审核辅助：把每条 takeaway 与其引用的原始转写证据并排列出，便于核对出处。"""
+    vid = args.video_id
+    enrich_path = config.ENRICH_DIR / f"{vid}.json"
+    if not enrich_path.exists():
+        print(f"无 enrichment：{enrich_path}", file=sys.stderr)
+        return 1
+    e = json.loads(enrich_path.read_text(encoding="utf-8"))
+    work = config.WORK_DIR / vid
+    asr = _load(work, "asr.json")
+    seg_index = {s["id"]: s for s in asr["segments"]} if asr else {}
+    qc_issues = _load(work, "qc.json") or []
+    title = config.load_catalog().get(vid, {}).get("title", "")
+
+    def fmt_t(sec):
+        if sec is None:
+            return "—"
+        m, s = divmod(int(sec), 60)
+        return f"{m}:{s:02d}"
+
+    print(f"\n{'=' * 72}")
+    print(f"{vid}  {title}")
+    print(f"{'=' * 72}")
+    print(f"后端: {e['generatedBy'].get('asrProvider')} / {e['generatedBy'].get('llmModel')}"
+          f"  语言: {e.get('language')}  章节: {len(e.get('chapters', []))}")
+    print(f"topics: {e.get('topics')}   roles: {e.get('roles')}")
+    print(f"whyWatch: {e.get('whyWatch')}")
+    if qc_issues:
+        print("\n⚠ 质检标记（需重点核对）:")
+        for it in qc_issues:
+            print(f"  [{it['level']}] {it['code']}: {it['msg']}")
+    print(f"\ntakeaways（{len(e.get('takeaways', []))} 条，观点 ← 原始转写证据）:")
+    for i, tk in enumerate(e.get("takeaways", [])):
+        print(f"\n  [{i}] t={fmt_t(tk.get('timestampSeconds'))} "
+              f"conf={tk.get('confidence')} 深链 ?t={int(tk['timestampSeconds']) if tk.get('timestampSeconds') is not None else '?'}")
+        print(f"      观点: {tk['statement']}")
+        ev = tk.get("evidenceSegmentIds", [])
+        if seg_index:
+            # 按时间排序展示，使深链 ?t=（取证据最早 start）与首条证据对齐。
+            ev_segs = sorted(
+                (seg_index[e] for e in ev if e in seg_index), key=lambda s: s["start"]
+            )
+            for seg in ev_segs[: args.max_evidence]:
+                print(f"      └ {seg['id']}@{fmt_t(seg['start'])} {seg['speaker']}: {seg['text'][:100]}")
+            if len(ev_segs) > args.max_evidence:
+                print(f"      └ …另 {len(ev_segs) - args.max_evidence} 段证据")
+        else:
+            print(f"      └ 证据段: {ev}（work/{vid}/asr.json 已清，无法展开原文）")
+    print()
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="pipeline.cli", description="视频清洗流水线")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -211,6 +263,11 @@ def build_parser() -> argparse.ArgumentParser:
     rs.add_argument("video_id")
     rs.add_argument("--stage", help="只重置某阶段")
     rs.set_defaults(func=cmd_reset)
+
+    rv = sub.add_parser("review", help="人工审核：观点 ← 原始转写证据 并排展示")
+    rv.add_argument("video_id")
+    rv.add_argument("--max-evidence", type=int, default=3, help="每条 takeaway 展开的证据段数上限")
+    rv.set_defaults(func=cmd_review)
     return p
 
 
