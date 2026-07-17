@@ -13,10 +13,16 @@ import json
 import os
 import shutil
 import subprocess
+import time
 import urllib.error
 import urllib.request
 
 from . import config
+
+# claude -p / API 偶发瞬时失败（exit 1、限流、网络）。批处理规模下必须重试，
+# 否则单场瞬时错误会累积成大量假失败。指数退避。
+LLM_RETRIES = 3
+LLM_RETRY_BACKOFF_SECONDS = 8
 
 ROLES = ("developer", "product-design", "founder-lead", "trend")
 TOPICS = ("agent", "ai-coding", "evals", "context", "design-to-code", "ai-product")
@@ -51,13 +57,24 @@ def resolve_backend() -> str:
 
 
 def _call(system: str, user: str, max_tokens: int = config.LLM_MAX_TOKENS) -> str:
-    """按当前后端调 LLM，返回模型文本。stub 后端不应走到这里。"""
+    """按当前后端调 LLM（含瞬时失败重试），返回模型文本。stub 后端不应走到这里。"""
     backend = resolve_backend()
-    if backend == "api":
-        return _call_api(system, user, max_tokens)
-    if backend == "claude-cli":
-        return _call_claude_cli(system, user)
-    raise LLMError(f"当前后端为 {backend}，不应调用 _call")
+    if backend == "stub":
+        raise LLMError(f"当前后端为 {backend}，不应调用 _call")
+
+    last: Exception | None = None
+    for attempt in range(1, LLM_RETRIES + 1):
+        try:
+            if backend == "api":
+                return _call_api(system, user, max_tokens)
+            return _call_claude_cli(system, user)
+        except LLMError as e:
+            last = e
+            if attempt < LLM_RETRIES:
+                wait = LLM_RETRY_BACKOFF_SECONDS * attempt
+                print(f"  [llm] {backend} 第 {attempt} 次失败，{wait}s 后重试：{str(e)[:120]}")
+                time.sleep(wait)
+    raise LLMError(f"{backend} 连续 {LLM_RETRIES} 次失败：{last}")
 
 
 def _call_api(system: str, user: str, max_tokens: int) -> str:

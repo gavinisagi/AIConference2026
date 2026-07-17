@@ -5,11 +5,43 @@
 """
 from __future__ import annotations
 
+import re
 from difflib import SequenceMatcher
 
 
 def _similar(a: str, b: str) -> float:
     return SequenceMatcher(None, a.lower(), b.lower()).ratio()
+
+
+# 非英语（拉丁文）高信号功能词——用于探测 Moss 在英文音频上偶发的语言幻觉。
+# 均为在英文里几乎不出现的整词，降低误报。
+_NON_EN_MARKERS = {
+    "che", "sono", "quindi", "alcune", "della", "perché", "questo", "molto",  # it
+    "pero", "porque", "también", "entonces", "estos", "está", "hacer",        # es
+    "aber", "nicht", "sich", "auch", "sehr", "diese", "weil",                  # de
+    "mais", "parce", "cette", "aussi", "très", "être",                          # fr
+}
+_WORD_RE = re.compile(r"[a-zà-ÿ]+", re.IGNORECASE)
+
+
+def _language_anomaly(asr_result: dict) -> list[dict]:
+    """探测与主语言不一致的分段（ASR 语言幻觉），仅对 language=en 生效。返回 warn。"""
+    if asr_result["asr"].get("language") != "en":
+        return []
+    flagged = []
+    for s in asr_result["segments"]:
+        words = {w.lower() for w in _WORD_RE.findall(s.get("text", ""))}
+        hits = words & _NON_EN_MARKERS
+        if len(hits) >= 2:
+            flagged.append((s["id"], s["start"], sorted(hits)))
+    if len(flagged) < 3:
+        return []
+    sample = "; ".join(f"{sid}@{st:.0f}s({'/'.join(h)})" for sid, st, h in flagged[:4])
+    return [{
+        "level": "warn",
+        "code": "asr-lang-anomaly",
+        "msg": f"{len(flagged)} 段疑似非英语（Moss 语言幻觉，需人工核对）：{sample}",
+    }]
 
 
 def check(asr_result: dict, seg_index: dict, draft: dict, duration: float) -> list[dict]:
@@ -65,6 +97,9 @@ def check(asr_result: dict, seg_index: dict, draft: dict, duration: float) -> li
             reps += 1
     if reps > 3:
         warn("asr-repeat", f"检测到 {reps} 处相邻重复文本（可能幻觉/卡死）")
+
+    # 5b) ASR 语言幻觉（英文音频里冒出非英语段）。
+    issues.extend(_language_anomaly(asr_result))
 
     # 6) 深链可生成（时间戳为非负数）。
     for i, tk in enumerate(takeaways):
