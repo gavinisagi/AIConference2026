@@ -29,15 +29,60 @@ function at(url: string, seconds: number): string {
   return `${url}${sep}t=${Math.floor(seconds)}s`;
 }
 
+function minutesOf(sec: number): number {
+  return Math.round(sec / 60);
+}
+
 export function TourView({ tour, officialUrl }: { tour: Tour; officialUrl: string }) {
   const agg: Record<TourMode, number> = { watch: 0, skim: 0, listen: 0 };
   for (const st of tour.stops) agg[st.howTo] += Math.max(0, st.endSeconds - st.startSeconds);
   const total = agg.watch + agg.skim + agg.listen || 1;
+  const durationSec = tour.stops.reduce((mx, s) => Math.max(mx, s.endSeconds), 0);
 
   return (
     <div className={styles.tour}>
-      <p className={styles.hook}>{tour.hook}</p>
+      {/* 钩子 hero：进来第一眼就是它。 */}
+      <p className={styles.hookHero}>{tour.hook}</p>
 
+      {/* 一行硬统计：全片多长 · 真正值得盯屏多久 · 几个必看点。 */}
+      <p className={styles.statline}>
+        全片 <b>{minutesOf(durationSec)} 分钟</b>
+        <span className={styles.statDot}>·</span>
+        真正值得盯屏约 <b className={styles.statWatch}>{minutesOf(agg.watch)} 分钟</b>
+        {tour.mustWatch.length > 0 && (
+          <>
+            <span className={styles.statDot}>·</span>
+            <b>{tour.mustWatch.length}</b> 个必看点
+          </>
+        )}
+      </p>
+
+      {/* 必看片段：转化力最强，前置。 */}
+      {tour.mustWatch.length > 0 && (
+        <section className={styles.section}>
+          <h3 className={styles.sectionHead}>必看片段 · 直接跳看</h3>
+          <div className={styles.mustList}>
+            {tour.mustWatch.map((m, i) => (
+              <a
+                key={i}
+                href={at(officialUrl, m.startSeconds)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.mustCard}
+              >
+                <div className={styles.mustTop}>
+                  <span className={styles.tc}>{mmss(m.startSeconds)}–{mmss(m.endSeconds)}</span>
+                  {m.live && <span className={styles.live}>Live 实操</span>}
+                  <b>{m.label}</b>
+                </div>
+                {m.why && <p className={styles.mustWhy}>{m.why}</p>}
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* 决策带：谁该看 + 时间占比 + 时间不够。 */}
       <div className={styles.band}>
         {tour.whoShouldWatch && (
           <div className={styles.who}>
@@ -71,30 +116,6 @@ export function TourView({ tour, officialUrl }: { tour: Tour; officialUrl: strin
           </div>
         )}
       </div>
-
-      {tour.mustWatch.length > 0 && (
-        <section className={styles.section}>
-          <h3 className={styles.sectionHead}>必看片段</h3>
-          <div className={styles.mustList}>
-            {tour.mustWatch.map((m, i) => (
-              <a
-                key={i}
-                href={at(officialUrl, m.startSeconds)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.mustCard}
-              >
-                <div className={styles.mustTop}>
-                  <span className={styles.tc}>{mmss(m.startSeconds)}–{mmss(m.endSeconds)}</span>
-                  {m.live && <span className={styles.live}>Live 实操</span>}
-                  <b>{m.label}</b>
-                </div>
-                {m.why && <p className={styles.mustWhy}>{m.why}</p>}
-              </a>
-            ))}
-          </div>
-        </section>
-      )}
 
       <section className={styles.section}>
         <h3 className={styles.sectionHead}>逐段导览</h3>

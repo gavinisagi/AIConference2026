@@ -30,6 +30,32 @@
   }
 }
 
+/* 有 tour 时：单列、限阅读宽、居中——导览是主角，元信息降为脚注。 */
+.layoutSingle {
+  display: block;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+/* 精简元信息脚注（tour 页专用，弱化） */
+.metaFoot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-8);
+  margin-top: var(--space-48);
+  padding-top: var(--space-16);
+  border-top: 1px solid var(--hairline);
+  font-size: var(--fs-body-s);
+  color: var(--ink-secondary);
+}
+.metaFootDot {
+  color: var(--ink-muted);
+}
+.metaFoot .sourceLink {
+  display: inline;
+}
+
 .main {
   min-width: 0;
 }

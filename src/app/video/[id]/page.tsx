@@ -99,7 +99,7 @@ export default async function VideoDetailPage({
           ]}
         />
 
-        <div className={styles.layout}>
+        <div className={session.tour ? styles.layoutSingle : styles.layout}>
           <article className={styles.main}>
             {/* 头部：标题 + 状态/来源/时长/主题 + 发布日期（§6.2）。 */}
             <header className={styles.head}>
@@ -137,6 +137,11 @@ export default async function VideoDetailPage({
               )}
             </header>
 
+            {/* 观看导览：有 tour 时是本页核心体验，钩子 hero 第一眼（承接层）。 */}
+            {session.tour && (
+              <TourView tour={session.tour} officialUrl={session.officialUrl} />
+            )}
+
             {/* 主行动：在官方来源观看（本站不播放，外链新标签 + noopener，§0/§6.2/§8.4）。 */}
             <section className={styles.actionBlock} aria-label="观看">
               <a
@@ -149,16 +154,6 @@ export default async function VideoDetailPage({
               </a>
               <p className={styles.watchNote}>本站不播放，跳转官方来源观看。</p>
             </section>
-
-            {/* 观看导览：有 tour 时作为本页核心体验（承接层）。 */}
-            {session.tour && (
-              <section className={styles.section} aria-labelledby="tour-head">
-                <h2 id="tour-head" className={styles.sectionHead}>
-                  观看导览
-                </h2>
-                <TourView tour={session.tour} officialUrl={session.officialUrl} />
-              </section>
-            )}
 
             {/* 为什么值得看：无 tour 时的核心增值；缺省走诚实占位（§6.2 / §7.1）。 */}
             {!session.tour && (
@@ -196,9 +191,33 @@ export default async function VideoDetailPage({
                 </ul>
               </section>
             )}
+            {/* 有 tour 时：元信息降级为一行精简脚注（弱化，不抢导览）。 */}
+            {session.tour && (
+              <footer className={styles.metaFoot}>
+                <span>{conferenceMeta[session.conferenceId].label}</span>
+                <span className={styles.metaFootDot}>·</span>
+                <span>{displayDuration(session)}</span>
+                {session.publishedDate && (
+                  <>
+                    <span className={styles.metaFootDot}>·</span>
+                    <span className={styles.metaMono}>{session.publishedDate}</span>
+                  </>
+                )}
+                <span className={styles.metaFootDot}>·</span>
+                <a
+                  href={session.officialUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.sourceLink}
+                >
+                  官方视频 ↗
+                </a>
+              </footer>
+            )}
           </article>
 
-          {/* 元信息侧栏：大会/主题/时长/发布/角色/深度解读/来源（§6.2，官方链接优先渲染）。 */}
+          {/* 元信息侧栏（无 tour 时）：大会/主题/时长/发布/角色/深度解读/来源（§6.2）。 */}
+          {!session.tour && (
           <aside className={styles.aside} aria-label="元信息">
             <dl className={styles.metaList}>
               <div className={styles.metaItem}>
@@ -258,6 +277,7 @@ export default async function VideoDetailPage({
               </div>
             </dl>
           </aside>
+          )}
         </div>
 
         {/* 相关推荐：同主题/同大会 3–6 条，复用 VideoCard（§6.2）。 */}

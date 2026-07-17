@@ -4,14 +4,27 @@
   gap: var(--space-32);
 }
 
-.hook {
+/* 钩子 hero：进来第一眼。 */
+.hookHero {
   font-family: var(--font-serif);
-  font-size: var(--fs-body-l);
-  line-height: var(--lh-body-l);
+  font-size: var(--fs-h2);
+  line-height: var(--lh-h2);
+  font-weight: var(--fw-h2);
   color: var(--ink);
   margin: 0;
   max-width: var(--reading-max);
+  text-wrap: balance;
 }
+/* 硬统计一行。 */
+.statline {
+  font-family: var(--font-sans);
+  font-size: var(--fs-body-m);
+  color: var(--ink-secondary);
+  margin: 0;
+}
+.statline b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.statWatch { color: var(--mode-watch-ink) !important; }
+.statDot { color: var(--ink-muted); margin: 0 var(--space-8); }
 
 /* 决策带 */
 .band {
