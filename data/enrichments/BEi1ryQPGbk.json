@@ -1,0 +1,297 @@
+{
+  "schemaVersion": 1,
+  "videoId": "BEi1ryQPGbk",
+  "generatedBy": {
+    "pipelineVersion": "0.1.0",
+    "asrProvider": "moss-asr",
+    "asrModel": "OpenMOSS-Team/MOSS-Transcribe-Diarize",
+    "llmModel": "claude-opus-4-8",
+    "dryRun": false
+  },
+  "topics": [
+    "ai-coding",
+    "ai-product"
+  ],
+  "roles": [
+    "developer",
+    "product-design",
+    "founder-lead",
+    "trend"
+  ],
+  "speakers": [
+    {
+      "name": "Paul Ford",
+      "org": null
+    }
+  ],
+  "whyWatch": "从媒体与文化的视角重新理解 AI 编程：当 LLM 被视为整个人类文化的压缩文件，软件生产正在从工业流程走向写作式创作。",
+  "takeaways": [
+    {
+      "id": "BEi1ryQPGbk-tk1",
+      "sessionId": "BEi1ryQPGbk",
+      "statement": "LLM 并非通往意识的产物，而是人类文化所有媒体产出的压缩文件——'culture.zip'；程序员如今是在用一个文化模拟器生产软件工件。",
+      "context": "这是全片的理论落点：把 LLM 放进文化史而非智能史的坐标系里理解。",
+      "timestampSeconds": 634.89,
+      "roles": [
+        "developer",
+        "trend"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00164",
+        "seg_00167",
+        "seg_00170"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "id": "BEi1ryQPGbk-tk2",
+      "sessionId": "BEi1ryQPGbk",
+      "statement": "vibe coding 让技术生产从工业流程（standup、agile、管理）转向类似散文写作的创作过程；程序与诗同构——都是把最多的信息压缩进最小的空间，未来软件生产会更像媒体/文化创作。",
+      "context": "合并了'编程体验散文化'与'程序即诗'两条论述；演讲者同时提醒：散文是极小的行业而编程是数万亿美元的行业，二者如何对接尚不明朗。",
+      "timestampSeconds": 543.33,
+      "roles": [
+        "developer",
+        "founder-lead",
+        "trend"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00143",
+        "seg_00147",
+        "seg_00150",
+        "seg_00174",
+        "seg_00178",
+        "seg_00182"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "id": "BEi1ryQPGbk-tk3",
+      "sessionId": "BEi1ryQPGbk",
+      "statement": "slop（劣质产出）不是 AI 发明的，也不足为惧：写作行业里每一份初稿都是灾难，编辑流程本来就是为消除 slop 而存在——只要有好的编辑式工具与框架，slop 很容易去除。",
+      "context": "对'AI slop 恐慌'的直接回应，是片中可操作性最强的观点：把编辑部的质量控制思路迁移到 AI 产出上。",
+      "timestampSeconds": 591.15,
+      "roles": [
+        "developer",
+        "product-design"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00154",
+        "seg_00158",
+        "seg_00161"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "BEi1ryQPGbk-tk4",
+      "sessionId": "BEi1ryQPGbk",
+      "statement": "过去的软件业是一个'祭司阶层'主导的风险削减工业：软件天然'抗拒被发布'，50 年来的 agile 与各种方法论都是为让软件跨过上线线而构建的形式化文化，其职能是把极难用的计算机变得对大众可及。",
+      "context": "合并了'风险削减工业过程'与'祭司阶层'两条：共同刻画被 AI 冲击之前软件行业的文化本质，为后文的转向做铺垫。",
+      "timestampSeconds": 451.56,
+      "roles": [
+        "developer",
+        "founder-lead",
+        "trend"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00122",
+        "seg_00126",
+        "seg_00130",
+        "seg_00133",
+        "seg_00136"
+      ],
+      "confidence": 0.88
+    },
+    {
+      "id": "BEi1ryQPGbk-tk5",
+      "sessionId": "BEi1ryQPGbk",
+      "statement": "文化以共享的方式存在于每个人的大脑中，本质上是一种预测模型；天主教会作为'用一本书预测世界'的模型已运转千年，持久性可能超过当下热门科技公司。",
+      "context": "演讲的核心理论框架（引 Richard Leakey 1994 年的意识模型为支点），是理解'LLM 即文化压缩'的前提。",
+      "timestampSeconds": 306.75,
+      "roles": [
+        "trend"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00085",
+        "seg_00090",
+        "seg_00095",
+        "seg_00108",
+        "seg_00112"
+      ],
+      "confidence": 0.8
+    },
+    {
+      "id": "BEi1ryQPGbk-tk6",
+      "sessionId": "BEi1ryQPGbk",
+      "statement": "读者并不关心作者本人，而是把内容当作模拟器，用来理解所处世界并预测自己的未来；读小说也是为了模拟世界而非纯粹娱乐。",
+      "context": "从媒体经验引出'内容即模拟器'的视角，对做内容型或 AI 产品的人有直接的用户心智启发。",
+      "timestampSeconds": 232.11,
+      "roles": [
+        "product-design",
+        "trend"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00065",
+        "seg_00070",
+        "seg_00074"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "id": "BEi1ryQPGbk-tk7",
+      "sessionId": "BEi1ryQPGbk",
+      "statement": "杂志/媒体的本质不是其产出物（文章、封面），而是作者、自由撰稿人、编辑与读者之间的分布式网络与共享理解。",
+      "context": "演讲开篇的媒体行业观察，为'软件行业也是一种文化网络'的类比奠基。",
+      "timestampSeconds": 89.04,
+      "roles": [
+        "product-design",
+        "trend"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00025",
+        "seg_00030",
+        "seg_00035"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "BEi1ryQPGbk-tk8",
+      "sessionId": "BEi1ryQPGbk",
+      "statement": "'修辞大于事实'：媒体与读者之间存在信任契约，读者不需要事实堆砌，只要立场与叙事清晰，事实会随之被接受。",
+      "context": "关于受众如何建立信任的媒体行业经验，对产品叙事与品牌沟通同样适用。",
+      "timestampSeconds": 176.37,
+      "roles": [
+        "product-design",
+        "founder-lead"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00050",
+        "seg_00055",
+        "seg_00060"
+      ],
+      "confidence": 0.85
+    }
+  ],
+  "summary": "Paul Ford 以媒体编辑的经验为参照，把文化解释为共享的预测模型，进而论证：过去 50 年的软件业是围绕风险削减建立的工业化文化，而 LLM 作为'culture.zip'式的文化压缩物，正让编程体验转向类似散文写作的创作过程——slop 并不可怕，编辑式流程本就是为消除它而生。",
+  "language": "en",
+  "speakerInferences": [
+    {
+      "speaker": "S01",
+      "name": "Paul Ford",
+      "org": null,
+      "confidence": 0.85,
+      "basis": "标题即'Explaining Culture to Technology, Paul Ford'且仅有一位说话人，其自述'now is a technologist'并大量谈写作，与作家出身的技术人 Paul Ford 的身份吻合；发言中未提及所属组织，故 org 置 null。"
+    }
+  ],
+  "visualMoments": [
+    {
+      "timestampSeconds": 543.33,
+      "segmentId": "seg_00143",
+      "speaker": "S01",
+      "source": "keyword",
+      "trigger": "over here",
+      "quote": "It's a lot more like what I used to do over here."
+    }
+  ],
+  "tour": {
+    "hook": "把LLM看作'culture.zip'：编程正从工业流程变成写作，slop早有解药——编辑。",
+    "whoShouldWatch": "被AI改变工作方式的工程师、技术管理者，以及关心软件文化转向的产品与内容从业者。",
+    "ifShortOnTime": "直接从 422s 看到结尾：前半是媒体行业铺垫，后半（约7分零2秒起）才抛出'软件业是风险削减工业'与'LLM=culture.zip、编程如写作'的核心论证，且是全片唯一有值得看画面的段落。",
+    "mustWatch": [
+      {
+        "startSeconds": 500,
+        "endSeconds": 620,
+        "label": "LLM即culture.zip",
+        "live": false,
+        "why": "全片核心比喻在此落地：讲者对照自己过去的媒体工作画面（543s'它更像我以前在这边做的事'），论证编程体验正转向散文写作式创作——这是唯一被判定值得抽帧观看的视觉时刻。"
+      }
+    ],
+    "stops": [
+      {
+        "startSeconds": 0,
+        "endSeconds": 110,
+        "title": "开场：一个媒体编辑闯入技术大会",
+        "what": "Paul Ford 以杂志编辑的身份切入，交代他为何有资格'向技术解释文化'，并预告将用媒体行业的经验来重新理解 AI 编程。",
+        "keyPoint": "这不是一场技术演讲，而是用媒体行业的镜子照软件业。",
+        "howTo": "listen",
+        "howToReason": "纯口头自我介绍与立论铺垫，无画面依赖，适合当播客听。",
+        "speaker": "Paul Ford"
+      },
+      {
+        "startSeconds": 110,
+        "endSeconds": 230,
+        "title": "杂志的本质：不是产出物，而是网络",
+        "what": "杂志/媒体的真正实体不是文章和封面，而是作者、自由撰稿人、编辑与读者之间的分布式网络与共享理解。",
+        "keyPoint": "媒体是一张共享理解的网络——这个定义稍后会被平移到软件业。",
+        "howTo": "listen",
+        "howToReason": "论述性内容，章节标注无视觉依赖，听清概念即可。",
+        "speaker": "Paul Ford"
+      },
+      {
+        "startSeconds": 230,
+        "endSeconds": 330,
+        "title": "读者要的是模拟器，不是作者",
+        "what": "读者并不关心作者本人，而是把内容当作理解世界、预测自己未来的模拟器；'修辞大于事实'——立场与叙事清晰，事实自会被接受。",
+        "keyPoint": "内容的价值在于帮读者模拟世界，信任契约建立在叙事而非事实堆砌上。",
+        "howTo": "listen",
+        "howToReason": "纯观点论述段，无演示无图表，专注听'模拟器'这个关键词。",
+        "speaker": "Paul Ford"
+      },
+      {
+        "startSeconds": 330,
+        "endSeconds": 422,
+        "title": "文化=共享的预测模型",
+        "what": "文化以共享方式存在于每个人脑中，本质是一种预测模型；天主教会靠'用一本书预测世界'运转千年，比当红科技公司更持久。",
+        "keyPoint": "文化就是分布式预测模型——这是理解后文'LLM=文化压缩'的钥匙。",
+        "howTo": "listen",
+        "howToReason": "概念推演的收束段，口头论证为主，是全片最该记笔记而非盯屏幕的一站。",
+        "speaker": "Paul Ford"
+      },
+      {
+        "startSeconds": 422,
+        "endSeconds": 500,
+        "title": "软件业：一个抗拒发布的风险削减工业",
+        "what": "过去50年的软件业由'祭司阶层'主导：软件天然抗拒被发布，agile、standup 等方法论都是为让软件跨过上线线而构建的形式化文化。",
+        "keyPoint": "敏捷与流程管理不是真理，是特定时代为削减风险发明的文化装置。",
+        "howTo": "skim",
+        "howToReason": "进入有视觉依赖的章节，配合幻灯片快速过即可，重点在论点而非画面细节。",
+        "speaker": "Paul Ford"
+      },
+      {
+        "startSeconds": 500,
+        "endSeconds": 620,
+        "title": "LLM 是 culture.zip：编程变成写作",
+        "what": "LLM 不是通往意识的产物，而是人类全部媒体产出的压缩文件；vibe coding 让技术生产从工业流程转向散文写作式创作——'更像我以前在媒体做的事'。",
+        "keyPoint": "程序员如今是在用文化模拟器生产软件，工作方式正向媒体创作靠拢。",
+        "howTo": "watch",
+        "howToReason": "全片唯一 LLM 判定值得抽帧的视觉时刻（543s）在此：讲者指向画面对照媒体工作与编程，视觉与核心比喻绑定。",
+        "speaker": "Paul Ford"
+      },
+      {
+        "startSeconds": 620,
+        "endSeconds": 711,
+        "title": "别怕 slop：编辑流程本为它而生",
+        "what": "slop 不是 AI 发明的——写作行业每份初稿都是灾难，编辑流程正是为消除 slop 而存在；程序与诗同构，都是把最多信息压进最小空间。",
+        "keyPoint": "对付 AI 劣质产出的答案早已存在：像编辑部一样建立编辑式工具与流程。",
+        "howTo": "skim",
+        "howToReason": "收尾论证配合幻灯片展开，扫一眼要点画面、听清'程序与诗'的类比即可。",
+        "speaker": "Paul Ford"
+      }
+    ]
+  },
+  "chapters": [
+    {
+      "index": 0,
+      "title": "杂志、文化与预测模型：从媒体视角理解共享认知",
+      "startSeconds": 0.03,
+      "endSeconds": 422.13,
+      "visualDependency": false
+    },
+    {
+      "index": 1,
+      "title": "从工业流程到媒体创作：LLM 时代编程范式的转变",
+      "startSeconds": 422.67,
+      "endSeconds": 710.97,
+      "visualDependency": true
+    }
+  ]
+}

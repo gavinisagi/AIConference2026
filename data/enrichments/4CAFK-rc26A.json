@@ -1,0 +1,365 @@
+{
+  "schemaVersion": 1,
+  "videoId": "4CAFK-rc26A",
+  "generatedBy": {
+    "pipelineVersion": "0.1.0",
+    "asrProvider": "moss-asr",
+    "asrModel": "OpenMOSS-Team/MOSS-Transcribe-Diarize",
+    "llmModel": "claude-opus-4-8",
+    "dryRun": false
+  },
+  "topics": [
+    "ai-product",
+    "ai-coding"
+  ],
+  "roles": [
+    "product-design",
+    "founder-lead",
+    "developer",
+    "trend"
+  ],
+  "speakers": [
+    {
+      "name": "Claire Vo",
+      "org": null
+    }
+  ],
+  "whyWatch": "当写代码不再稀缺,这场演讲把注意力拉回真正的瓶颈:找到人们愿意付费的东西、促成行为改变、并带人同行。",
+  "takeaways": [
+    {
+      "id": "4CAFK-rc26A-tk1",
+      "sessionId": "4CAFK-rc26A",
+      "statement": "AI 时代产能不再是瓶颈:工程师交付量约达过去 8 倍、App 提交量上升,但安装、使用与收入并未成比例增长——'生产爆炸而需求不成比例'是当下根本的产品与商业问题。",
+      "context": "结合了 PR 数量与收入脱钩、8 倍产能超过好点子积压、App Store 数据、token 丰裕四组论据。",
+      "timestampSeconds": 340.89,
+      "roles": [
+        "developer",
+        "founder-lead",
+        "trend"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00084",
+        "seg_00088",
+        "seg_00104",
+        "seg_00112",
+        "seg_00134",
+        "seg_00148",
+        "seg_00155",
+        "seg_00170"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "id": "4CAFK-rc26A-tk2",
+      "sessionId": "4CAFK-rc26A",
+      "statement": "敏捷、backlog、SAFe 曾是构建昂贵年代'避免构建'的合理流程;如今的多智能体循环、自主编码、token maxing 是同一冲动的新表达——服务于'构建'本身,而非'构建人们想要的东西'。",
+      "context": "用历史类比揭示新工具链可能重蹈流程崇拜的覆辙:精巧地描述工作如何完成,却不做价值验证。",
+      "timestampSeconds": 130.44,
+      "roles": [
+        "developer",
+        "product-design",
+        "trend"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00030",
+        "seg_00042",
+        "seg_00050",
+        "seg_00062",
+        "seg_00068",
+        "seg_00078"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "id": "4CAFK-rc26A-tk3",
+      "sessionId": "4CAFK-rc26A",
+      "statement": "产品管理的新定义不再是管理工程产能或做原型,而是三件事:找到钱(商业价值)、孕育原创想法、带人同行——这就是'任何人都能构建'时代的产品工作。",
+      "context": "演讲的核心框架与最终宣言:找到方向、决定什么值得构建、证明它能产生影响;不要只写代码,去构建公司。",
+      "timestampSeconds": 748.01,
+      "roles": [
+        "product-design",
+        "founder-lead"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00188",
+        "seg_00196",
+        "seg_00305",
+        "seg_00314",
+        "seg_00387",
+        "seg_00392"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "4CAFK-rc26A-tk4",
+      "sessionId": "4CAFK-rc26A",
+      "statement": "'人们想要'必须落在商业价值上:第一个问题是人们是否愿意为解决这个问题付钱;多数产品人回避思考商业价值,但这恰恰是核心问题。",
+      "context": "区分'有人觉得有用'(个人软件)与真实商业关切,把付费意愿作为价值判断的起点。",
+      "timestampSeconds": 785.65,
+      "roles": [
+        "product-design",
+        "founder-lead"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00199",
+        "seg_00203",
+        "seg_00207",
+        "seg_00210"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "id": "4CAFK-rc26A-tk5",
+      "sessionId": "4CAFK-rc26A",
+      "statement": "行为改变是被严重低估的稀缺环节:识别问题和构建方案都不稀缺,稀缺的是让成百上千人真正改变工作方式来使用它——需要在体验、定位、分发三个维度反复打磨,'发布即采用'的假设几乎从不成立。",
+      "context": "近二十年实践反复验证的教训:大家热衷于'要是有这个东西就好了',而非'谁会真的为此改变行为'。",
+      "timestampSeconds": 858.29,
+      "roles": [
+        "product-design",
+        "founder-lead"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00215",
+        "seg_00220",
+        "seg_00231",
+        "seg_00235",
+        "seg_00243"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "4CAFK-rc26A-tk6",
+      "sessionId": "4CAFK-rc26A",
+      "statement": "AI 能优化既有想法、探索邻近空间,但无法从第一性原理构想尚无现实依据的未来;当产能不再受限、数据与实验触及边界时,凭信念坚持独特愿景并将产品塑造成那个样子,是人类独有且长期萎缩的核心肌肉。",
+      "context": "整合了 AI 构想能力的边界、'只做有证据的增量'旧习惯导致的愿景肌肉萎缩、以及数据无法回答一切的实验平台经验。",
+      "timestampSeconds": 996.45,
+      "roles": [
+        "product-design",
+        "founder-lead",
+        "trend"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00248",
+        "seg_00256",
+        "seg_00260",
+        "seg_00269",
+        "seg_00274",
+        "seg_00281"
+      ],
+      "confidence": 0.8
+    },
+    {
+      "id": "4CAFK-rc26A-tk7",
+      "sessionId": "4CAFK-rc26A",
+      "statement": "分发的本质是'带人同行':客户、社区、人才乃至整个市场都需要追随你的愿景;当任何人都能写代码、构建智能体时,说服顶尖人才和市场的感召力是唯一的护城河。",
+      "context": "把分发从渠道问题升级为领导力问题——机会只有在众人追随时才能被资本化。",
+      "timestampSeconds": 1138.21,
+      "roles": [
+        "founder-lead",
+        "product-design",
+        "trend"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00285",
+        "seg_00290",
+        "seg_00296",
+        "seg_00301"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "id": "4CAFK-rc26A-tk8",
+      "sessionId": "4CAFK-rc26A",
+      "statement": "快依然胜于对,但必须知道'slop cannon'瞄准哪里;如果你的工作和一年前没有任何不同、没有越来越聚焦商业价值与愿景,终局就是'一个巨大的代码库和一个渺小的公司'——应把 AI 当作愿景与商业回报的加速器,而非新的挡箭牌。",
+      "context": "演讲者以自己积压的 64 个 PR 为例说明产能空转:token 消耗可能根本落不到市场。",
+      "timestampSeconds": 1338.77,
+      "roles": [
+        "developer",
+        "product-design",
+        "founder-lead"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00340",
+        "seg_00344",
+        "seg_00362",
+        "seg_00374",
+        "seg_00377",
+        "seg_00384"
+      ],
+      "confidence": 0.85
+    }
+  ],
+  "summary": "Claire Vo 指出 AI 让工程产能爆炸式增长,但市场对代码的消费并未同步扩张,产出与商业结果已经脱钩;约束从'能不能构建'转移到'什么值得构建'。她重新定义产品工作为三件事:把'人们想要'落到商业价值与行为改变上、在缺乏数据时从第一性原理孕育原创愿景、以及用感召力带动人才/客户/市场同行,并警告仅仅堆砌代码的终局是'巨大的代码库和渺小的公司'。",
+  "language": "en",
+  "speakerInferences": [
+    {
+      "speaker": "S01",
+      "name": "Claire Vo",
+      "org": null,
+      "confidence": 0.85,
+      "basis": "标题《The New PM, Claire Vo》即演讲人名，S01 为唯一说话人且以第一人称做主旨演讲（'I've done a couple of talks'、谈 product management），与标题人名相符；样本中未出现组织信息，故 org 置 null。"
+    }
+  ],
+  "visualMoments": [
+    {
+      "timestampSeconds": 107.45,
+      "segmentId": "seg_00024",
+      "speaker": "S01",
+      "source": "keyword",
+      "trigger": "over here",
+      "quote": "I'm getting a laugh over here."
+    },
+    {
+      "timestampSeconds": 130.44,
+      "segmentId": "seg_00030",
+      "speaker": "S01",
+      "source": "llm",
+      "reason": "过去几十年行业发明了大量流程（敏捷循环、backlog、PRD、SAFe）本质上是'避免构建'的创造性方式；在构建昂贵、缓慢、高风险的年代这曾是合理的，产品经理的工作几乎就是学会说'不'。"
+    },
+    {
+      "timestampSeconds": 431.17,
+      "segmentId": "seg_00104",
+      "speaker": "S01",
+      "source": "llm",
+      "reason": "工程师现在每季度交付的代码量是过去的约8倍，单人与团队的产能大幅上升，即将超过既有的'好点子积压'——产能不再是瓶颈，约束已经转移。"
+    },
+    {
+      "timestampSeconds": 515.73,
+      "segmentId": "seg_00130",
+      "speaker": "S01",
+      "source": "keyword",
+      "trigger": "this chart",
+      "quote": "But I think you all have seen this chart, which is while App Store, you know, submissions"
+    },
+    {
+      "timestampSeconds": 538.49,
+      "segmentId": "seg_00134",
+      "speaker": "S01",
+      "source": "llm",
+      "reason": "App Store 提交量上升但安装、评分与使用并未增长：市场对代码的消费没有随生产扩张，'生产爆炸而需求不成比例'是当下有野心的构建者面临的真正问题。"
+    }
+  ],
+  "tour": {
+    "hook": "代码产能暴涨8倍而需求没涨——PM的新战场是钱、原创愿景与带人同行",
+    "whoShouldWatch": "产品经理、AI 时代的创始人,以及正被'交付很快但业务没动'困扰的工程负责人",
+    "ifShortOnTime": "只看 7:08–14:08(428s–848s):两张图讲清'产能8倍、需求不涨'的核心论据,这是全片立论的地基;再听 14:08 起对产品工作三要素的重新定义即可",
+    "mustWatch": [
+      {
+        "startSeconds": 428,
+        "endSeconds": 480,
+        "label": "工程产能8倍图",
+        "live": false,
+        "why": "全片最关键的数据画面:工程师季度交付量约达过去8倍,产能即将超过好点子的积压——直观看到约束从'能不能建'转移的那一刻"
+      },
+      {
+        "startSeconds": 515,
+        "endSeconds": 580,
+        "label": "供需脱钩图",
+        "live": false,
+        "why": "App Store 提交量上升但安装与使用持平——'生产爆炸而需求不成比例'这一根本问题的唯一图证,看过这张图才理解后面所有论点的紧迫感"
+      }
+    ],
+    "stops": [
+      {
+        "startSeconds": 0,
+        "endSeconds": 130,
+        "title": "开场提问:人人能构建时,PM 还剩什么",
+        "what": "Claire Vo 抛出全片核心问题:当写代码不再稀缺,产品经理这个角色到底意味着什么。现场氛围轻松,有互动笑点。",
+        "keyPoint": "这不是又一场'AI 取代 PM'的焦虑演讲,而是重新定义产品工作本身",
+        "howTo": "listen",
+        "howToReason": "开场以口头设问为主,107s 处的互动只是现场笑点,不依赖画面",
+        "speaker": "Claire Vo"
+      },
+      {
+        "startSeconds": 130,
+        "endSeconds": 428,
+        "title": "流程考古:敏捷与 backlog 是'避免构建'的发明",
+        "what": "回顾几十年来行业发明的流程——敏捷循环、PRD、SAFe——本质是构建昂贵年代'避免构建'的合理手段,PM 的工作几乎就是学会说'不'。",
+        "keyPoint": "今天的多智能体循环、token maxing 是同一冲动的新表达:服务于'构建'本身,而非'构建人们想要的东西'",
+        "howTo": "skim",
+        "howToReason": "这段配有流程演进的幻灯片,快速扫过图即可,论述本身听懂就行",
+        "speaker": "Claire Vo"
+      },
+      {
+        "startSeconds": 428,
+        "endSeconds": 515,
+        "title": "产能不再是瓶颈:8倍交付量",
+        "what": "用数据展示工程师每季度交付代码量约达过去8倍,单人与团队产能即将超过既有的好点子积压。",
+        "keyPoint": "约束已从'能不能构建'转移到'什么值得构建'",
+        "howTo": "watch",
+        "howToReason": "431s 起的产能图是全片立论的第一块数据地基,值得停下来看清坐标和量级",
+        "speaker": "Claire Vo"
+      },
+      {
+        "startSeconds": 515,
+        "endSeconds": 848,
+        "title": "供需脱钩:生产爆炸而需求不成比例",
+        "what": "App Store 提交量上升,但安装、评分与使用并未同步增长——市场对代码的消费没有随生产扩张,产出与商业结果已经脱钩。",
+        "keyPoint": "'生产爆炸而需求不成比例'是当下有野心的构建者面临的根本产品与商业问题",
+        "howTo": "watch",
+        "howToReason": "515s 讲者明确说'你们都见过这张图',这张供需脱钩图是全片最核心的视觉论据",
+        "speaker": "Claire Vo"
+      },
+      {
+        "startSeconds": 848,
+        "endSeconds": 1060,
+        "title": "新产品工作之一二:找到钱与促成行为改变",
+        "what": "重新定义产品管理为三件事的前两件:'人们想要'必须落到商业价值上(第一个问题是有人愿意付钱吗),以及被严重低估的行为改变——让成百上千人真正改变工作方式。",
+        "keyPoint": "识别问题和构建方案都不稀缺,稀缺的是行为改变;'发布即采用'的假设几乎从不成立",
+        "howTo": "listen",
+        "howToReason": "此章节无关键画面,纯口头论述,信息密度高,适合专注听甚至倍速听",
+        "speaker": "Claire Vo"
+      },
+      {
+        "startSeconds": 1060,
+        "endSeconds": 1274,
+        "title": "新产品工作之三:原创愿景与带人同行",
+        "what": "AI 能优化既有想法、探索邻近空间,但无法从第一性原理构想尚无数据支撑的未来;分发的本质是让客户、人才乃至整个市场追随你的愿景。",
+        "keyPoint": "当任何人都能写代码,凭信念坚持独特愿景并说服顶尖人才与市场的感召力,是唯一的护城河",
+        "howTo": "listen",
+        "howToReason": "同为纯论述段落,无视觉依赖,核心是观点本身,听比看更高效",
+        "speaker": "Claire Vo"
+      },
+      {
+        "startSeconds": 1274,
+        "endSeconds": 1546,
+        "title": "结语:去构建公司,而非只写代码",
+        "what": "收尾警告:快依然胜于对,但必须知道'slop cannon'瞄准哪里;如果你的工作和一年前没有任何不同,终局就是'一个巨大的代码库和一个渺小的公司'。",
+        "keyPoint": "把 AI 当作愿景与商业回报的加速器,而非新的挡箭牌",
+        "howTo": "listen",
+        "howToReason": "结语无画面依赖,金句密集('巨大代码库、渺小公司'),适合完整听完收束全片",
+        "speaker": "Claire Vo"
+      }
+    ]
+  },
+  "chapters": [
+    {
+      "index": 0,
+      "title": "开场：当任何人都能构建时，产品经理意味着什么",
+      "startSeconds": 0.26,
+      "endSeconds": 427.94,
+      "visualDependency": true
+    },
+    {
+      "index": 1,
+      "title": "约束已转移：代码过剩，市场稀缺",
+      "startSeconds": 427.97,
+      "endSeconds": 848.42,
+      "visualDependency": true
+    },
+    {
+      "index": 2,
+      "title": "新产品工作的三要素：行为改变、原创愿景与分发",
+      "startSeconds": 848.45,
+      "endSeconds": 1274.61,
+      "visualDependency": false
+    },
+    {
+      "index": 3,
+      "title": "结语：头衔会活下来，工作不会——去构建公司而非只写代码",
+      "startSeconds": 1274.65,
+      "endSeconds": 1546.58,
+      "visualDependency": false
+    }
+  ]
+}

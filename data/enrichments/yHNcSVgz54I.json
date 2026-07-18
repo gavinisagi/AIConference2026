@@ -1,0 +1,328 @@
+{
+  "schemaVersion": 1,
+  "videoId": "yHNcSVgz54I",
+  "generatedBy": {
+    "pipelineVersion": "0.1.0",
+    "asrProvider": "moss-asr",
+    "asrModel": "OpenMOSS-Team/MOSS-Transcribe-Diarize",
+    "llmModel": "claude-opus-4-8",
+    "dryRun": false
+  },
+  "topics": [
+    "ai-product",
+    "evals"
+  ],
+  "roles": [
+    "developer",
+    "product-design",
+    "founder-lead",
+    "trend"
+  ],
+  "speakers": [
+    {
+      "name": "Alane Suhr",
+      "org": null
+    }
+  ],
+  "whyWatch": "从语言与意义的视角拆解\"AI\"这一概念如何反过来驱使我们，并论证技术从业者有能力拒绝\"不可避免\"的叙事、夺回设计技术的能动性。",
+  "takeaways": [
+    {
+      "id": "yHNcSVgz54I-tk1",
+      "sessionId": "yHNcSVgz54I",
+      "statement": "概念本身没有能动性，人才有：AI 概念靠故事、预言、基准和预测\"自我正当化\"（终结者、HAL 9000 正是其言外之意的产物），只要我们相信并受其支配它就成真；技术从业者身处做决策的房间，应拒绝\"技术不可避免\"的话语框架，围绕赋能他人等人类价值观来设计技术。",
+      "context": "全片核心论点与行动号召，收束前面对\"AI\"概念的全部分析。",
+      "timestampSeconds": 783.18,
+      "roles": [
+        "developer",
+        "founder-lead",
+        "product-design",
+        "trend"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00244",
+        "seg_00247",
+        "seg_00250",
+        "seg_00252",
+        "seg_00255",
+        "seg_00258",
+        "seg_00261",
+        "seg_00264",
+        "seg_00266",
+        "seg_00268",
+        "seg_00270",
+        "seg_00272"
+      ],
+      "confidence": 0.88
+    },
+    {
+      "id": "yHNcSVgz54I-tk2",
+      "sessionId": "yHNcSVgz54I",
+      "statement": "\"AI\"概念的特殊危险在于：它让我们相信存在一套尚未揭示、但一旦揭示就会被普遍认同的判定标准——演讲者认为这套标准根本不可能存在；当概念承诺了无法兑现的东西而我们未察觉时，就会向一个只能\"信仰\"而不允许自己完全理解的事物让渡能动性。",
+      "context": "对\"AI\"一词的概念诊断，是后续能动性论证的前提。",
+      "timestampSeconds": 354.78,
+      "roles": [
+        "trend",
+        "founder-lead",
+        "product-design"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00112",
+        "seg_00116",
+        "seg_00120",
+        "seg_00123",
+        "seg_00126",
+        "seg_00130",
+        "seg_00133"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "id": "yHNcSVgz54I-tk3",
+      "sessionId": "yHNcSVgz54I",
+      "statement": "今天\"AI\"的外延指称是 LLM：神经模型是训练数据的压缩表示，而最经济的压缩方式就是表征生成数据的底层结构——人类写作依赖句法、类比、常识，因此模型学会这些并不令人意外，连最简陋的语言模型也能一致编码\"国家—首都\"类比。",
+      "context": "把抽象的\"AI\"还原为具体技术对象，用压缩视角祛魅模型的\"理解\"能力。",
+      "timestampSeconds": 443.76,
+      "roles": [
+        "developer",
+        "trend"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00139",
+        "seg_00145",
+        "seg_00152",
+        "seg_00160",
+        "seg_00166",
+        "seg_00174",
+        "seg_00179",
+        "seg_00184",
+        "seg_00188"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "yHNcSVgz54I-tk4",
+      "sessionId": "yHNcSVgz54I",
+      "statement": "基座模型对多数实际用途\"显然无用\"，指令微调只是微小调整，使输出呈现为我们会解读成\"回应\"的形式；正因模型是人类文本的压缩、输出难与真人区分，它利用了我们向语言解读意图的驱动力——在人机关系私人化时后果严重，已存在与聊天机器人相关的死亡案例。",
+      "context": "从技术机制推导出拟人化交互的真实风险，对做 AI 产品的人有直接警示意义。",
+      "timestampSeconds": 606.0,
+      "roles": [
+        "product-design",
+        "developer",
+        "founder-lead"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00193",
+        "seg_00197",
+        "seg_00200",
+        "seg_00203",
+        "seg_00207",
+        "seg_00210"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "id": "yHNcSVgz54I-tk5",
+      "sessionId": "yHNcSVgz54I",
+      "statement": "用基准测试构建判定标准的经验主义者，与断言\"概率模型永远不可能是 AI\"的否定论者（如 Gary Marcus），共享同一个模式：都仍然相信并任由\"AI 是否达成\"这一概念驱使自己。",
+      "context": "指出争论双方的共同盲区，也是对基准/评测文化的一记侧击。",
+      "timestampSeconds": 716.52,
+      "roles": [
+        "trend",
+        "developer"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00224",
+        "seg_00229",
+        "seg_00234",
+        "seg_00238"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "id": "yHNcSVgz54I-tk6",
+      "sessionId": "yHNcSVgz54I",
+      "statement": "表达是一个困难的搜索问题：我们永远无法完全说出想说的东西，因此会创造新概念或使用定义上模糊的概念来宽泛地指向意图；learning、consciousness、reasoning 等被频繁援引的概念从未有令人满意的内涵定义，但模糊概念本身是有用的语言工具。",
+      "context": "解释为何模糊概念普遍存在且合理——为区分\"AI\"这一概念的特殊性做铺垫。",
+      "timestampSeconds": 154.26,
+      "roles": [
+        "trend",
+        "developer",
+        "product-design"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00050",
+        "seg_00055",
+        "seg_00060",
+        "seg_00064",
+        "seg_00096",
+        "seg_00099",
+        "seg_00102"
+      ],
+      "confidence": 0.87
+    },
+    {
+      "id": "yHNcSVgz54I-tk7",
+      "sessionId": "yHNcSVgz54I",
+      "statement": "意义可分为三类：内涵意义（构成概念的标准）、外延意义（概念在当下语境中的具体指称）、言外之意（概念对语境施加的隐含推断，如\"讲课者被默认拥有权威\"）。",
+      "context": "全片的分析框架，后续对\"AI\"的拆解均沿这三个维度展开。",
+      "timestampSeconds": 33.65,
+      "roles": [
+        "developer",
+        "product-design"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00014",
+        "seg_00022",
+        "seg_00029",
+        "seg_00036",
+        "seg_00042"
+      ],
+      "confidence": 0.85
+    },
+    {
+      "id": "yHNcSVgz54I-tk8",
+      "sessionId": "yHNcSVgz54I",
+      "statement": "我们使用和创造的语言会塑造我们自身与周围的世界；一个概念的\"意义\"可以理解为它促使我们去做的事情。",
+      "context": "开场立论，将语言与行动直接挂钩，是\"能动性\"论证的起点。",
+      "timestampSeconds": 18.21,
+      "roles": [
+        "trend",
+        "product-design"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00008",
+        "seg_00009",
+        "seg_00010"
+      ],
+      "confidence": 0.9
+    }
+  ],
+  "summary": "Alane Suhr 以意义理论（内涵、外延、言外之意）为框架，指出\"AI\"是一个承诺了不可能存在的判定标准的特殊概念：无论追逐基准的经验主义者还是断然否定者，都仍被\"AI 是否达成\"驱使。她将当下 AI 的外延还原为 LLM——人类文本的压缩表示，其类人输出利用了我们向语言解读意图的本能并带来真实风险。结论是：概念本身没有能动性，人有；从业者身处决策的房间，应围绕赋能他人的价值观设计技术，而非通过预言把一个虚构概念亲手造真。",
+  "language": "en",
+  "speakerInferences": [
+    {
+      "speaker": "S01",
+      "name": "Alane Suhr",
+      "org": null,
+      "confidence": 0.85,
+      "basis": "标题为 'Agency in Language, Alane Suhr | Compile 26'，S01 是唯一说话人且以第一人称做主旨陈述（'the talks already have... said the same thing I'm about to now'），符合演讲者身份；样本中未出现所属组织信息，故 org 置 null。"
+    }
+  ],
+  "visualMoments": [],
+  "tour": {
+    "hook": "拆解\"AI\"这个词如何反过来支配我们，并教从业者夺回设计技术的能动性。",
+    "whoShouldWatch": "被基准竞赛和\"AI 不可避免\"叙事裹挟的 AI 从业者、研究者，以及想厘清\"AI 到底指什么\"的技术决策者。",
+    "ifShortOnTime": "直接听 634 秒（约 10:35）起的最后一章：前面的语言学铺垫在此收束成核心论点——概念没有能动性、人有，以及从业者该如何行动；若还有余裕，补看 214 秒（约 3:34）起对\"AI 承诺了不可能的判定标准\"的论证。",
+    "mustWatch": [
+      {
+        "startSeconds": 214,
+        "endSeconds": 340,
+        "label": "AI 概念的陷阱",
+        "live": false,
+        "why": "全片最锋利的论证：\"AI\"许诺了一套一旦揭示人人认同的判定标准，而这套标准根本不可能存在——理解了这一点，后面所有结论才成立。"
+      },
+      {
+        "startSeconds": 635,
+        "endSeconds": 873,
+        "label": "夺回能动性",
+        "live": false,
+        "why": "结论段把语言学分析转化为行动号召：概念靠故事和预言自我正当化，但身处决策房间的是人；这是演讲真正想留给观众的东西。"
+      }
+    ],
+    "stops": [
+      {
+        "startSeconds": 0,
+        "endSeconds": 105,
+        "title": "语言塑造我们，而表达是搜索问题",
+        "what": "开场提出全片框架：我们使用和创造的语言反过来塑造自身与世界；表达永远无法完全命中意图，所以人会发明新概念或借用模糊概念来宽泛地指向想说的东西。",
+        "keyPoint": "一个概念的\"意义\"，可以理解为它促使我们去做的事情。",
+        "howTo": "listen",
+        "howToReason": "纯口头论述、无画面依赖，适合当播客听；重点在建立后文反复使用的分析框架。",
+        "speaker": "Alane Suhr"
+      },
+      {
+        "startSeconds": 105,
+        "endSeconds": 211,
+        "title": "意义的三分法：内涵、外延、言外之意",
+        "what": "给出贯穿全片的分析工具：内涵意义是构成概念的标准，外延意义是概念在当下语境的具体指称，言外之意是概念对语境施加的隐含推断（如\"讲课者默认拥有权威\"）。",
+        "keyPoint": "记住这三个词——后面对\"AI\"的整套解剖都建立在这套三分法上。",
+        "howTo": "listen",
+        "howToReason": "概念定义靠口头例子展开，无值得抽帧的画面；专心听懂三分法即可。",
+        "speaker": "Alane Suhr"
+      },
+      {
+        "startSeconds": 214,
+        "endSeconds": 380,
+        "title": "\"AI\"是一个承诺了不可能之物的概念",
+        "what": "learning、consciousness、reasoning 等概念从未有令人满意的内涵定义，模糊本是语言的正常工具；但\"AI\"特殊在它让人相信存在一套尚未揭示、揭示后必被公认的判定标准——而这套标准不可能存在。",
+        "keyPoint": "当概念承诺了无法兑现的东西而我们未察觉，就会向一个只能信仰的事物让渡能动性。",
+        "howTo": "listen",
+        "howToReason": "全片论证密度最高的一段，但仍是纯口头推理；建议不倍速、逐句跟上。",
+        "speaker": "Alane Suhr"
+      },
+      {
+        "startSeconds": 380,
+        "endSeconds": 500,
+        "title": "追基准者与否定论者，被同一个概念驱使",
+        "what": "用基准测试为 AI 构建判定标准的经验主义者，与断言\"概率模型永远不可能是 AI\"的否定论者（如 Gary Marcus），看似对立，实则共享同一模式：都仍相信并任由\"AI 是否达成\"驱使自己。",
+        "keyPoint": "反对 AI 叙事的人，往往和追逐它的人一样被这个概念支配。",
+        "howTo": "listen",
+        "howToReason": "观点对比靠口头陈述完成，无演示或图表；听清两派的共同前提即可。",
+        "speaker": "Alane Suhr"
+      },
+      {
+        "startSeconds": 500,
+        "endSeconds": 634,
+        "title": "外延还原：LLM 是人类语言的压缩表示",
+        "what": "今天\"AI\"的外延指称就是 LLM：神经模型是训练数据的压缩，而最经济的压缩就是表征生成数据的底层结构（句法、类比、常识），连简陋的语言模型也能一致编码\"国家—首都\"类比；指令微调只是让输出呈现为我们会解读成\"回应\"的形式。",
+        "keyPoint": "模型输出难与真人区分，恰恰利用了我们向语言解读意图的本能——在人机关系私人化时已酿成与聊天机器人相关的死亡案例。",
+        "howTo": "listen",
+        "howToReason": "技术还原与风险论述均为口头展开，无标记的视觉时刻；这段信息量大，适合原速听。",
+        "speaker": "Alane Suhr"
+      },
+      {
+        "startSeconds": 635,
+        "endSeconds": 760,
+        "title": "概念靠故事与预言自我正当化",
+        "what": "AI 概念通过科幻叙事（终结者、HAL 9000 正是其言外之意的产物）、基准和预测不断\"自我正当化\"：只要我们相信并受其支配，它就成真。",
+        "keyPoint": "把\"AI 不可避免\"当成预言接受，就是亲手把一个虚构概念造真。",
+        "howTo": "listen",
+        "howToReason": "文化引用均为口头点到，无需看画面；重点是理解\"预言的自我实现\"机制。",
+        "speaker": "Alane Suhr"
+      },
+      {
+        "startSeconds": 760,
+        "endSeconds": 873,
+        "title": "结语：人在房间里，人有能动性",
+        "what": "收束全片：概念本身没有能动性，人才有；技术从业者身处做决策的房间，应拒绝\"技术不可避免\"的话语框架，围绕赋能他人等人类价值观来设计技术。",
+        "keyPoint": "你可以拒绝\"不可避免\"的叙事——设计技术的能动性始终在人手里。",
+        "howTo": "listen",
+        "howToReason": "行动号召式结尾，情绪与措辞是重点，完整听完比看画面更重要。",
+        "speaker": "Alane Suhr"
+      }
+    ]
+  },
+  "chapters": [
+    {
+      "index": 0,
+      "title": "语言中的能动性：意义的三种类型",
+      "startSeconds": 0.03,
+      "endSeconds": 210.69,
+      "visualDependency": false
+    },
+    {
+      "index": 1,
+      "title": "AI 是一个模糊概念，而 LLM 是被压缩的语言结构",
+      "startSeconds": 213.99,
+      "endSeconds": 634.08,
+      "visualDependency": false
+    },
+    {
+      "index": 2,
+      "title": "概念没有能动性，我们有：夺回对 AI 叙事的主导权",
+      "startSeconds": 634.5,
+      "endSeconds": 872.58,
+      "visualDependency": false
+    }
+  ]
+}

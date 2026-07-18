@@ -1,0 +1,375 @@
+{
+  "schemaVersion": 1,
+  "videoId": "Z5M33oh-SAU",
+  "generatedBy": {
+    "pipelineVersion": "0.1.0",
+    "asrProvider": "moss-asr",
+    "asrModel": "OpenMOSS-Team/MOSS-Transcribe-Diarize",
+    "llmModel": "claude-opus-4-8",
+    "dryRun": false
+  },
+  "topics": [
+    "context",
+    "agent"
+  ],
+  "roles": [
+    "developer",
+    "founder-lead",
+    "trend"
+  ],
+  "speakers": [
+    {
+      "name": "Ben Geist",
+      "org": null
+    }
+  ],
+  "whyWatch": "从 token 支出的经济压力出发，用熵减框架论证\"上下文/信息\"是被当前 LLM 进步忽视的另一半，并以共享 KV 缓存、稀疏注意力、记忆模态三个实证案例给出可落地的效率路径。",
+  "takeaways": [
+    {
+      "id": "Z5M33oh-SAU-tk1",
+      "sessionId": "Z5M33oh-SAU",
+      "statement": "智能随投入呈对数曲线，智能效率在随时间下降而非上升；让曲线趋向线性的关键是给模型提供更多上下文——共享上下文多智能体与稀疏注意力两个案例共同印证，引入信息/上下文检索本身就能让整个系统大幅更高效。",
+      "context": "基于 Ramp 内部运行的 SWE-bench 变体测量，是全片的核心论题，后续案例均为其实证。",
+      "timestampSeconds": 177.12,
+      "roles": [
+        "developer",
+        "trend"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00046",
+        "seg_00049",
+        "seg_00052",
+        "seg_00172",
+        "seg_00175",
+        "seg_00178"
+      ],
+      "confidence": 0.78
+    },
+    {
+      "id": "Z5M33oh-SAU-tk2",
+      "sessionId": "Z5M33oh-SAU",
+      "statement": "为智能付费实际是在为 token 付费，二者并不等价；Ramp 数据显示月度 token 支出自 2025 年 1 月以来增长 13 倍，Uber、Meta 等公司已开始压制 token maxing，指数级 token 消耗在经济上不可持续。",
+      "context": "全片的动机：智能与 token 的价格错配终将反噬采购方，效率问题因此迫在眉睫。",
+      "timestampSeconds": 47.82,
+      "roles": [
+        "founder-lead",
+        "trend"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00014",
+        "seg_00018",
+        "seg_00022",
+        "seg_00026",
+        "seg_00036",
+        "seg_00040",
+        "seg_00043"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "id": "Z5M33oh-SAU-tk3",
+      "sessionId": "Z5M33oh-SAU",
+      "statement": "把 LLM 与智能体系统建模为\"熵减机器\"：结合香农信息熵与热力学熵可得，系统熵的可降幅度同时受\"投入的功\"与\"已有信息\"双重上界约束——如同打扫房间既要出力也要先知道脏衣服在哪。",
+      "context": "全片的理论框架，为\"上下文提升效率\"提供数学直觉基础。",
+      "timestampSeconds": 216.87,
+      "roles": [
+        "developer",
+        "trend"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00056",
+        "seg_00059",
+        "seg_00062",
+        "seg_00065",
+        "seg_00069",
+        "seg_00073",
+        "seg_00077"
+      ],
+      "confidence": 0.7
+    },
+    {
+      "id": "Z5M33oh-SAU-tk4",
+      "sessionId": "Z5M33oh-SAU",
+      "statement": "当前 LLM 的进步（思维链、推理）几乎全部押注在\"投入更多功\"上；而信息/上下文这一半的主流手段（RAG、记忆系统）扩展性差、只擅长大海捞针式语义检索，在多跳推理上挣扎，且都发生在受限的 token 空间而非潜空间——这是效率瓶颈的根源。",
+      "context": "承接熵减框架的问题诊断：行业忽视了双重约束中的信息侧。",
+      "timestampSeconds": 308.91,
+      "roles": [
+        "developer",
+        "product-design",
+        "trend"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00079",
+        "seg_00082",
+        "seg_00084",
+        "seg_00087",
+        "seg_00090",
+        "seg_00093"
+      ],
+      "confidence": 0.8
+    },
+    {
+      "id": "Z5M33oh-SAU-tk5",
+      "sessionId": "Z5M33oh-SAU",
+      "statement": "经典 supervisor-worker 多智能体架构因上下文互不共享而极度低效；为其维护全局共享 KV 缓存、并在派生新 worker 时按任务压缩过滤出相关上下文来初始化，可在准确率不变的前提下减少 42–57% 的 worker token、21–31% 的总 token。",
+      "context": "第一个实证案例，也是最可直接借鉴的工程结果。",
+      "timestampSeconds": 396.21,
+      "roles": [
+        "developer"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00100",
+        "seg_00106",
+        "seg_00110",
+        "seg_00114",
+        "seg_00118",
+        "seg_00122",
+        "seg_00126",
+        "seg_00130"
+      ],
+      "confidence": 0.82
+    },
+    {
+      "id": "Z5M33oh-SAU-tk6",
+      "sessionId": "Z5M33oh-SAU",
+      "statement": "稀疏注意力可被建模为重排器：用 DeepSeek 稀疏注意力模型 lightning indexer 的 query/key 计算文档得分，在多跳问答数据集上匹配或超越当前最先进的重排模型——证明稀疏注意力的效率来源于对自身上下文的精准检索。",
+      "context": "第二个实证案例，揭示稀疏注意力与 RAG 重排在机制上同构。",
+      "timestampSeconds": 547.04,
+      "roles": [
+        "developer",
+        "trend"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00136",
+        "seg_00140",
+        "seg_00144",
+        "seg_00148",
+        "seg_00156",
+        "seg_00163",
+        "seg_00168"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "Z5M33oh-SAU-tk7",
+      "sessionId": "Z5M33oh-SAU",
+      "statement": "与 Stanford SNAP 实验室合作把记忆/上下文注入当作独立模态：用记忆模块把文档与查询压缩成 16 个潜表示直接注入冻结的 Qwen 8B，在 TriviaQA 上 exact match 超过 RAG-50，同时输入端表示数量减少 372 倍。",
+      "context": "第三个实证案例，全片新颖度最高的研究方向：潜空间上下文注入。",
+      "timestampSeconds": 751.47,
+      "roles": [
+        "developer",
+        "trend"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00183",
+        "seg_00187",
+        "seg_00191",
+        "seg_00194",
+        "seg_00196",
+        "seg_00198",
+        "seg_00200"
+      ],
+      "confidence": 0.8
+    },
+    {
+      "id": "Z5M33oh-SAU-tk8",
+      "sessionId": "Z5M33oh-SAU",
+      "statement": "理想的上下文注入模型应满足三条标准：低延迟以便推理时使用、能扩展到大语料库、对基座 LLM 零切换成本（新模型发布无需重训即可复用）；这些研究的落地目标是 Ramp 内部正在生成海量上下文的大型 AI 工具系统。",
+      "context": "面向选型与架构决策的收尾标准，交代研究的实际落地场景。",
+      "timestampSeconds": 830.94,
+      "roles": [
+        "developer",
+        "product-design",
+        "founder-lead"
+      ],
+      "evidenceSegmentIds": [
+        "seg_00204",
+        "seg_00207",
+        "seg_00210",
+        "seg_00212",
+        "seg_00214"
+      ],
+      "confidence": 0.82
+    }
+  ],
+  "summary": "Ramp 的 Ben Geist 指出智能效率正在下降：token 支出指数增长但智能回报呈对数曲线。他将 LLM 建模为熵减机器，论证系统熵降同时受\"投入的功\"与\"已有信息\"双重约束，而当前行业几乎只押注前者。随后以三个案例展示引入上下文/信息检索带来的数量级效率提升：多智能体全局共享 KV 缓存（省 21–31% 总 token）、稀疏注意力即重排器（匹配 SOTA 重排模型）、记忆作为独立模态注入冻结 LLM（超越 RAG 且表示数量减少 372 倍），并提出理想上下文注入系统的三条标准。",
+  "language": "en",
+  "speakerInferences": [
+    {
+      "speaker": "S01",
+      "name": "Ben Geist",
+      "org": null,
+      "confidence": 0.85,
+      "basis": "S01 是唯一说话人且以演讲者口吻开场('today I'm gonna be talking about')，标题中的人名为 Ben Geist；样本中无组织线索，故 org 置 null。"
+    }
+  ],
+  "visualMoments": [
+    {
+      "timestampSeconds": 47.82,
+      "segmentId": "seg_00014",
+      "speaker": "S01",
+      "source": "llm",
+      "reason": "为智能付更多钱正出现边际递减：用户被承诺按单位经济价格购买智能，实际付费对象是 token，而智能不等于 token，这一错配终将反噬采购方。"
+    },
+    {
+      "timestampSeconds": 69.51,
+      "segmentId": "seg_00020",
+      "speaker": "S01",
+      "source": "keyword",
+      "trigger": "over here",
+      "quote": "The more money you're paying, we see like the state of the art over here,"
+    },
+    {
+      "timestampSeconds": 163.32,
+      "segmentId": "seg_00043",
+      "speaker": "S01",
+      "source": "keyword",
+      "trigger": "this graph",
+      "quote": "And some of the research I've been doing personally is how can we make sure that this graph is more linear rather than m"
+    },
+    {
+      "timestampSeconds": 396.21,
+      "segmentId": "seg_00100",
+      "speaker": "S01",
+      "source": "llm",
+      "reason": "经典 supervisor-worker 多智能体架构极度低效：token 消耗惊人，且 supervisor 与各 worker 各自产生的上下文互不共享，同一发现被重复探索。"
+    },
+    {
+      "timestampSeconds": 594.75,
+      "segmentId": "seg_00148",
+      "speaker": "S01",
+      "source": "llm",
+      "reason": "用 DeepSeek 稀疏注意力模型 lightning indexer 的 query/key 计算文档得分（ReLU 余弦得分按头求和、对文档内 token 取均值），在多跳问答数据集上匹配或超越当前最先进的重排模型——证明稀疏注意力的"
+    },
+    {
+      "timestampSeconds": 797.82,
+      "segmentId": "seg_00196",
+      "speaker": "S01",
+      "source": "llm",
+      "reason": "记忆模块在 TriviaQA 上的 exact match 超过 RAG-50（55%），同时输入端使用的表示数量减少 372 倍——在更高准确率的同时实现数量级的效率提升。"
+    }
+  ],
+  "tour": {
+    "hook": "用熵减物理学拆解为何 token 越烧越亏：上下文才是被整个行业忽视的效率另一半",
+    "whoShouldWatch": "被 token 账单困扰的 AI 基础设施与智能体系统工程师，以及关注 LLM 推理效率研究的从业者",
+    "ifShortOnTime": "直接从 6:15（374 秒）看到结尾：三个实验依次给出可落地的效率路径，尤其别错过 13:18（798 秒）起的记忆模态结果——超越 RAG 且输入表示减少 372 倍，是全片最硬的数字",
+    "mustWatch": [
+      {
+        "startSeconds": 47,
+        "endSeconds": 110,
+        "label": "token 支出 13 倍曲线",
+        "live": false,
+        "why": "一张图讲清全片动机：智能回报是对数曲线而支出是指数曲线，'买智能实为买 token'的错配在此可视化呈现"
+      },
+      {
+        "startSeconds": 396,
+        "endSeconds": 470,
+        "label": "共享 KV 缓存架构",
+        "live": false,
+        "why": "经典 supervisor-worker 架构为何低效、全局共享 KV 缓存如何按任务过滤初始化新 worker，看架构图比听描述快得多"
+      },
+      {
+        "startSeconds": 797,
+        "endSeconds": 874,
+        "label": "372 倍压缩结果",
+        "live": false,
+        "why": "16 个潜表示注入冻结 Qwen 8B 就超过 RAG-50 的结果图表，是'上下文进潜空间'这一论点最有力的实证"
+      }
+    ],
+    "stops": [
+      {
+        "startSeconds": 0,
+        "endSeconds": 105,
+        "title": "买的是 token，不是智能",
+        "what": "开场抛出核心矛盾：Ramp 数据显示月度 token 支出自 2025 年 1 月以来涨了 13 倍，但智能回报呈对数曲线，Uber、Meta 已开始压制 token maxing。",
+        "keyPoint": "为智能付费实际是在为 token 付费，二者并不等价，指数级消耗在经济上不可持续",
+        "howTo": "skim",
+        "howToReason": "支出与智能的对比曲线图（约 48 秒与 70 秒处）值得扫一眼，其余是口头铺垫",
+        "speaker": "Ben Geist"
+      },
+      {
+        "startSeconds": 105,
+        "endSeconds": 250,
+        "title": "LLM 是一台熵减机器",
+        "what": "结合香农信息熵与热力学熵建模：系统熵能降多少，同时受'投入的功'与'已有信息'双重上界约束——如同打扫房间既要出力也要先知道脏衣服在哪。",
+        "keyPoint": "熵降有两个杠杆：功和信息；163 秒处的图表明确了目标——让智能曲线从对数趋向线性",
+        "howTo": "skim",
+        "howToReason": "熵框架是听懂后半场的钥匙，163 秒的关键图表（this graph）需要看，公式推导部分扫幻灯片即可",
+        "speaker": "Ben Geist"
+      },
+      {
+        "startSeconds": 250,
+        "endSeconds": 371,
+        "title": "行业只押注了一半：功",
+        "what": "指出思维链、推理等当前进步几乎全在'投入更多功'这一侧；而信息侧的主流手段 RAG 和记忆系统扩展性差、只擅长大海捞针式语义检索，且都困在 token 空间而非潜空间。",
+        "keyPoint": "效率瓶颈的根源是信息/上下文这一半被忽视，且现有手段没有进入潜空间",
+        "howTo": "listen",
+        "howToReason": "这段是纯论述性批判，无关键画面，适合当播客听",
+        "speaker": "Ben Geist"
+      },
+      {
+        "startSeconds": 374,
+        "endSeconds": 560,
+        "title": "实验一：多智能体共享 KV 缓存",
+        "what": "经典 supervisor-worker 架构因上下文互不共享而重复探索、极度费 token；为其维护全局共享 KV 缓存，派生新 worker 时按任务压缩过滤出相关上下文来初始化。",
+        "keyPoint": "准确率不变的前提下，worker token 减少 42–57%，总 token 减少 21–31%",
+        "howTo": "watch",
+        "howToReason": "396 秒起的架构对比图是理解'低效在哪、缓存怎么共享'的关键，视觉信息密度高",
+        "speaker": "Ben Geist"
+      },
+      {
+        "startSeconds": 560,
+        "endSeconds": 680,
+        "title": "实验二：稀疏注意力即重排器",
+        "what": "把稀疏注意力建模为重排器：用 DeepSeek lightning indexer 的 query/key 计算文档得分（ReLU 余弦得分按头求和、文档内 token 取均值），在多跳问答数据集上对标重排模型。",
+        "keyPoint": "稀疏注意力匹配甚至超越 SOTA 重排模型——它的效率本质上来自对自身上下文的精准检索",
+        "howTo": "skim",
+        "howToReason": "595 秒处的打分公式与对比结果表值得停帧看，讲解本身跟着幻灯片走即可",
+        "speaker": "Ben Geist"
+      },
+      {
+        "startSeconds": 680,
+        "endSeconds": 797,
+        "title": "实验三：记忆作为独立模态",
+        "what": "与 Stanford SNAP 实验室合作，把上下文注入当作一种模态：记忆模块将文档与查询压缩成 16 个潜表示，直接注入冻结的 Qwen 8B，无需改动基座模型。",
+        "keyPoint": "上下文可以绕过 token 空间、以潜表示形式注入冻结 LLM——这是对'信息侧'最激进的重构",
+        "howTo": "listen",
+        "howToReason": "方法描述以口头讲解为主，架构细节听清管线即可，结果图在下一站",
+        "speaker": "Ben Geist"
+      },
+      {
+        "startSeconds": 797,
+        "endSeconds": 874,
+        "title": "372 倍压缩与三条落地标准",
+        "what": "记忆模块在 TriviaQA 上 exact match 超过 RAG-50（55%），输入表示数量减少 372 倍；收尾提出理想上下文注入模型的三条标准：低延迟、可扩展到大语料、对基座模型零切换成本。",
+        "keyPoint": "三条标准是选型清单：低延迟可推理时用、能扩展、新基座模型发布无需重训即可复用",
+        "howTo": "watch",
+        "howToReason": "798 秒的结果图表是全片结论所系，三条标准幻灯片值得截图留存",
+        "speaker": "Ben Geist"
+      }
+    ]
+  },
+  "chapters": [
+    {
+      "index": 0,
+      "title": "智能效率的困境：我们买的是 token 而不是智能",
+      "startSeconds": 0.12,
+      "endSeconds": 371.13,
+      "visualDependency": true
+    },
+    {
+      "index": 1,
+      "title": "三个潜空间上下文注入实验：共享 KV 缓存、稀疏注意力即重排器、记忆模态",
+      "startSeconds": 374.88,
+      "endSeconds": 797.64,
+      "visualDependency": false
+    },
+    {
+      "index": 2,
+      "title": "结果与愿景：372 倍输入压缩与理想上下文模型的三条标准",
+      "startSeconds": 797.82,
+      "endSeconds": 874.68,
+      "visualDependency": false
+    }
+  ]
+}
