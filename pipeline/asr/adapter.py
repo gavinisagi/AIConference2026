@@ -27,9 +27,20 @@ def _detect_language(segments: list[dict]) -> str:
 
 
 def from_moss_result(moss_json_path: str | Path, video_id: str | None = None) -> dict:
-    """读现有 moss 结果 → 统一 schema（已校验）。"""
+    """读转录结果 → 统一 schema（已校验）。
+
+    支持两种输入：
+      1) 已是统一 schema（moss_transcribe.py CLI 产出，含 schemaVersion/source/asr）→ 直通校验；
+      2) 旧 moss 格式（{audio,duration_seconds,segments:[{start,end,speaker,text}]}）→ 转换。
+    """
     p = Path(moss_json_path)
     raw = json.loads(p.read_text(encoding="utf-8"))
+
+    # 路径 1：已是统一 schema，直通（可用 video_id 覆盖 source.videoId）。
+    if raw.get("schemaVersion") == 1 and isinstance(raw.get("source"), dict) and isinstance(raw.get("asr"), dict):
+        if video_id:
+            raw["source"]["videoId"] = video_id
+        return schema.validate(raw)
 
     input_path = raw.get("audio") or str(p)
     vid = video_id or config.parse_video_id(input_path) or config.parse_video_id(p)
