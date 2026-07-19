@@ -76,3 +76,6 @@ __pycache__/
 # API keys / 本地环境
 .env
 .env.local
+
+# 部署用 SQL：由 scripts/export-sql.mjs 从数据源再生，不入库
+/deploy/*.sql
