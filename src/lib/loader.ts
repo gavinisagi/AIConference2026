@@ -12,6 +12,7 @@
 import rawDataset from '@/data/dataset.json';
 import {
   type Conference,
+  type ConferenceDigest,
   type ConferenceId,
   type NormalizedDataset,
   type Role,
@@ -37,6 +38,11 @@ const CONFERENCES: readonly Conference[] = Object.freeze(
 
 const CONFERENCES_BY_ID: ReadonlyMap<string, Conference> = new Map(
   CONFERENCES.map((c) => [c.id, c]),
+);
+
+// 会议信号聚合（缺省为空数组 → 页面不渲染该区）。
+const DIGESTS: readonly ConferenceDigest[] = Object.freeze(
+  Array.isArray(dataset.digests) ? dataset.digests : [],
 );
 
 // --- 统计口径（缺省时给出安全兜底，UI 再决定是否显示 — 占位）。 ---
@@ -74,6 +80,14 @@ export function getConferences(): readonly Conference[] {
 /** 按 id 取大会；不存在返回 undefined。 */
 export function getConferenceById(id: string): Conference | undefined {
   return CONFERENCES_BY_ID.get(id);
+}
+
+/**
+ * 会议信号聚合（知识层）：横切该大会全部清洗产物归纳的信号。
+ * 无清洗数据的大会返回 undefined，页面不渲染该区（优雅降级）。
+ */
+export function getDigestByConference(conferenceId: ConferenceId): ConferenceDigest | undefined {
+  return DIGESTS.find((d) => d.conferenceId === conferenceId);
 }
 
 /** 站点统计口径（totalSessions=941 / totalHours=409）。 */

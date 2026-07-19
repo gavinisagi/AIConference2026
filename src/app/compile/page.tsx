@@ -1,6 +1,13 @@
 import type { Metadata } from 'next';
-import { getConferenceById, getSessionsByConference, displayTitle, displayDuration } from '@/lib/loader';
-import type { Session } from '@/lib/schema';
+import {
+  getConferenceById,
+  getSessionsByConference,
+  getSessionById,
+  getDigestByConference,
+  displayTitle,
+  displayDuration,
+} from '@/lib/loader';
+import type { ConferenceDigest, Session } from '@/lib/schema';
 import { VideoCard } from '@/app/catalog/VideoCard';
 import { Breadcrumb } from '@/app/_shared/Breadcrumb';
 import styles from './compile.module.css';
@@ -21,6 +28,7 @@ export default function CompileHubPage() {
   );
   const withTour = all.filter((s) => s.tour);
   const rest = all.filter((s) => !s.tour);
+  const digest = getDigestByConference('cursor-compile');
 
   return (
     <main className={styles.page}>
@@ -36,9 +44,14 @@ export default function CompileHubPage() {
           </p>
         </header>
 
+        {/* 知识层：横切全会议的信号。读者 3 分钟拿到整届 payload，再决定深入哪场。 */}
+        {digest && <DigestPanel digest={digest} />}
+
         {withTour.length > 0 && (
           <section className={styles.section} aria-labelledby="featured">
-            <h2 id="featured" className={styles.sectionHead}>导览已就绪</h2>
+            <h2 id="featured" className={styles.sectionHead}>
+              逐场导览 · {withTour.length} 场
+            </h2>
             <ul className={styles.featList}>
               {withTour.map((s) => (
                 <li key={s.id}>
@@ -65,6 +78,84 @@ export default function CompileHubPage() {
         )}
       </div>
     </main>
+  );
+}
+
+/** 官方源深链：跳到该场演讲的具体时刻。 */
+function officialAt(url: string, seconds: number | null): string {
+  if (seconds === null || seconds <= 0) return url;
+  const sep = url.includes('?') ? '&' : '?';
+  return `${url}${sep}t=${Math.floor(seconds)}s`;
+}
+
+/** 出处标签：短标题（去掉「, 讲者 | Compile 26」尾巴；过长按词边界截断加省略号）。 */
+function shortTitle(title: string): string {
+  const head = title.split(/[,|｜]/)[0].trim();
+  if (head.length <= 26) return head;
+  const cut = head.slice(0, 26);
+  const lastSpace = cut.lastIndexOf(' ');
+  return (lastSpace > 12 ? cut.slice(0, lastSpace) : cut) + '…';
+}
+
+/**
+ * 信号面板（知识层）——横切全会议归纳「这个领域正在发生什么」。
+ * 每条信号带出处深链，沿用「观点必须能回指来源」的原则。
+ */
+function DigestPanel({ digest }: { digest: ConferenceDigest }) {
+  return (
+    <section className={styles.digest} aria-labelledby="signals">
+      <h2 id="signals" className={styles.sectionHead}>
+        这届大会发生了什么 · {digest.signals.length} 个信号
+      </h2>
+      <p className={styles.digestHeadline}>{digest.headline}</p>
+      {digest.narrative && <p className={styles.digestNarrative}>{digest.narrative}</p>}
+
+      <ol className={styles.signalList}>
+        {digest.signals.map((sig, i) => (
+          <li key={i} className={styles.signal}>
+            <span className={styles.signalNo}>{String(i + 1).padStart(2, '0')}</span>
+            <div className={styles.signalBody}>
+              <h3 className={styles.signalTitle}>{sig.title}</h3>
+              <p className={styles.signalStatement}>{sig.statement}</p>
+              {sig.whyItMatters && (
+                <p className={styles.signalWhy}>
+                  <span className={styles.signalWhyLabel}>为何重要</span>
+                  {sig.whyItMatters}
+                </p>
+              )}
+              {sig.sources.length > 0 && (
+                <div className={styles.sources}>
+                  <span className={styles.sourcesLabel}>出处</span>
+                  {sig.sources.map((src, j) => {
+                    const s = getSessionById(src.videoId);
+                    if (!s) return null;
+                    const m = src.timestampSeconds !== null ? Math.floor(src.timestampSeconds / 60) : null;
+                    const sec = src.timestampSeconds !== null ? Math.floor(src.timestampSeconds % 60) : null;
+                    return (
+                      <a
+                        key={j}
+                        className={styles.sourceLink}
+                        href={officialAt(s.officialUrl, src.timestampSeconds)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {shortTitle(displayTitle(s))}
+                        {m !== null && sec !== null && (
+                          <span className={styles.sourceTime}>
+                            {' '}
+                            {m}:{String(sec).padStart(2, '0')}
+                          </span>
+                        )}
+                      </a>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </li>
+        ))}
+      </ol>
+    </section>
   );
 }
 

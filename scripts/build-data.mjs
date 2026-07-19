@@ -27,6 +27,8 @@ const SOURCE_PATH = resolve(ROOT, 'data/catalog.json');
 // 两个覆盖目录不存在或为空时，合并是空操作，输出与纯 catalog 派生字节一致。
 const ENRICH_DIR = resolve(ROOT, 'data/enrichments');
 const EDITORIAL_DIR = resolve(ROOT, 'data/editorial');
+// 会议级信号聚合（知识层）：data/digests/<conferenceId>.json，缺省则站点不渲染该区。
+const DIGEST_DIR = resolve(ROOT, 'data/digests');
 const OUTPUT_PATH = resolve(ROOT, 'src/data/dataset.json');
 const DATASET_VERSION = 1;
 
@@ -218,6 +220,59 @@ function sanitizeTakeaways(v, sessionId) {
   return out;
 }
 
+/**
+ * 读取并规范化会议信号聚合。只接受 conferenceId 在契约内、signals 非空的 digest；
+ * sources 仅保留真实存在的 session id（不让站点渲染死链）。
+ */
+function loadDigests(validSessionIds, warnings) {
+  const out = [];
+  if (!existsSync(DIGEST_DIR)) return out;
+  for (const name of readdirSync(DIGEST_DIR).sort()) {
+    if (!name.endsWith('.json')) continue;
+    let d;
+    try {
+      d = JSON.parse(readFileSync(resolve(DIGEST_DIR, name), 'utf8'));
+    } catch (e) {
+      warnings.push(`digests/${name}: 无法解析 JSON，已跳过（${e.message}）`);
+      continue;
+    }
+    const cid = d && d.conferenceId;
+    if (!CONFERENCES_BY_ID.has(cid)) {
+      warnings.push(`digests/${name}: conferenceId "${cid}" 不在契约内，忽略`);
+      continue;
+    }
+    const signals = [];
+    for (const s of Array.isArray(d.signals) ? d.signals : []) {
+      if (!s || !isNonEmptyString(s.title) || !isNonEmptyString(s.statement)) continue;
+      const sources = (Array.isArray(s.sources) ? s.sources : [])
+        .filter((x) => x && validSessionIds.has(x.videoId))
+        .map((x) => ({
+          videoId: x.videoId,
+          timestampSeconds:
+            typeof x.timestampSeconds === 'number' && x.timestampSeconds >= 0 ? x.timestampSeconds : null,
+        }));
+      signals.push({
+        title: s.title.trim(),
+        statement: s.statement.trim(),
+        whyItMatters: isNonEmptyString(s.whyItMatters) ? s.whyItMatters.trim() : '',
+        sources,
+      });
+    }
+    if (signals.length === 0) {
+      warnings.push(`digests/${name}: 无有效 signal，忽略`);
+      continue;
+    }
+    out.push({
+      conferenceId: cid,
+      talkCount: typeof d.talkCount === 'number' ? d.talkCount : 0,
+      headline: isNonEmptyString(d.headline) ? d.headline.trim() : '',
+      narrative: isNonEmptyString(d.narrative) ? d.narrative.trim() : '',
+      signals,
+    });
+  }
+  return out;
+}
+
 const TOUR_MODES = ['watch', 'skim', 'listen'];
 
 /** 规范化 tour 覆盖 → Tour（严格投影；任一必填缺失/非法 → 返回 null 视为不覆盖）。 */
@@ -385,6 +440,9 @@ function build() {
     sessions.push(session);
   }
 
+  // 会议信号聚合（知识层）：sources 只保留真实 session，避免死链。
+  const digests = loadDigests(new Set(sessions.map((s) => s.id)), overrideWarnings);
+
   // 覆盖告警走 stderr（不进 dataset.json，避免污染漂移比对）。
   for (const w of overrideWarnings) console.error(`[build-data] 覆盖告警: ${w}`);
 
@@ -428,6 +486,7 @@ function build() {
     },
     conferences,
     sessions,
+    digests,
     _droppedRecords: dropped, // 不可降级的坏记录（正常应为空）。
   };
 }

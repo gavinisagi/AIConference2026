@@ -155,6 +155,36 @@ export interface Session {
 }
 
 // ---------------------------------------------------------------------------
+// 会议级信号聚合（知识层：横切一届大会，回答「这个领域正在发生什么」）
+// ---------------------------------------------------------------------------
+
+/** 信号出处：回指某场演讲的具体时刻（沿用观点必须能回指的原则）。 */
+export interface DigestSource {
+  videoId: string;
+  timestampSeconds: number | null;
+}
+
+/** 一条跨场信号。 */
+export interface DigestSignal {
+  title: string;
+  statement: string;
+  whyItMatters: string;
+  sources: DigestSource[];
+}
+
+/**
+ * 会议信号聚合——不是逐场复述，而是横切归纳。
+ * 读者 3 分钟拿到整届大会 payload，再决定深入哪场。缺省为 undefined，页面不渲染该区。
+ */
+export interface ConferenceDigest {
+  conferenceId: ConferenceId;
+  talkCount: number;
+  headline: string;
+  narrative: string;
+  signals: DigestSignal[];
+}
+
+// ---------------------------------------------------------------------------
 // 统计与 dataset 容器
 // ---------------------------------------------------------------------------
 
@@ -193,6 +223,8 @@ export interface NormalizedDataset {
   stats: SiteStats;
   conferences: Conference[];
   sessions: Session[];
+  /** 会议信号聚合（按大会一份；无清洗数据的大会缺省）。 */
+  digests: ConferenceDigest[];
 }
 
 // ---------------------------------------------------------------------------

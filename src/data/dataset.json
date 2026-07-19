@@ -20957,5 +20957,160 @@
       }
     }
   ],
+  "digests": [
+    {
+      "conferenceId": "cursor-compile",
+      "talkCount": 9,
+      "headline": "编码免费之后：瓶颈迁往需求、评审与上下文",
+      "narrative": "这届 Compile 的共识是：AI 已把写代码变成廉价产能，真正的稀缺资源全面转移——商业需求、评审判断、上下文效率与基础设施护栏成为新战场。Cursor 以自研前沿模型和 agent 基建押注平台化，而 Shopify、Planetscale、Ramp 则给出了组织与系统层面的落地机制；与此同时，token 账单的指数增长正在逼迫全行业重算经济账。",
+      "signals": [
+        {
+          "title": "产能过剩需求不涨",
+          "statement": "工程师交付量达过去 8 倍、App 提交量上升，但安装、使用与收入未成比例增长；逐字符手写软件的时代终结后，'构建人们想要的东西'取代'构建'成为根本问题。",
+          "whyItMatters": "当任何人都能构建时，找到愿意付钱的问题、驱动用户行为改变，比交付速度更能决定公司生死——否则终局是'巨大的代码库和渺小的公司'。",
+          "sources": [
+            {
+              "videoId": "4CAFK-rc26A",
+              "timestampSeconds": 340.89
+            },
+            {
+              "videoId": "4CAFK-rc26A",
+              "timestampSeconds": 1338.77
+            },
+            {
+              "videoId": "ByOF8qByGHU",
+              "timestampSeconds": 3.29
+            }
+          ]
+        },
+        {
+          "title": "token经济学拉响警报",
+          "statement": "Ramp 数据显示企业月度 token 支出自 2025 年 1 月以来增长 13 倍，Uber、Meta 已开始压制 token maxing；Shopify 则反向操作——不设限额只设熔断器，并禁用小模型，赌'人的时间比模型时间值钱'。",
+          "whyItMatters": "为智能付费实为为 token 付费，指数级消耗在经济上不可持续；'烧多少 token'正从炫耀资本变成需要精算的成本策略，两派做法将很快分出胜负。",
+          "sources": [
+            {
+              "videoId": "Z5M33oh-SAU",
+              "timestampSeconds": 47.82
+            },
+            {
+              "videoId": "ByOF8qByGHU",
+              "timestampSeconds": 860.89
+            },
+            {
+              "videoId": "4CAFK-rc26A",
+              "timestampSeconds": 130.44
+            }
+          ]
+        },
+        {
+          "title": "评审成为新瓶颈",
+          "statement": "AI 大量产码后瓶颈迁移到代码评审：Shopify 用 Council of LLMs 多模型分工评审，把周期从 24-48 小时压到约 1 小时；Cursor 的 Origin 平台称可将 review 时间缩短一半以上；Paul Ford 指出 slop 的解药早已存在——编辑流程。",
+          "whyItMatters": "'LGTM'证明人类本就没认真看代码；谁能工业化地做好'编辑与裁决'，谁就掌握 AI 产码时代的质量闸门——但责任仍署人类的名字，'可以共享，不能让渡'。",
+          "sources": [
+            {
+              "videoId": "ByOF8qByGHU",
+              "timestampSeconds": 386.19
+            },
+            {
+              "videoId": "fWa7uxyhVDE",
+              "timestampSeconds": 1278.99
+            },
+            {
+              "videoId": "BEi1ryQPGbk",
+              "timestampSeconds": 591.15
+            }
+          ]
+        },
+        {
+          "title": "护栏靠原语不靠信任",
+          "statement": "agent 规模化落地的答案是基础设施原语：Planetscale 在 600TB 级生产库上默认拒绝破坏性变更、支持瞬时回滚，让 agent 一句'shard this database'即可安全分片；Cursor 给每个 agent 配独立计算机与完整开发环境，automations 上线数月已运行超 600 万次。",
+          "whyItMatters": "放手让 agent 干活的前提不是更聪明的模型，而是可撤销、可约束、可验证的平台机制——'如果数据库能做到，任何领域都能做到'，这里藏着未来十年的基建生意。",
+          "sources": [
+            {
+              "videoId": "zxvyO5vnknI",
+              "timestampSeconds": 187.57
+            },
+            {
+              "videoId": "zxvyO5vnknI",
+              "timestampSeconds": 564.77
+            },
+            {
+              "videoId": "fWa7uxyhVDE",
+              "timestampSeconds": 430.14
+            },
+            {
+              "videoId": "fWa7uxyhVDE",
+              "timestampSeconds": 984.36
+            }
+          ]
+        },
+        {
+          "title": "上下文是效率另一半",
+          "statement": "两场研究型演讲共同指向被忽视的效率杠杆：Ramp 为多智能体维护共享 KV 缓存可减少 42-57% 的 worker token，把记忆压成 16 个潜表示注入冻结的 Qwen 8B 后输入表示减少 372 倍；Baseten 则训练黑盒压缩器一次前向把完整 KV cache 压成'权重'，支撑 32 轮迭代压缩。",
+          "whyItMatters": "当前 LLM 的进步几乎全押在'投入更多算力'上，而信息/上下文这一半才是让智能曲线趋向线性的关键；KV cache 层的记忆研究可能是 agent 长程可用与成本可控的共同解。",
+          "sources": [
+            {
+              "videoId": "Z5M33oh-SAU",
+              "timestampSeconds": 177.12
+            },
+            {
+              "videoId": "Z5M33oh-SAU",
+              "timestampSeconds": 396.21
+            },
+            {
+              "videoId": "Z5M33oh-SAU",
+              "timestampSeconds": 751.47
+            },
+            {
+              "videoId": "I8YnwUV2C9w",
+              "timestampSeconds": 283.22
+            },
+            {
+              "videoId": "I8YnwUV2C9w",
+              "timestampSeconds": 672.04
+            }
+          ]
+        },
+        {
+          "title": "Cursor押注前沿模型",
+          "statement": "Cursor 宣布正以 10-20 倍于以往的算力从零训练前沿级新模型（数周内发布），同时 95% 用户已转向 agent-first 使用方式，并发布 SDK、插件生态与代码托管平台 Origin，从产品全面转向平台。",
+          "whyItMatters": "应用层公司向上打入前沿模型训练是格局级信号：AI coding 的竞争正从'谁的编辑器好用'升级为'谁掌握模型+基建+平台的全栈'。",
+          "sources": [
+            {
+              "videoId": "fWa7uxyhVDE",
+              "timestampSeconds": 1465.35
+            },
+            {
+              "videoId": "fWa7uxyhVDE",
+              "timestampSeconds": 357.57
+            },
+            {
+              "videoId": "fWa7uxyhVDE",
+              "timestampSeconds": 522.87
+            }
+          ]
+        },
+        {
+          "title": "人的价值收敛三件事",
+          "statement": "跨场共识指向人类不可替代的三块：品味与判断（Shopify 的追问——'如何在 10,000 个正确解中选中这一个'）、凭信念坚持 AI 无法从第一性原理构想的原创愿景、以及产品级关键决策（如 Planetscale 强调分片键仍须人类基于产品理解拍板）。",
+          "whyItMatters": "'什么该交给 agent、什么必须留给人'的分工线正在清晰化：机械的大规模重构归 agent，愿景、取舍与责任归人——这条线就是从业者重新定位自身价值的坐标。",
+          "sources": [
+            {
+              "videoId": "ByOF8qByGHU",
+              "timestampSeconds": 198.89
+            },
+            {
+              "videoId": "4CAFK-rc26A",
+              "timestampSeconds": 996.45
+            },
+            {
+              "videoId": "zxvyO5vnknI",
+              "timestampSeconds": 955.25
+            }
+          ]
+        }
+      ]
+    }
+  ],
   "_droppedRecords": []
 }
