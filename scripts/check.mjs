@@ -37,8 +37,11 @@ if (!existsSync(resolve(ROOT, 'node_modules'))) {
   process.exit(1);
 }
 
-// 0) 构建期数据契约校验（schema + 与已提交 dataset.json 漂移比对）。
-run('0/3 data contract (schema + drift)', 'node scripts/build-data.mjs --verify');
+// 0) 生成 src/data/dataset.json（含全量 schema 校验）。
+//    dataset.json 是构建产物、不入库：数据源为本地 JSON（DATA_SOURCE=file，默认）
+//    或构建期从 DB/CRUD API 拉取（DATA_SOURCE=api）。loader 静态 import 它，
+//    因此必须先于 typecheck / build 生成。
+run('0/3 data (generate + schema)', 'node scripts/build-data.mjs');
 
 // 1) lint
 run('1/3 lint', 'npm run lint');
