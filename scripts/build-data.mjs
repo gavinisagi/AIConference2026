@@ -45,16 +45,45 @@ const DATA_SOURCE = process.env.DATA_SOURCE || 'file';
 const DATA_API_URL = process.env.DATA_API_URL || '';
 const DATA_API_TOKEN = process.env.DATA_API_TOKEN || '';
 
-/** 读取数据源 → { catalog: [], enrichments: Map, editorial: Map }。 */
+// 发布开关：数据库/本地配置控制「站点实际渲染哪些内容」，与清洗进度解耦。
+//   publish.conferences[id] === true   → 该会议已发布（缺省/false = 整会议隐藏）
+//   publish.sessions[videoId] === true → 该场已发布
+// 规则：publish 整体缺省 → 全部发布（开发默认）；
+//       给了 conferences 但没给 sessions → 已发布会议下的场次全发布；
+//       给了 sessions → 只发布显式为 true 的场次。
+const PUBLISH_PATH = resolve(ROOT, 'data/publish.json');
+
+/** 读取数据源 → { catalog: [], enrichments: Map, editorial: Map, publish }。 */
 async function readSource(warnings) {
   if (DATA_SOURCE === 'api') return readFromApi(warnings);
   if (DATA_SOURCE !== 'file') {
     throw new Error(`未知 DATA_SOURCE="${DATA_SOURCE}"（可选 file | api）`);
   }
+  let publish = null;
+  if (existsSync(PUBLISH_PATH)) {
+    try {
+      publish = JSON.parse(readFileSync(PUBLISH_PATH, 'utf8'));
+    } catch (e) {
+      warnings.push(`data/publish.json 无法解析，按「全部发布」处理（${e.message}）`);
+    }
+  }
   return {
     catalog: JSON.parse(readFileSync(SOURCE_PATH, 'utf8')),
     enrichments: loadOverrides(ENRICH_DIR, warnings),
     editorial: loadOverrides(EDITORIAL_DIR, warnings),
+    publish,
+  };
+}
+
+/** 依据 publish 配置判断某场是否应出现在站点。publish 为空 → 全部发布。 */
+function makePublishFilter(publish) {
+  if (!publish || typeof publish !== 'object') return () => true;
+  const confs = publish.conferences && typeof publish.conferences === 'object' ? publish.conferences : null;
+  const sess = publish.sessions && typeof publish.sessions === 'object' ? publish.sessions : null;
+  return (session) => {
+    if (confs && confs[session.conferenceId] !== true) return false;
+    if (sess) return sess[session.id] === true;
+    return true;
   };
 }
 
@@ -89,6 +118,8 @@ async function readFromApi(warnings) {
     catalog: payload.catalog,
     enrichments: toMap(payload.enrichments, 'enrichments'),
     editorial: toMap(payload.editorial, 'editorial'),
+    // 发布开关由 DB 的 is_published 列派生（CRUD 服务负责序列化成此形状）。
+    publish: payload.publish || null,
   };
 }
 
@@ -499,8 +530,21 @@ function build(source, overrideWarnings) {
     sessions.push(session);
   }
 
+  // 发布过滤：站点只渲染已发布内容（发布范围由 DB/publish.json 控制，与清洗进度解耦）。
+  const isPublished = makePublishFilter(source.publish);
+  const beforeCount = sessions.length;
+  const published = sessions.filter(isPublished);
+  if (published.length !== beforeCount) {
+    console.log(`[build-data] 发布过滤: ${published.length}/${beforeCount} 场进入站点`);
+  }
+  sessions.length = 0;
+  sessions.push(...published);
+
   // 会议信号聚合（知识层）：sources 只保留真实 session，避免死链。
-  const digests = loadDigests(new Set(sessions.map((s) => s.id)), overrideWarnings);
+  // 已发布场次为空的会议，其 digest 一并隐藏。
+  const digests = loadDigests(new Set(sessions.map((s) => s.id)), overrideWarnings).filter((d) =>
+    sessions.some((s) => s.conferenceId === d.conferenceId),
+  );
 
   // 覆盖告警走 stderr（不进 dataset.json，避免污染漂移比对）。
   for (const w of overrideWarnings) console.error(`[build-data] 覆盖告警: ${w}`);

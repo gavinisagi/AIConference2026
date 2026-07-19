@@ -1,0 +1,32 @@
+/* 站点级页脚：归属与免责（低调、不与内容抢注意力）。 */
+.siteFoot {
+  background: var(--surface-sunken);
+  border-top: 1px solid var(--hairline);
+  padding: var(--space-32) var(--page-margin-desktop);
+  margin-top: var(--space-64);
+}
+.siteFootInner {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+.footLine {
+  font-size: var(--fs-body-s);
+  line-height: var(--lh-body-s);
+  color: var(--ink-muted);
+  margin: 0;
+  max-width: 80ch;
+}
+.footLine b {
+  color: var(--ink-secondary);
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .siteFoot {
+    padding: var(--space-24) var(--page-margin-mobile);
+    margin-top: var(--space-48);
+  }
+}

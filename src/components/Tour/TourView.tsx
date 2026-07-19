@@ -29,6 +29,16 @@ function at(url: string, seconds: number): string {
   return `${url}${sep}t=${Math.floor(seconds)}s`;
 }
 
+/**
+ * 说话人是否可展示：diarization 原始标签（S01/S02…）对读者是噪声，
+ * 推断不出真名时宁可不显示，也不暴露内部编号。
+ */
+function displayableSpeaker(speaker: string): string | null {
+  const s = speaker.trim();
+  if (!s || /^S\d+$/i.test(s)) return null;
+  return s;
+}
+
 function minutesOf(sec: number): number {
   return Math.round(sec / 60);
 }
@@ -158,7 +168,9 @@ export function TourView({ tour, officialUrl }: { tour: Tour; officialUrl: strin
                     ▶ 跳到 {mmss(st.startSeconds)}
                   </a>
                 </div>
-                {st.speaker && <div className={styles.spk}>讲者 · {st.speaker}</div>}
+                {displayableSpeaker(st.speaker) && (
+                  <div className={styles.spk}>讲者 · {displayableSpeaker(st.speaker)}</div>
+                )}
               </div>
             </li>
           ))}

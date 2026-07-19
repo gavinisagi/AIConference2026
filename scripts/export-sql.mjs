@@ -24,6 +24,7 @@ const CATALOG = resolve(ROOT, 'data/catalog.json');
 const ENRICH_DIR = resolve(ROOT, 'data/enrichments');
 const EDITORIAL_DIR = resolve(ROOT, 'data/editorial');
 const DIGEST_DIR = resolve(ROOT, 'data/digests');
+const PUBLISH_PATH = resolve(ROOT, 'data/publish.json');
 
 // 与 build-data.mjs CONFERENCES 保持一致（source key → 站点 conferenceId）。
 const CONFERENCES = {
@@ -58,6 +59,12 @@ function readDir(dir) {
     .map((f) => ({ id: f.slice(0, -5), data: JSON.parse(readFileSync(resolve(dir, f), 'utf8')) }));
 }
 
+// 发布范围（data/publish.json）：决定 is_published 初值。缺省 → 全部未发布，需手动开。
+const publish = existsSync(PUBLISH_PATH) ? JSON.parse(readFileSync(PUBLISH_PATH, 'utf8')) : null;
+const pubConf = (id) => Boolean(publish?.conferences?.[id]);
+const pubSess = (id, confId) =>
+  publish?.sessions ? Boolean(publish.sessions[id]) && pubConf(confId) : pubConf(confId);
+
 const out = [];
 const p = (s = '') => out.push(s);
 
@@ -78,6 +85,8 @@ CREATE TABLE IF NOT EXISTS conferences (
   name          text NOT NULL,
   color_hex     text NOT NULL,
   official_url  text,
+  -- 发布开关：false 时整个会议不出现在站点（与清洗进度解耦，由编辑决定）
+  is_published  boolean NOT NULL DEFAULT false,
   updated_at    timestamptz NOT NULL DEFAULT now()
 );
 
@@ -92,10 +101,13 @@ CREATE TABLE IF NOT EXISTS sessions (
   duration_sec   integer,                      -- NULL = 时长未知
   upload_date    text,
   thumbnail_url  text,
+  -- 发布开关：仅 is_published=true 且所属会议已发布的场次会出现在站点
+  is_published   boolean NOT NULL DEFAULT false,
   created_at     timestamptz NOT NULL DEFAULT now(),
   updated_at     timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS sessions_conference_idx ON sessions(conference_id);
+CREATE INDEX IF NOT EXISTS sessions_published_idx ON sessions(is_published) WHERE is_published;
 
 -- 清洗产物（流水线 AI 输出）：每场至多一行。嵌套结构走 JSONB，便于随契约演进。
 CREATE TABLE IF NOT EXISTS enrichments (
@@ -148,10 +160,10 @@ for (const r of catalog) {
 p('-- =========================== 大会 ===========================');
 for (const [sourceKey, c] of Object.entries(CONFERENCES)) {
   p(
-    `INSERT INTO conferences (id, source_key, name, color_hex, official_url) VALUES ` +
-      `(${q(c.id)}, ${q(sourceKey)}, ${q(c.name)}, ${q(c.colorHex)}, ${q(officialBySource[sourceKey] || null)}) ` +
+    `INSERT INTO conferences (id, source_key, name, color_hex, official_url, is_published) VALUES ` +
+      `(${q(c.id)}, ${q(sourceKey)}, ${q(c.name)}, ${q(c.colorHex)}, ${q(officialBySource[sourceKey] || null)}, ${pubConf(c.id)}) ` +
       `ON CONFLICT (id) DO UPDATE SET source_key=EXCLUDED.source_key, name=EXCLUDED.name, ` +
-      `color_hex=EXCLUDED.color_hex, official_url=EXCLUDED.official_url, updated_at=now();`,
+      `color_hex=EXCLUDED.color_hex, official_url=EXCLUDED.official_url, is_published=EXCLUDED.is_published, updated_at=now();`,
   );
 }
 p('');
@@ -166,13 +178,14 @@ for (const r of catalog) {
     continue; // 不可降级的必填缺失 → 不入库（与 build-data 的丢弃规则一致）
   }
   p(
-    `INSERT INTO sessions (video_id, conference_id, title, official_url, source_url, playlist_index, duration_sec, upload_date, thumbnail_url) VALUES ` +
+    `INSERT INTO sessions (video_id, conference_id, title, official_url, source_url, playlist_index, duration_sec, upload_date, thumbnail_url, is_published) VALUES ` +
       `(${q(r.video_id)}, ${q(conf.id)}, ${q(r.title || '')}, ${q(r.url)}, ${q(r.source_url)}, ` +
       `${n(r.playlist_index)}, ${n(typeof r.duration === 'number' && r.duration > 0 ? Math.round(r.duration) : null)}, ` +
-      `${q(r.upload_date)}, ${q(r.thumbnail)}) ` +
+      `${q(r.upload_date)}, ${q(r.thumbnail)}, ${pubSess(r.video_id, conf.id)}) ` +
       `ON CONFLICT (video_id) DO UPDATE SET conference_id=EXCLUDED.conference_id, title=EXCLUDED.title, ` +
       `official_url=EXCLUDED.official_url, source_url=EXCLUDED.source_url, playlist_index=EXCLUDED.playlist_index, ` +
-      `duration_sec=EXCLUDED.duration_sec, upload_date=EXCLUDED.upload_date, thumbnail_url=EXCLUDED.thumbnail_url, updated_at=now();`,
+      `duration_sec=EXCLUDED.duration_sec, upload_date=EXCLUDED.upload_date, thumbnail_url=EXCLUDED.thumbnail_url, ` +
+      `is_published=EXCLUDED.is_published, updated_at=now();`,
   );
 }
 p('');
@@ -219,9 +232,23 @@ for (const { data: d } of digests) {
   );
 }
 p('');
+p('-- =========================== 发布视图（构建期取数用） ===========================');
+p(`
+-- 站点实际渲染的内容 = 已发布会议 ∩ 已发布场次。
+-- 构建期 DATA_SOURCE=api/pg 只需查这个视图，无需在应用层重复发布逻辑。
+CREATE OR REPLACE VIEW published_sessions AS
+SELECT s.*, c.name AS conference_name, c.color_hex, c.source_key
+FROM sessions s
+JOIN conferences c ON c.id = s.conference_id
+WHERE s.is_published AND c.is_published;
+`);
+p('');
 p('COMMIT;');
 p('');
-p(`-- 汇总：${catalog.length - skipped} 场次 · ${enrichments.length} 清洗 · ${editorial.length} 覆盖 · ${digests.length} 信号` +
-  (skipped ? ` · 跳过 ${skipped} 条必填缺失` : ''));
+const pubCount = catalog.filter((r) => CONFERENCES[r.source] && pubSess(r.video_id, CONFERENCES[r.source].id)).length;
+p(`-- 汇总：${catalog.length - skipped} 场次入库（其中 ${pubCount} 场已发布）· ${enrichments.length} 清洗 · ` +
+  `${editorial.length} 覆盖 · ${digests.length} 信号` + (skipped ? ` · 跳过 ${skipped} 条必填缺失` : ''));
+p('-- 调整上线范围：UPDATE sessions SET is_published=true WHERE video_id IN (...);');
+p("-- 整会议上线：    UPDATE conferences SET is_published=true WHERE id='ai-engineer';");
 
 process.stdout.write(out.join('\n') + '\n');
