@@ -15,7 +15,7 @@
  * 本模块是规范化与枚举取值的“单一事实来源”；docs/data-contract.md 是人读契约，
  * src/lib/schema.ts 是站点侧的 TS 类型镜像。三者须保持一致。
  */
-import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, readdirSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 
@@ -31,6 +31,66 @@ const EDITORIAL_DIR = resolve(ROOT, 'data/editorial');
 const DIGEST_DIR = resolve(ROOT, 'data/digests');
 const OUTPUT_PATH = resolve(ROOT, 'src/data/dataset.json');
 const DATASET_VERSION = 1;
+
+// ---------------------------------------------------------------------------
+// 可插拔数据源（方案 A：构建期读取，站点保持纯静态导出）
+// ---------------------------------------------------------------------------
+//   DATA_SOURCE=file （默认）本地 JSON —— 开发 / CI / 离线可复现构建。
+//   DATA_SOURCE=api  构建期从 DATA_API_URL 拉取 —— 生产：数据在 DB，CRUD 改动后
+//                    触发重建即可，站点仍是静态资源（无服务器、可 CDN）。
+// api 端点须返回 { catalog: [...], enrichments: {id:{...}}, editorial: {id:{...}} }，
+// 与 file 源同形；因此 DB 选型对本脚本透明（Postgres/SQLite/Supabase 皆可，
+// 由你的 CRUD 服务负责查询与序列化）。
+const DATA_SOURCE = process.env.DATA_SOURCE || 'file';
+const DATA_API_URL = process.env.DATA_API_URL || '';
+const DATA_API_TOKEN = process.env.DATA_API_TOKEN || '';
+
+/** 读取数据源 → { catalog: [], enrichments: Map, editorial: Map }。 */
+async function readSource(warnings) {
+  if (DATA_SOURCE === 'api') return readFromApi(warnings);
+  if (DATA_SOURCE !== 'file') {
+    throw new Error(`未知 DATA_SOURCE="${DATA_SOURCE}"（可选 file | api）`);
+  }
+  return {
+    catalog: JSON.parse(readFileSync(SOURCE_PATH, 'utf8')),
+    enrichments: loadOverrides(ENRICH_DIR, warnings),
+    editorial: loadOverrides(EDITORIAL_DIR, warnings),
+  };
+}
+
+/** 构建期从 CRUD API 拉取（Node 内置 fetch，无第三方依赖）。 */
+async function readFromApi(warnings) {
+  if (!DATA_API_URL) throw new Error('DATA_SOURCE=api 需同时设置 DATA_API_URL');
+  const headers = { accept: 'application/json' };
+  if (DATA_API_TOKEN) headers.authorization = `Bearer ${DATA_API_TOKEN}`;
+
+  const res = await fetch(DATA_API_URL, { headers });
+  if (!res.ok) throw new Error(`数据 API ${res.status} ${res.statusText}: ${DATA_API_URL}`);
+  const payload = await res.json();
+
+  if (!Array.isArray(payload.catalog)) {
+    throw new Error('数据 API 响应缺少 catalog 数组');
+  }
+  const toMap = (obj, label) => {
+    const m = new Map();
+    if (!obj) return m;
+    if (typeof obj !== 'object') {
+      warnings.push(`数据 API 的 ${label} 非对象，已忽略`);
+      return m;
+    }
+    for (const [id, v] of Object.entries(obj)) m.set(id, v);
+    return m;
+  };
+  console.log(
+    `[build-data] 数据源 api: ${payload.catalog.length} 条 catalog，` +
+      `${Object.keys(payload.enrichments || {}).length} 条 enrichment`,
+  );
+  return {
+    catalog: payload.catalog,
+    enrichments: toMap(payload.enrichments, 'enrichments'),
+    editorial: toMap(payload.editorial, 'editorial'),
+  };
+}
 
 // ---------------------------------------------------------------------------
 // 契约枚举（对齐 design-spec §2.3）。此处是生成侧的权威取值集合。
@@ -416,15 +476,14 @@ const CONFERENCES_BY_ID = new Set(Object.values(CONFERENCES).map((c) => c.id));
 // ---------------------------------------------------------------------------
 // 组装 dataset
 // ---------------------------------------------------------------------------
-function build() {
-  const rawText = readFileSync(SOURCE_PATH, 'utf8');
-  const raw = JSON.parse(rawText);
-  if (!Array.isArray(raw)) throw new Error('catalog.json must be a JSON array');
+/** 由数据源产出 dataset（source 形状见 readSource：catalog / enrichments / editorial）。 */
+function build(source, overrideWarnings) {
+  const raw = source.catalog;
+  if (!Array.isArray(raw)) throw new Error('catalog 必须是数组');
 
-  // 回填层：读取 enrichments / editorial 覆盖（目录不存在 → 空 Map，纯 catalog 派生）。
-  const overrideWarnings = [];
-  const enrichments = loadOverrides(ENRICH_DIR, overrideWarnings);
-  const editorial = loadOverrides(EDITORIAL_DIR, overrideWarnings);
+  // 回填层：enrichments / editorial 覆盖（为空 → 纯 catalog 派生）。
+  const enrichments = source.enrichments;
+  const editorial = source.editorial;
 
   const sessions = [];
   const dropped = [];
@@ -470,7 +529,7 @@ function build() {
 
   return {
     datasetVersion: DATASET_VERSION,
-    generatedFrom: 'data/catalog.json',
+    generatedFrom: DATA_SOURCE === 'api' ? `api:${DATA_API_URL}` : 'data/catalog.json',
     sourceRecordCount: raw.length,
     // 契约枚举镜像（供消费方/文档核对）。
     contract: { statuses: STATUSES, roles: ROLES, topics: TOPICS },
@@ -520,9 +579,14 @@ function validateDataset(ds) {
 // ---------------------------------------------------------------------------
 // 入口
 // ---------------------------------------------------------------------------
-function main() {
+async function main() {
+  // --verify：只生成 + 全量 schema 校验，不写盘（供 CI 校验数据源是否健康）。
+  // dataset.json 是构建产物、不入库，故不再做「与已提交文件的漂移比对」。
   const verify = process.argv.includes('--verify');
-  const ds = build();
+
+  const overrideWarnings = [];
+  const source = await readSource(overrideWarnings);
+  const ds = build(source, overrideWarnings);
 
   const validationErrors = validateDataset(ds);
   if (validationErrors.length > 0) {
@@ -531,34 +595,19 @@ function main() {
     process.exit(1);
   }
 
-  const serialized = JSON.stringify(ds, null, 2) + '\n';
-
   if (verify) {
-    let onDisk;
-    try {
-      onDisk = readFileSync(OUTPUT_PATH, 'utf8');
-    } catch {
-      console.error(
-        '[build-data] --verify: src/data/dataset.json missing. Run `node scripts/build-data.mjs` and commit it.',
-      );
-      process.exit(1);
-    }
-    if (onDisk !== serialized) {
-      console.error(
-        '[build-data] --verify: src/data/dataset.json is stale (drift from data/catalog.json).\n' +
-          '  Regenerate with `node scripts/build-data.mjs` and commit the result.',
-      );
-      process.exit(1);
-    }
     console.log(
-      `[build-data] --verify OK: ${ds.stats.totalSessions} sessions, ${ds.stats.totalHours}h, schema valid, no drift.`,
+      `[build-data] --verify OK (源=${DATA_SOURCE}): ${ds.stats.totalSessions} sessions, ` +
+        `${ds.stats.totalHours}h, schema valid.`,
     );
     return;
   }
 
-  writeFileSync(OUTPUT_PATH, serialized);
+  // dataset.json 不入库，全新 checkout 里 src/data/ 目录可能不存在 → 先建目录。
+  mkdirSync(dirname(OUTPUT_PATH), { recursive: true });
+  writeFileSync(OUTPUT_PATH, JSON.stringify(ds, null, 2) + '\n');
   console.log(
-    `[build-data] wrote src/data/dataset.json: ${ds.stats.totalSessions} sessions, ` +
+    `[build-data] wrote src/data/dataset.json (源=${DATA_SOURCE}): ${ds.stats.totalSessions} sessions, ` +
       `${ds.stats.totalHours}h, deepRead=${ds.stats.deepReadCount}.`,
   );
   console.log(
@@ -567,4 +616,7 @@ function main() {
   );
 }
 
-main();
+main().catch((err) => {
+  console.error(`[build-data] 失败: ${err.message}`);
+  process.exit(1);
+});

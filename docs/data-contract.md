@@ -151,7 +151,34 @@ design-spec 与任务约束明确：`whyWatch` / `takeaways` / 角色标注 / �
 ## 8. 再生与校验
 
 ```sh
-node scripts/build-data.mjs          # 重新生成 src/data/dataset.json（改语料或关键词后运行）
-node scripts/build-data.mjs --verify # 全量 schema 校验 + 漂移比对（check 内置调用）
-npm run check                        # 跨平台校验入口：data verify → lint → typecheck → 静态导出
+node scripts/build-data.mjs          # 从数据源生成 src/data/dataset.json（含全量 schema 校验）
+node scripts/build-data.mjs --verify # 只校验不写盘（CI 检查数据源是否健康）
+npm run check                        # 跨平台入口：生成数据 → lint → typecheck → 静态导出
+```
+
+## 9. 数据源（可插拔，方案 A：构建期读取）
+
+`dataset.json` 是**构建产物、不入库**；由 `build-data.mjs` 在构建期从数据源生成。
+站点因此保持**纯静态导出**（无服务器、可 CDN），而数据可以住在数据库里。
+
+| `DATA_SOURCE` | 读取来源 | 用途 |
+|---|---|---|
+| `file`（默认） | `data/catalog.json` + `data/{enrichments,editorial}/*.json` | 开发 / CI / 离线可复现构建 |
+| `api` | `DATA_API_URL`（可选 `DATA_API_TOKEN` 走 Bearer） | 生产：数据在 DB，由 CRUD 服务提供 |
+
+`api` 端点需返回与 file 源**同形**的 payload：
+
+```jsonc
+{
+  "catalog":     [ /* 上游记录数组，字段同 data/catalog.json */ ],
+  "enrichments": { "<videoId>": { /* 见 pipeline/contracts/enrichment-contract.md */ } },
+  "editorial":   { "<videoId>": { /* 人工覆盖，同上 §3 */ } }
+}
+```
+
+**DB 选型对本脚本透明**（Postgres / SQLite / Supabase 皆可）——查询与序列化由你的 CRUD 服务负责。
+内容更新流程：CRUD 改数据 → 触发重建（webhook / 定时）→ 静态资源重新发布。
+
+```sh
+DATA_SOURCE=api DATA_API_URL=https://your-api/dataset DATA_API_TOKEN=xxx npm run check
 ```
