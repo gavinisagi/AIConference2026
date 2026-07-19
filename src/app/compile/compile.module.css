@@ -212,6 +212,16 @@
   height: 100%;
 }
 .featCard:hover { box-shadow: var(--shadow-card-hover); transform: translateY(-2px); }
+/* 封面：留存的关键画面，让卡片不再是纯文字 */
+.featCover {
+  display: block;
+  width: calc(100% + var(--space-48));
+  margin: calc(var(--space-24) * -1) calc(var(--space-24) * -1) 0;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-bottom: 1px solid var(--hairline);
+  background: var(--surface-sunken);
+}
 .featTop { display: flex; align-items: center; justify-content: space-between; }
 .featBadge {
   font-family: var(--font-mono);

@@ -76,6 +76,21 @@ export interface Speaker {
   org: string | null;
 }
 
+/**
+ * 留存的关键画面：流水线在「值得看画面」的时刻抽帧、视觉分类后保留的可读屏幕内容
+ * （幻灯片 / 图表 / 代码 / 产品界面）。纯讲者特写与黑帧不会留存，故本数组可能为空。
+ */
+export interface SessionFrame {
+  /** 该画面在原片中的时刻（秒），可生成深链。 */
+  timestampSeconds: number;
+  /** 站点内静态资源路径，如 /frames/<videoId>/t900.jpg。 */
+  src: string;
+  /** 画面类型（slide / chart / code / demo_ui）。 */
+  kind: string;
+  /** 一句话描述画面上的具体内容。 */
+  caption: string;
+}
+
 /** 导览的观看模式：看画面 / 略读 / 听即可（依据画面内容与运动强度判定）。 */
 export const TOUR_MODES = ['watch', 'skim', 'listen'] as const;
 export type TourMode = (typeof TOUR_MODES)[number];
@@ -152,6 +167,8 @@ export interface Session {
   roles: Role[];
   /** 观看导览（清洗流水线产出；缺省 null，页面走详情降级）。 */
   tour: Tour | null;
+  /** 留存的关键画面（可读屏幕内容；无可用画面时为空数组）。 */
+  frames: SessionFrame[];
 }
 
 // ---------------------------------------------------------------------------

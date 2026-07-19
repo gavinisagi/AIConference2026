@@ -26,7 +26,7 @@ for _stream in (sys.stdout, sys.stderr):
         except (ValueError, OSError):
             pass
 
-from . import config, digest, emit, llm, media, qc, segment, state, subtitle, tour, transcribe, visual
+from . import config, digest, emit, frames, llm, media, qc, segment, state, subtitle, tour, transcribe, visual
 
 
 def _load(work: Path, name: str):
@@ -138,6 +138,14 @@ def run_video(video_id: str, args) -> bool:
     tour_out = _load(work, "tour.json")
     tour_data = tour_out if tour_out else None
 
+    # 6c) frames（关键帧留存：把可读的幻灯片/演示画面截下来，站点配图）
+    def _frames():
+        _dump(work, "frames.json",
+              frames.collect_frames(video_id, media_path, visual_out, tour_data, chapters, work, dry))
+    if not stage("frames", _frames):
+        return False
+    frames_data = _load(work, "frames.json") or []
+
     # 7) qc（自动质检）
     seg_index = segment.segment_index(asr)
     duration = asr["source"]["durationSeconds"]
@@ -160,7 +168,7 @@ def run_video(video_id: str, args) -> bool:
     def _emit():
         enrichment = emit.build_enrichment(
             video_id, draft, seg_index, asr, titled_chapters, dry,
-            speakers=speakers, visual=visual_out, tour=tour_data,
+            speakers=speakers, visual=visual_out, tour=tour_data, frames=frames_data,
         )
         path = emit.write_enrichment(video_id, enrichment)
         print(f"[{video_id}] emit → {path}  ({len(enrichment['takeaways'])} takeaways)")

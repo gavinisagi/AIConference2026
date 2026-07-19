@@ -136,7 +136,7 @@ export default async function VideoDetailPage({
 
             {/* 观看导览：有 tour 时是本页核心体验，钩子 hero 第一眼（承接层）。 */}
             {session.tour && (
-              <TourView tour={session.tour} officialUrl={session.officialUrl} />
+              <TourView tour={session.tour} officialUrl={session.officialUrl} frames={session.frames} />
             )}
 
             {/* 主行动：在官方来源观看（本站不播放，外链新标签 + noopener，§0/§6.2/§8.4）。 */}

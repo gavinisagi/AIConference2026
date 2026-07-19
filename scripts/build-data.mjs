@@ -241,6 +241,8 @@ function normalizeRecord(raw, index) {
     roles: [],
     // 观看导览：清洗流水线产出，缺省 null（页面走详情降级）。
     tour: null,
+    // 留存的关键画面：缺省空数组（页面不渲染画面区）。
+    frames: [],
   };
 
   return { session, errors };
@@ -365,6 +367,28 @@ function loadDigests(validSessionIds, warnings) {
 }
 
 const TOUR_MODES = ['watch', 'skim', 'listen'];
+const FRAME_KINDS = ['slide', 'chart', 'code', 'demo_ui', 'mixed'];
+
+/**
+ * 规范化 frames 覆盖 → SessionFrame[]。
+ * src 必须是站点内 /frames/ 下的相对路径（不接受外链，避免热链与混合内容）；
+ * 逐条校验，非法条目跳过而非整组丢弃——少一张图不该让整场没有画面。
+ */
+function sanitizeFrames(v) {
+  if (!Array.isArray(v)) return null;
+  const out = [];
+  for (const f of v) {
+    if (!f || typeof f.src !== 'string' || !f.src.startsWith('/frames/')) continue;
+    if (typeof f.timestampSeconds !== 'number' || f.timestampSeconds < 0) continue;
+    out.push({
+      timestampSeconds: f.timestampSeconds,
+      src: f.src,
+      kind: FRAME_KINDS.includes(f.kind) ? f.kind : 'slide',
+      caption: typeof f.caption === 'string' ? f.caption.trim() : '',
+    });
+  }
+  return out;
+}
 
 /** 规范化 tour 覆盖 → Tour（严格投影；任一必填缺失/非法 → 返回 null 视为不覆盖）。 */
 function sanitizeTour(v) {
@@ -446,6 +470,11 @@ function applyOverride(session, ov, source, warnings) {
     if (tks) session.takeaways = tks;
     else warnings.push(`${at}: takeaways 非法，忽略`);
   }
+  if ('frames' in ov) {
+    const fr = sanitizeFrames(ov.frames);
+    if (fr) session.frames = fr;
+    else warnings.push(`${at}: frames 非法，忽略`);
+  }
   if ('tour' in ov) {
     const tour = sanitizeTour(ov.tour);
     if (tour) session.tour = tour;
@@ -484,6 +513,7 @@ function validateSession(s, index) {
     errors.push(`${at}: roles must be array of contract roles`);
   if (!Array.isArray(s.speakers)) errors.push(`${at}: speakers must be array`);
   if (!Array.isArray(s.takeaways)) errors.push(`${at}: takeaways must be array`);
+  if (!Array.isArray(s.frames)) errors.push(`${at}: frames must be array`);
   if (s.tour !== null) {
     if (typeof s.tour !== 'object') errors.push(`${at}: tour must be object or null`);
     else if (!isNonEmptyString(s.tour.hook)) errors.push(`${at}: tour.hook required`);

@@ -164,8 +164,22 @@ function FeaturedTour({ session }: { session: Session }) {
   const total = agg.watch + agg.skim + agg.listen || 1;
   const pct = (n: number) => Math.round((n / total) * 100);
 
+  const cover = session.frames[0];
+
   return (
     <a className={styles.featCard} href={`/video/${session.id}/`}>
+      {/* 封面用该场留存的首张关键画面；无画面则不占位（不放占位图）。 */}
+      {cover && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          className={styles.featCover}
+          src={cover.src}
+          alt={cover.caption || displayTitle(session)}
+          loading="lazy"
+          width={640}
+          height={360}
+        />
+      )}
       <div className={styles.featTop}>
         <span className={styles.featBadge}>观看导览</span>
         <span className={styles.featMeta}>{displayDuration(session)}</span>

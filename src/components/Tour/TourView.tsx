@@ -1,4 +1,4 @@
-import type { Tour, TourMode } from '@/lib/schema';
+import type { SessionFrame, Tour, TourMode } from '@/lib/schema';
 import styles from './TourView.module.css';
 
 /**
@@ -43,7 +43,16 @@ function minutesOf(sec: number): number {
   return Math.round(sec / 60);
 }
 
-export function TourView({ tour, officialUrl }: { tour: Tour; officialUrl: string }) {
+export function TourView({
+  tour,
+  officialUrl,
+  frames = [],
+}: {
+  tour: Tour;
+  officialUrl: string;
+  /** 留存的关键画面；为空则不渲染画面区（不占位、不放占位图）。 */
+  frames?: SessionFrame[];
+}) {
   const agg: Record<TourMode, number> = { watch: 0, skim: 0, listen: 0 };
   for (const st of tour.stops) agg[st.howTo] += Math.max(0, st.endSeconds - st.startSeconds);
   const total = agg.watch + agg.skim + agg.listen || 1;
@@ -89,6 +98,40 @@ export function TourView({ tour, officialUrl }: { tour: Tour; officialUrl: strin
               </a>
             ))}
           </div>
+        </section>
+      )}
+
+      {/* 关键画面：流水线留存的可读屏幕内容（幻灯片/图表/代码/界面），点击跳原片对应时刻。 */}
+      {frames.length > 0 && (
+        <section className={styles.section}>
+          <h3 className={styles.sectionHead}>关键画面 · 点击跳到该处</h3>
+          <ul className={styles.frameStrip}>
+            {frames.map((f) => (
+              <li key={f.src} className={styles.frameItem}>
+                <a
+                  href={at(officialUrl, f.timestampSeconds)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.frameLink}
+                >
+                  {/* 静态导出：用原生 img 避免 next/image 的运行时优化依赖。 */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    className={styles.frameImg}
+                    src={f.src}
+                    alt={f.caption || `原片 ${mmss(f.timestampSeconds)} 处画面`}
+                    loading="lazy"
+                    width={480}
+                    height={270}
+                  />
+                  <span className={styles.frameMeta}>
+                    <span className={styles.frameTime}>{mmss(f.timestampSeconds)}</span>
+                    {f.caption && <span className={styles.frameCaption}>{f.caption}</span>}
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
         </section>
       )}
 

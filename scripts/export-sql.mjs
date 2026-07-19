@@ -119,6 +119,7 @@ CREATE TABLE IF NOT EXISTS enrichments (
   why_watch     text,
   takeaways     jsonb,                          -- [{id,statement,context,timestampSeconds,roles,...}]
   tour          jsonb,                          -- {hook,whoShouldWatch,ifShortOnTime,mustWatch,stops}
+  frames        jsonb,                          -- [{timestampSeconds,src,kind,caption}] 留存关键画面
   summary       text,
   language      text,
   generated_by  jsonb,                          -- 溯源：pipelineVersion/asrProvider/llmModel
@@ -195,11 +196,12 @@ const enrichments = readDir(ENRICH_DIR);
 p(`-- =========================== 清洗产物（${enrichments.length} 场） ===========================`);
 for (const { id, data: e } of enrichments) {
   p(
-    `INSERT INTO enrichments (video_id, schema_ver, topics, roles, speakers, why_watch, takeaways, tour, summary, language, generated_by) VALUES ` +
+    `INSERT INTO enrichments (video_id, schema_ver, topics, roles, speakers, why_watch, takeaways, tour, frames, summary, language, generated_by) VALUES ` +
       `(${q(id)}, ${n(e.schemaVersion ?? 1)}, ${j(e.topics ?? null)}, ${j(e.roles ?? [])}, ${j(e.speakers ?? [])}, ` +
-      `${q(e.whyWatch)}, ${j(e.takeaways ?? [])}, ${j(e.tour ?? null)}, ${q(e.summary)}, ${q(e.language)}, ${j(e.generatedBy ?? null)}) ` +
+      `${q(e.whyWatch)}, ${j(e.takeaways ?? [])}, ${j(e.tour ?? null)}, ${j(e.frames ?? [])}, ${q(e.summary)}, ${q(e.language)}, ${j(e.generatedBy ?? null)}) ` +
       `ON CONFLICT (video_id) DO UPDATE SET schema_ver=EXCLUDED.schema_ver, topics=EXCLUDED.topics, roles=EXCLUDED.roles, ` +
       `speakers=EXCLUDED.speakers, why_watch=EXCLUDED.why_watch, takeaways=EXCLUDED.takeaways, tour=EXCLUDED.tour, ` +
+      `frames=EXCLUDED.frames, ` +
       `summary=EXCLUDED.summary, language=EXCLUDED.language, generated_by=EXCLUDED.generated_by, updated_at=now();`,
   );
 }
