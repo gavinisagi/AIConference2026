@@ -1,0 +1,20 @@
+/* ConfBadge — 大会色标，design-spec §3.6（6px 圆点 + 大会名，禁止大面积铺色） */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body-s); /* Body S */
+  line-height: var(--lh-body-s);
+  color: var(--ink-secondary);
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex: none;
+  /* 具体色值由内联 CSS 变量 --conf-dot 注入，取自 tokens.conferenceMeta */
+  background: var(--conf-dot);
+}

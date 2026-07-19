@@ -1,0 +1,36 @@
+#!/usr/bin/env sh
+# bootstrap — 从裸检出到可运行环境。幂等：可重复运行不报错。
+#
+# 职责：校验运行时前置条件并安装所有依赖。不做构建/校验（那是 scripts/check）。
+set -eu
+
+# 切换到仓库根目录（脚本位于 <root>/scripts/）。
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+ROOT_DIR=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)
+cd "$ROOT_DIR"
+
+echo "[bootstrap] repo root: $ROOT_DIR"
+
+# --- 前置检查：node / npm 必须存在 ---
+if ! command -v node >/dev/null 2>&1; then
+  echo "[bootstrap] ERROR: node not found on PATH. Install Node.js >= 18.18." >&2
+  exit 1
+fi
+if ! command -v npm >/dev/null 2>&1; then
+  echo "[bootstrap] ERROR: npm not found on PATH." >&2
+  exit 1
+fi
+
+echo "[bootstrap] node $(node --version) / npm $(npm --version)"
+
+# --- 安装依赖（幂等）---
+# 有 lockfile 时用 npm ci 保证可复现；否则用 npm install 生成 lockfile。
+if [ -f package-lock.json ]; then
+  echo "[bootstrap] package-lock.json found -> npm ci"
+  npm ci
+else
+  echo "[bootstrap] no lockfile -> npm install"
+  npm install
+fi
+
+echo "[bootstrap] done."

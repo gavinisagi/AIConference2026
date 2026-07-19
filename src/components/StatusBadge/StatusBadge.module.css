@@ -1,0 +1,69 @@
+/* StatusBadge — 三态视频状态徽章，design-spec §3.2 / §3.6 */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px var(--space-8);
+  border-radius: var(--radius-chip); /* 4px */
+  font-family: var(--font-sans);
+  font-size: var(--fs-label); /* 13px */
+  line-height: var(--lh-label);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* recommended — 暖金；全站视觉锚点，配 ★（§3.2） */
+.recommended {
+  background: var(--status-recommended-bg);
+  color: var(--status-recommended-ink);
+}
+
+/* indexed — 中性；已入库未深读（§3.2） */
+.indexed {
+  background: var(--status-indexed-bg);
+  color: var(--status-indexed-ink);
+}
+
+/* analyzing — 深绿；配脉冲点表进行中（§3.2） */
+.analyzing {
+  background: var(--status-analyzing-bg);
+  color: var(--status-analyzing-ink);
+}
+
+/* ★ 图标（recommended） */
+.star {
+  font-size: 12px;
+  line-height: 1;
+}
+
+/* 静态圆点（indexed），随文本色 */
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+
+/* 脉冲点（analyzing）：进行中态，尊重 prefers-reduced-motion（globals 已全局降级） */
+.pulse {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+  animation: pulse 1.6s var(--easing) infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.75);
+  }
+}

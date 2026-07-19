@@ -1,0 +1,74 @@
+/* /catalog 页面外壳（design-spec §5.1） */
+
+.page {
+  background: var(--paper);
+  min-height: 100vh;
+  padding: var(--space-48) var(--page-margin-desktop) var(--space-96);
+}
+.inner {
+  max-width: var(--content-max);
+  margin: 0 auto;
+}
+
+.crumb {
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  color: var(--ink-muted);
+  margin-bottom: var(--space-24);
+}
+.crumb a {
+  color: var(--ink-secondary);
+  text-decoration: none;
+}
+.crumb a:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.head {
+  margin-bottom: var(--space-32);
+}
+.h1 {
+  margin: 0 0 var(--space-12);
+  font-family: var(--font-serif);
+  font-size: var(--fs-display);
+  line-height: var(--lh-display);
+  font-weight: var(--fw-display);
+  letter-spacing: var(--tracking-display);
+  color: var(--ink);
+}
+.lede {
+  margin: 0 0 var(--space-24);
+  max-width: var(--reading-max);
+  font-size: var(--fs-body-l);
+  line-height: var(--lh-body-l);
+  color: var(--ink-secondary);
+}
+
+/* 概览统计条：等宽体、报告感，配上下细分隔线（§5.1）。 */
+.statline {
+  margin: 0 0 var(--space-12);
+  padding: var(--space-16) 0;
+  border-top: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline);
+  font-family: var(--font-mono);
+  font-size: var(--fs-body-m);
+  letter-spacing: 0.01em;
+  color: var(--ink);
+}
+
+.dist {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  color: var(--ink-muted);
+}
+.distItem {
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: var(--space-32) var(--page-margin-mobile) var(--space-64);
+  }
+}

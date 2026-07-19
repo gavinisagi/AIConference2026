@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+# check — 瘦委托入口。真正的跨平台校验在 scripts/check.mjs（见其头注）。
+# 保留本文件仅为兼容既有 `sh scripts/check` 调用；推荐直接用 `npm run check`。
+# 换成 Node 的原因：本机 bash 会落到不可用的 WSL，纯 sh 版在 Windows 跑不通。
+exec node "$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)/check.mjs"

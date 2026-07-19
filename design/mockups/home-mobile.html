@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>AI Conference 2026 Compass</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&amp;family=Inter:wght@400;500;600&amp;family=Public+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#1B3A5B",
+                        surface: "#FBFAF8",
+                        ink: "#1C1B19",
+                        outline: "#E7E4DE",
+                        status: {
+                            amber: { bg: "#FBEFD6", text: "#8A5200" },
+                            green: { bg: "#E8F5E9", text: "#2F5D50" },
+                            gray: { bg: "#F0F0F0", text: "#666666" }
+                        }
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    fontFamily: {
+                        headline: ["\"Source Serif 4\"", "serif"],
+                        display: ["\"Source Serif 4\"", "serif"],
+                        body: ["Inter", "sans-serif"],
+                        label: ["Public Sans", "sans-serif"],
+                        mono: ["Menlo", "Monaco", "Consolas", "monospace"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #FBFAF8;
+            color: #1C1B19;
+            -webkit-font-smoothing: antialiased;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+            font-size: 1.25rem;
+        }
+        .serif-title {
+            letter-spacing: -0.02em;
+        }
+        .border-hairline {
+            border-width: 0.5px;
+        }
+    </style>
+<style>
+    html, body {
+      min-height: max(884px, 100dvh);
+      overflow-x: hidden;
+      max-width: 100vw;
+    }
+    /* 防止任何子元素撑破视口，消除 375–430px 横向滚动 */
+    * { min-width: 0; }
+  </style>
+  </head>
+<body class="font-body selection:bg-primary/10 selection:text-primary">
+<!-- TopAppBar -->
+<header class="bg-[#FBFAF8] dark:bg-surface border-b border-[#E7E4DE] dark:border-outline-variant fixed top-0 left-0 w-full z-50 flex justify-between items-center px-4 h-14">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#1B3A5B]">explore</span>
+<span class="font-headline text-xl font-bold text-[#1C1B19] dark:text-on-surface">◮ Compass</span>
+</div>
+<button class="text-[#1B3A5B] font-headline text-lg font-bold leading-tight active:opacity-80 transition-opacity">关注 X</button>
+</header>
+<main class="pt-14 pb-24">
+<!-- Hero Section -->
+<section class="px-6 pt-10 pb-12 border-b border-outline">
+<h1 class="font-headline text-[34px] leading-[1.1] font-bold text-ink mb-4 serif-title">
+                300 小时 AI 大会视频，<br/>不必全看
+            </h1>
+<p class="text-[#1C1B19]/70 text-base leading-relaxed mb-8 max-w-[90%]">
+                由专业团队按角色与时间预算深度萃取的 AI 学习导航。
+            </p>
+<div class="flex flex-wrap gap-x-4 gap-y-2 mb-10">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-[#2F5D50]"></span>
+<span class="text-xs font-mono font-medium opacity-60">AI Engineer 853</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-[#A259FF]"></span>
+<span class="text-xs font-mono font-medium opacity-60">Figma Config 78</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-[#4A4A4A]"></span>
+<span class="text-xs font-mono font-medium opacity-60">Cursor Compile 10</span>
+</div>
+</div>
+<button class="w-full h-11 bg-primary text-white font-semibold rounded-lg flex items-center justify-center gap-2 transition-transform active:scale-95 shadow-sm">
+<span class="material-symbols-outlined text-base">north_east</span> 在 X 上关注更新
+            </button>
+<button class="w-full h-11 mt-3 border border-hairline-strong text-ink font-semibold rounded-lg flex items-center justify-center transition-transform active:scale-95">
+                加入候选名单
+            </button>
+<p class="text-xs text-ink/50 mt-2 text-center">每周精选邮件筹备中，加入候选名单即可在上线时收到通知。</p>
+</section>
+<!-- Role Navigation -->
+<section class="px-6 py-10">
+<h2 class="font-headline text-sm uppercase tracking-widest text-ink/40 mb-6">按职业角色导航</h2>
+<div class="grid grid-cols-2 gap-3">
+<a class="p-4 border border-outline rounded-lg flex flex-col gap-2 hover:bg-outline/20 transition-colors" href="#">
+<div class="flex items-center justify-between">
+<span class="material-symbols-outlined text-primary/40">code</span>
+<span class="material-symbols-outlined text-ink/25 text-base">arrow_outward</span>
+</div>
+<span class="font-headline text-lg font-semibold leading-tight">开发者</span>
+<span class="text-xs text-ink/60 leading-relaxed">基础设施、Agent 编排框架与 LLM 微调实战。</span>
+</a>
+<a class="p-4 border border-outline rounded-lg flex flex-col gap-2 hover:bg-outline/20 transition-colors" href="#">
+<div class="flex items-center justify-between">
+<span class="material-symbols-outlined text-primary/40">auto_awesome</span>
+<span class="material-symbols-outlined text-ink/25 text-base">arrow_outward</span>
+</div>
+<span class="font-headline text-lg font-semibold leading-tight">产品/设计</span>
+<span class="text-xs text-ink/60 leading-relaxed">交互范式演变、Design-to-Code 工作流与 AI 心理模型。</span>
+</a>
+<a class="p-4 border border-outline rounded-lg flex flex-col gap-2 hover:bg-outline/20 transition-colors" href="#">
+<div class="flex items-center justify-between">
+<span class="material-symbols-outlined text-primary/40">corporate_fare</span>
+<span class="material-symbols-outlined text-ink/25 text-base">arrow_outward</span>
+</div>
+<span class="font-headline text-lg font-semibold leading-tight">创始人/负责人</span>
+<span class="text-xs text-ink/60 leading-relaxed">商业模式重构、团队效率杠杆与 AI 安全合规。</span>
+</a>
+<a class="p-4 border border-outline rounded-lg flex flex-col gap-2 hover:bg-outline/20 transition-colors" href="#">
+<div class="flex items-center justify-between">
+<span class="material-symbols-outlined text-primary/40">trending_up</span>
+<span class="material-symbols-outlined text-ink/25 text-base">arrow_outward</span>
+</div>
+<span class="font-headline text-lg font-semibold leading-tight">只想跟进趋势</span>
+<span class="text-xs text-ink/60 leading-relaxed">行业风向标、Keynote 精华与前沿实验室发布。</span>
+</a>
+</div>
+</section>
+<!-- Time Budget -->
+<section class="py-10 bg-[#F5F3EF]">
+<h2 class="px-6 font-headline text-sm uppercase tracking-widest text-ink/40 mb-6">按时间预算开始</h2>
+<div class="flex overflow-x-auto px-6 gap-4 hide-scrollbar snap-x">
+<div class="flex-none w-72 bg-white border border-outline p-6 rounded-lg snap-start">
+<div class="font-mono text-xs text-primary mb-2">TIME BUDGET</div>
+<h3 class="font-headline text-2xl font-bold mb-3">10m 快速速读</h3>
+<p class="text-sm text-ink/60 leading-relaxed mb-6">适合晨间通勤，提取 5 个核心技术突破点。包含精炼摘要与结论。</p>
+<div class="flex items-center text-primary text-sm font-semibold">
+                        开始阅读 <span class="material-symbols-outlined ml-1 text-sm">arrow_forward</span>
+</div>
+</div>
+<div class="flex-none w-72 bg-white border border-outline p-6 rounded-lg snap-start">
+<div class="font-mono text-xs text-primary mb-2">TIME BUDGET</div>
+<h3 class="font-headline text-2xl font-bold mb-3">1h 午间沙龙</h3>
+<p class="text-sm text-ink/60 leading-relaxed mb-6">深度复盘一场 Keynote。包含幻灯片精华、Demo 演示与行业影响。</p>
+<div class="flex items-center text-primary text-sm font-semibold">
+                        开始观看 <span class="material-symbols-outlined ml-1 text-sm">arrow_forward</span>
+</div>
+</div>
+<div class="flex-none w-72 bg-white border border-outline p-6 rounded-lg snap-start">
+<div class="font-mono text-xs text-primary mb-2">TIME BUDGET</div>
+<h3 class="font-headline text-2xl font-bold mb-3">3h 深度研修</h3>
+<p class="text-sm text-ink/60 leading-relaxed mb-6">垂直领域的完整技术路径。包含代码实现、Eval 标准与专家点评。</p>
+<div class="flex items-center text-primary text-sm font-semibold">
+                        开始研习 <span class="material-symbols-outlined ml-1 text-sm">arrow_forward</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Top 10 Insights -->
+<section class="px-6 py-12">
+<h2 class="font-headline text-sm uppercase tracking-widest text-ink/40 mb-2">本周最值得看的 10 个观点</h2>
+<p class="text-[10px] font-bold uppercase tracking-wide text-ink/40 mb-8">示例内容 / Sample — 讲者与观点为占位数据</p>
+<div class="space-y-10">
+<!-- Card 01 -->
+<div class="group">
+<div class="flex gap-4 items-start mb-3">
+<span class="font-mono text-2xl text-ink/20 leading-none">01</span>
+<div class="space-y-3">
+<div class="inline-flex items-center px-2 py-0.5 bg-[#FBEFD6] text-[#8A5200] text-[10px] font-bold rounded-sm border-l-[3px] border-[#8A5200]">
+<span class="material-symbols-outlined text-[12px] mr-1" style="font-variation-settings: 'FILL' 1;">star</span>
+                                推荐先看
+                            </div>
+<h3 class="font-headline text-xl font-bold leading-snug">“模型能力不再是护城河，数据的垂直处理链路才是。”</h3>
+<p class="text-sm text-ink/70 leading-relaxed italic">为什么值得看：重新定义了 2026 年企业级 AI 应用的竞争核心。</p>
+</div>
+</div>
+<div class="ml-10 flex flex-wrap gap-2 mb-4">
+<span class="px-2 py-1 bg-outline/40 text-[10px] font-label rounded">示例讲者</span>
+<span class="px-2 py-1 bg-outline/40 text-[10px] font-label rounded">12:45</span>
+<span class="px-2 py-1 bg-outline/40 text-[10px] font-label rounded">Strategy</span>
+</div>
+<a class="ml-10 text-primary text-sm font-semibold flex items-center hover:underline" href="#">
+                        看官方片段 <span class="material-symbols-outlined text-sm ml-1">north_east</span>
+</a>
+<div class="mt-8 border-b border-outline/50"></div>
+</div>
+<!-- Card 02 -->
+<div class="group">
+<div class="flex gap-4 items-start mb-3">
+<span class="font-mono text-2xl text-ink/20 leading-none">02</span>
+<div class="space-y-3">
+<div class="inline-flex items-center px-2 py-0.5 bg-[#F0F0F0] text-[#666666] text-[10px] font-bold rounded-sm">
+                                已收录
+                            </div>
+<h3 class="font-headline text-xl font-bold leading-snug">“Agentic Workflow 的关键在于如何优雅地处理幻觉。”</h3>
+<p class="text-sm text-ink/70 leading-relaxed italic">为什么值得看：提供了实战层面的 Error Handling 最佳实践案例。</p>
+</div>
+</div>
+<div class="ml-10 flex flex-wrap gap-2 mb-4">
+<span class="px-2 py-1 bg-outline/40 text-[10px] font-label rounded">示例讲者</span>
+<span class="px-2 py-1 bg-outline/40 text-[10px] font-label rounded">45:20</span>
+<span class="px-2 py-1 bg-outline/40 text-[10px] font-label rounded">Agents</span>
+</div>
+<a class="ml-10 text-primary text-sm font-semibold flex items-center hover:underline" href="#">
+                        看官方片段 <span class="material-symbols-outlined text-sm ml-1">north_east</span>
+</a>
+<div class="mt-8 border-b border-outline/50"></div>
+</div>
+<!-- Card 03 -->
+<div class="group">
+<div class="flex gap-4 items-start mb-3">
+<span class="font-mono text-2xl text-ink/20 leading-none">03</span>
+<div class="space-y-3">
+<div class="inline-flex items-center px-2 py-0.5 bg-[#E8F5E9] text-[#2F5D50] text-[10px] font-bold rounded-sm">
+                                解读中
+                            </div>
+<h3 class="font-headline text-xl font-bold leading-snug">“未来的编程不再是写逻辑，而是构建完美的评测集。”</h3>
+<p class="text-sm text-ink/70 leading-relaxed italic">为什么值得看：颠覆了传统的软件工程生命周期。深度解读将在周五更新。</p>
+</div>
+</div>
+<div class="ml-10 flex flex-wrap gap-2 mb-4">
+<span class="px-2 py-1 bg-outline/40 text-[10px] font-label rounded">示例讲者</span>
+<span class="px-2 py-1 bg-outline/40 text-[10px] font-label rounded">08:12</span>
+<span class="px-2 py-1 bg-outline/40 text-[10px] font-label rounded">Coding</span>
+</div>
+<a class="ml-10 text-primary text-sm font-semibold flex items-center hover:underline" href="#">
+                        预约提醒 <span class="material-symbols-outlined text-sm ml-1">notifications</span>
+</a>
+</div>
+</div>
+</section>
+<!-- Topic Exploration -->
+<section class="px-6 py-12 bg-ink text-white">
+<h2 class="font-headline text-sm uppercase tracking-widest opacity-40 mb-2">按主题探索</h2>
+<p class="text-[10px] opacity-40 font-mono mb-8">分场数为按标题关键词的近似归类，非人工精确编目</p>
+<div class="grid grid-cols-2 gap-px bg-white/10 border border-white/10 rounded-lg overflow-hidden">
+<a class="p-6 bg-ink hover:bg-primary/20 transition-colors" href="#">
+<h4 class="font-headline text-lg mb-1">Agent</h4>
+<p class="text-[10px] opacity-40 font-mono">约 262 场</p>
+</a>
+<a class="p-6 bg-ink hover:bg-primary/20 transition-colors" href="#">
+<h4 class="font-headline text-lg mb-1">AI 编程</h4>
+<p class="text-[10px] opacity-40 font-mono">约 101 场</p>
+</a>
+<a class="p-6 bg-ink hover:bg-primary/20 transition-colors" href="#">
+<h4 class="font-headline text-lg mb-1">Evals</h4>
+<p class="text-[10px] opacity-40 font-mono">约 70 场</p>
+</a>
+<a class="p-6 bg-ink hover:bg-primary/20 transition-colors" href="#">
+<h4 class="font-headline text-lg mb-1">Context</h4>
+<p class="text-[10px] opacity-40 font-mono">约 75 场</p>
+</a>
+<a class="p-6 bg-ink hover:bg-primary/20 transition-colors" href="#">
+<h4 class="font-headline text-lg mb-1">Design-to-Code</h4>
+<p class="text-[10px] opacity-40 font-mono">约 64 场</p>
+</a>
+<a class="p-6 bg-ink hover:bg-primary/20 transition-colors" href="#">
+<h4 class="font-headline text-lg mb-1">AI 产品</h4>
+<p class="text-[10px] opacity-40 font-mono">约 61 场</p>
+</a>
+</div>
+</section>
+<!-- Footer -->
+<footer class="w-full px-6 py-10 mb-20 text-center bg-[#FBFAF8] dark:bg-surface border-t border-[#E7E4DE] mt-12">
+<div class="font-headline font-semibold text-[#1C1B19] dark:text-on-surface mb-4">◮ Compass AI</div>
+<div class="flex justify-center gap-4 mb-6">
+<a class="font-body text-xs leading-relaxed opacity-60 text-[#1C1B19] dark:text-on-surface no-underline hover:text-[#1B3A5B] transition-colors" href="#">关于我们</a>
+<a class="font-body text-xs leading-relaxed opacity-60 text-[#1C1B19] dark:text-on-surface no-underline hover:text-[#1B3A5B] transition-colors" href="#">方法论</a>
+<a class="font-body text-xs leading-relaxed opacity-60 text-[#1C1B19] dark:text-on-surface no-underline hover:text-[#1B3A5B] transition-colors" href="#">隐私政策</a>
+</div>
+<p class="font-body text-xs leading-relaxed opacity-60 text-[#1C1B19] dark:text-on-surface">
+                © 2026 Compass AI Editorial. Methodology: Curated for high-signal learning.
+            </p>
+</footer>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-16 pb-safe px-6 bg-[#FBFAF8] dark:bg-surface border-t border-[#E7E4DE] dark:border-outline-variant shadow-lg">
+<a class="flex flex-col items-center justify-center text-[#1B3A5B] dark:text-primary font-bold scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+<span class="font-label text-[10px] tracking-tight">目录</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#1C1B19]/40 dark:text-on-surface-variant hover:text-[#1B3A5B] transition-colors" href="#">
+<span class="material-symbols-outlined">category</span>
+<span class="font-label text-[10px] tracking-tight">主题</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#1C1B19]/40 dark:text-on-surface-variant hover:text-[#1B3A5B] transition-colors" href="#">
+<span class="material-symbols-outlined">notifications</span>
+<span class="font-label text-[10px] tracking-tight">候选名单</span>
+</a>
+</nav>
+<script>
+        // Micro-interaction for feedback
+        document.querySelectorAll('button, a').forEach(el => {
+            el.addEventListener('click', () => {
+                el.style.opacity = '0.7';
+                setTimeout(() => {
+                    el.style.opacity = '1';
+                }, 100);
+            });
+        });
+    </script>
+</body></html>

@@ -1,0 +1,23 @@
+/* MetaRow — 元信息行，design-spec §6.1（等宽 Meta，讲者·时长·主题） */
+
+.row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
+  color: var(--ink-muted);
+}
+
+.item {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* 中点分隔（· ），随文本色，克制 */
+.sep {
+  color: var(--hairline-strong);
+  user-select: none;
+}

@@ -1,0 +1,242 @@
+/* 视频详情页（design-spec §6.2）——移动优先，桌面双栏（正文 + 元信息侧栏）。 */
+
+.page {
+  background: var(--paper);
+  min-height: 100vh;
+  padding: var(--space-32) var(--page-margin-mobile) var(--space-64);
+}
+@media (min-width: 768px) {
+  .page {
+    padding: var(--space-48) var(--page-margin-desktop) var(--space-96);
+  }
+}
+
+.inner {
+  max-width: var(--content-max);
+  margin: 0 auto;
+}
+
+/* 正文 + 侧栏：手机竖排，桌面 minmax(0,1fr) + 侧栏定宽。 */
+.layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-32);
+}
+@media (min-width: 900px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: var(--space-48);
+    align-items: start;
+  }
+}
+
+/* 有 tour 时：单列、限阅读宽、居中——导览是主角，元信息降为脚注。 */
+.layoutSingle {
+  display: block;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+/* 精简元信息脚注（tour 页专用，弱化） */
+.metaFoot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-8);
+  margin-top: var(--space-48);
+  padding-top: var(--space-16);
+  border-top: 1px solid var(--hairline);
+  font-size: var(--fs-body-s);
+  color: var(--ink-secondary);
+}
+.metaFootDot {
+  color: var(--ink-muted);
+}
+.metaFoot .sourceLink {
+  display: inline;
+}
+
+.main {
+  min-width: 0;
+}
+
+/* ---- 头部 ---- */
+.head {
+  margin-bottom: var(--space-24);
+}
+.badgeRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-8);
+  margin-bottom: var(--space-12);
+}
+.title {
+  margin: 0 0 var(--space-16);
+  font-family: var(--font-serif);
+  font-size: var(--fs-h2);
+  line-height: var(--lh-h2);
+  font-weight: var(--fw-h2);
+  color: var(--ink);
+  text-wrap: balance;
+}
+.metaRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-12);
+  margin-bottom: var(--space-12);
+  font-size: var(--fs-body-s);
+  color: var(--ink-secondary);
+}
+.metaMono {
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  color: var(--ink-muted);
+}
+.metaMuted {
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  color: var(--ink-muted);
+}
+.speaker {
+  color: var(--ink-secondary);
+}
+
+.topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+}
+.topicChip {
+  text-decoration: none;
+}
+
+/* ---- 主行动 ---- */
+.actionBlock {
+  margin: var(--space-24) 0;
+  padding: var(--space-24);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+.watchLink {
+  display: inline-block;
+  text-decoration: none;
+}
+.watchNote {
+  margin: var(--space-12) 0 0;
+  font-size: var(--fs-body-s);
+  color: var(--ink-muted);
+}
+
+/* ---- 分节 ---- */
+.section {
+  margin: var(--space-32) 0;
+}
+.sectionHead {
+  margin: 0 0 var(--space-16);
+  font-family: var(--font-serif);
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
+  font-weight: var(--fw-h3);
+  color: var(--ink);
+}
+.whyWatch {
+  margin: 0;
+  max-width: var(--reading-max);
+  font-size: var(--fs-body-l);
+  line-height: var(--lh-body-l);
+  color: var(--ink);
+}
+.whyWatchPending {
+  margin: 0;
+  max-width: var(--reading-max);
+  font-size: var(--fs-body-m);
+  line-height: var(--lh-body-m);
+  color: var(--ink-muted);
+  font-style: italic;
+}
+
+.takeawayList {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-16);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* ---- 元信息侧栏 ---- */
+.aside {
+  min-width: 0;
+}
+@media (min-width: 900px) {
+  .aside {
+    position: sticky;
+    top: var(--space-24);
+  }
+}
+.metaList {
+  margin: 0;
+  padding: var(--space-16) var(--space-24);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-card);
+  background: var(--surface-sunken);
+}
+.metaItem {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-16);
+  padding: var(--space-8) 0;
+  border-bottom: 1px solid var(--hairline);
+}
+.metaItem:last-child {
+  border-bottom: none;
+}
+.metaKey {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  color: var(--ink-muted);
+}
+.metaVal {
+  margin: 0;
+  text-align: right;
+  font-size: var(--fs-body-s);
+  color: var(--ink);
+}
+.sourceLink {
+  display: block;
+  color: var(--accent);
+  text-decoration: none;
+}
+.sourceLink:hover {
+  text-decoration: underline;
+}
+
+/* ---- 相关推荐 ---- */
+.relatedSection {
+  margin-top: var(--space-48);
+  padding-top: var(--space-32);
+  border-top: 1px solid var(--hairline);
+}
+.relatedGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-16);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+@media (min-width: 768px) {
+  .relatedGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-24);
+  }
+}
+@media (min-width: 1100px) {
+  .relatedGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

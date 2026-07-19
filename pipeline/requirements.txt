@@ -1,0 +1,5 @@
+# 本流水线刻意零第三方依赖，仅用 Python 3.12 标准库：
+#   - schema 校验：pipeline/asr/schema.py 手写轻量校验器
+#   - HTTP(Anthropic API)：urllib.request
+#   - 媒体探测/切分：subprocess 调系统原生 ffprobe/ffmpeg
+# 无需 venv/pip。用系统 python 3.12+ 直接运行：python -m pipeline.cli ...
