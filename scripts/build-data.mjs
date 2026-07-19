@@ -15,7 +15,7 @@
  * 本模块是规范化与枚举取值的“单一事实来源”；docs/data-contract.md 是人读契约，
  * src/lib/schema.ts 是站点侧的 TS 类型镜像。三者须保持一致。
  */
-import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, readdirSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 
@@ -544,6 +544,8 @@ async function main() {
     return;
   }
 
+  // dataset.json 不入库，全新 checkout 里 src/data/ 目录可能不存在 → 先建目录。
+  mkdirSync(dirname(OUTPUT_PATH), { recursive: true });
   writeFileSync(OUTPUT_PATH, JSON.stringify(ds, null, 2) + '\n');
   console.log(
     `[build-data] wrote src/data/dataset.json (源=${DATA_SOURCE}): ${ds.stats.totalSessions} sessions, ` +
