@@ -26,7 +26,7 @@ for _stream in (sys.stdout, sys.stderr):
         except (ValueError, OSError):
             pass
 
-from . import config, emit, llm, media, qc, segment, state, subtitle, tour, transcribe, visual
+from . import config, digest, emit, llm, media, qc, segment, state, subtitle, tour, transcribe, visual
 
 
 def _load(work: Path, name: str):
@@ -347,6 +347,20 @@ def cmd_subtitle(args) -> int:
     return 0
 
 
+def cmd_digest(args) -> int:
+    """会议级信号聚合：横切该大会全部 enrichment → data/digests/<conferenceId>.json。"""
+    dry = args.dry_run or llm.resolve_backend() == "stub"
+    d = digest.generate_digest(args.conference_id, dry)
+    if not d:
+        print(f"未产出 digest（无 enrichment / 生成失败 / dry-run）", file=sys.stderr)
+        return 1
+    path = digest.write_digest(args.conference_id, d)
+    print(f"  digest → {path}  ({len(d['signals'])} 条信号，横切 {d['talkCount']} 场)")
+    for s in d["signals"]:
+        print(f"    · {s.get('title')} — {str(s.get('statement'))[:70]}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="pipeline.cli", description="视频清洗流水线")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -383,6 +397,11 @@ def build_parser() -> argparse.ArgumentParser:
     sb.add_argument("--media", help="显式指定视频路径(决定字幕写到哪+同名)")
     sb.add_argument("--dry-run", action="store_true", help="不翻译，只出英文")
     sb.set_defaults(func=cmd_subtitle)
+
+    dg = sub.add_parser("digest", help="会议级信号聚合(横切该大会全部 enrichment)")
+    dg.add_argument("conference_id", help="如 cursor-compile / ai-engineer / figma-config")
+    dg.add_argument("--dry-run", action="store_true")
+    dg.set_defaults(func=cmd_digest)
     return p
 
 

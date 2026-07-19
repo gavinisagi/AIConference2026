@@ -419,6 +419,39 @@ def build_tour(payload: dict, dry_run: bool) -> dict | None:
     return out
 
 
+# --- 会议级信号聚合 ----------------------------------------------------
+
+_DIGEST_SYS = (
+    "你是技术媒体主编。给定一场大会全部演讲的钩子与关键观点(带时间戳)，横切出这届大会的"
+    "【信号】——不是逐场复述，而是跨场归纳出「这个领域正在发生什么」。目标读者是想快速搞懂"
+    "AI 走向的从业者，3 分钟读完就拿到整届大会的 payload。\n"
+    "严格要求：\n"
+    "1) 每条信号必须来自输入的观点，sources 只能引用给定的 videoId 与其观点的 timestampSeconds，"
+    "不得编造 id/时间/数字。\n"
+    "2) 信号要具体、带数字或专有名词，避免「AI 很重要」这类空话。优先跨场共振的主题。\n"
+    "3) 5-7 条，按重要性排序。\n"
+    "4) 只输出 JSON：{\"headline\":\"一句话定调(<=30字)\",\"narrative\":\"2-3句说清这届大会的整体走向\","
+    "\"signals\":[{\"title\":\"<=12字短标题\",\"statement\":\"信号本身，一句话，带具体数字/名词\","
+    "\"whyItMatters\":\"为什么重要/意味着什么(1-2句)\","
+    "\"sources\":[{\"videoId\":\"...\",\"timestampSeconds\":123}]}]}"
+)
+
+
+def build_digest(payload: dict, dry_run: bool) -> dict | None:
+    """全会议观点 → 信号聚合。dry_run/stub → None（页面走降级不展示）。"""
+    if _use_stub(dry_run):
+        return None
+    try:
+        out = _parse_json(_call(_DIGEST_SYS, json.dumps(payload, ensure_ascii=False), max_tokens=8192))
+    except LLMError:
+        return None
+    if not isinstance(out.get("signals"), list) or not out["signals"]:
+        return None
+    out.setdefault("headline", "")
+    out.setdefault("narrative", "")
+    return out
+
+
 # --- 字幕翻译 ----------------------------------------------------------
 
 _TRANSLATE_SYS = (
