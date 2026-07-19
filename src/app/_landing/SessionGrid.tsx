@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { Session } from '@/lib/schema';
-import { VideoCard } from '@/app/catalog/VideoCard';
+import { VideoCard } from '@/components/VideoCard/VideoCard';
 import styles from './landing.module.css';
 
 export interface SessionGridProps {

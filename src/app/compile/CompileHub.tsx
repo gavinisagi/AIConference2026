@@ -7,7 +7,7 @@ import {
   displayDuration,
 } from '@/lib/loader';
 import type { ConferenceDigest, Session } from '@/lib/schema';
-import { VideoCard } from '@/app/catalog/VideoCard';
+import { VideoCard } from '@/components/VideoCard/VideoCard';
 import { Breadcrumb } from '@/app/_shared/Breadcrumb';
 import styles from './compile.module.css';
 
@@ -29,7 +29,7 @@ export function CompileHub({ asHome = false }: { asHome?: boolean }) {
     <main className={styles.page}>
       <div className={styles.inner}>
         {!asHome && (
-          <Breadcrumb items={[{ label: '目录', href: '/catalog/' }, { label: 'Cursor Compile' }]} />
+          <Breadcrumb items={[{ label: '导览', href: '/' }, { label: 'Cursor Compile' }]} />
         )}
 
         <header className={styles.hero}>

@@ -10,7 +10,7 @@
  * 诚实原则（design-spec §7.1）：角色↔视频映射当前无真实标注（roles 全为空），故角色落地页
  * 预设筛选真实产出 0 条，走空态导语而非编造清单；主题为标题关键词近似归类，须以「约」表述。
  */
-import { EMPTY_FILTERS, applyFilters } from '@/app/catalog/filters';
+import { EMPTY_FILTERS, applyFilters } from '@/app/_catalog/filters';
 import type { Session, Role, Topic } from '@/lib/schema';
 import { TOPICS } from '@/lib/schema';
 import { topicMeta } from '@/design/tokens';
