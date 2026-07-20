@@ -7,6 +7,7 @@ import {
   displayDuration,
 } from '@/lib/loader';
 import type { ConferenceDigest, Session } from '@/lib/schema';
+import { frameSrc } from '@/lib/assets';
 import { VideoCard } from '@/components/VideoCard/VideoCard';
 import { Breadcrumb } from '@/app/_shared/Breadcrumb';
 import styles from './compile.module.css';
@@ -173,7 +174,7 @@ function FeaturedTour({ session }: { session: Session }) {
         // eslint-disable-next-line @next/next/no-img-element
         <img
           className={styles.featCover}
-          src={cover.src}
+          src={frameSrc(cover.src)}
           alt={cover.caption || displayTitle(session)}
           loading="lazy"
           width={640}

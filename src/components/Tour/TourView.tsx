@@ -1,4 +1,5 @@
 import type { SessionFrame, Tour, TourMode } from '@/lib/schema';
+import { frameSrc } from '@/lib/assets';
 import styles from './TourView.module.css';
 
 /**
@@ -118,7 +119,7 @@ export function TourView({
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     className={styles.frameImg}
-                    src={f.src}
+                    src={frameSrc(f.src)}
                     alt={f.caption || `原片 ${mmss(f.timestampSeconds)} 处画面`}
                     loading="lazy"
                     width={480}

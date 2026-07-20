@@ -83,7 +83,7 @@ export interface Speaker {
 export interface SessionFrame {
   /** 该画面在原片中的时刻（秒），可生成深链。 */
   timestampSeconds: number;
-  /** 站点内静态资源路径，如 /frames/<videoId>/t900.jpg。 */
+  /** 站点内相对路径，如 /frames/<videoId>/t900.jpg；渲染时经 frameSrc() 拼上 R2 origin。 */
   src: string;
   /** 画面类型（slide / chart / code / demo_ui）。 */
   kind: string;

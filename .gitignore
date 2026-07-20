@@ -90,3 +90,7 @@ __pycache__/
 
 # 部署用 SQL：由 scripts/export-sql.mjs 从数据源再生，不入库
 /deploy/*.sql
+
+# 关键画面：清洗产物、二进制，不入 git；生产走 R2（见 deploy/R2-frames.md）。
+# 本地仍由流水线写入 public/frames/ 供开发预览与上传，仅不进版本库。
+/public/frames/
