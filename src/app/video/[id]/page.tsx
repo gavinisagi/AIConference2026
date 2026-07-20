@@ -9,6 +9,7 @@ import {
   displayDeepReadStatus,
 } from '@/lib/loader';
 import type { Session } from '@/lib/schema';
+import { frameSrc } from '@/lib/assets';
 import { conferenceMeta, topicMeta } from '@/design/tokens';
 import { Button, Chip, ConfBadge, DurationTag, StatusBadge, TakeawayCard, TourView } from '@/components';
 import { VideoCard } from '@/components/VideoCard/VideoCard';
@@ -36,9 +37,34 @@ export async function generateMetadata({
   const { id } = await params;
   const session = getSessionById(id);
   if (!session) return { title: '视频详情 · AI Conference 2026 Compass' };
+  const title = displayTitle(session);
+  const description =
+    session.whyWatch ?? '在官方来源观看这场 AI 大会 session。本站不播放，仅跳转官方。';
+
+  // 单场 OG 封面：优先用该场留存的首张关键画面（16:9 真实内容，比通用图更有点击欲）；
+  // 无画面回落站点通用 og.png。相对 /frames 路径由 metadataBase 解析成绝对地址；配了
+  // R2 base 时 frameSrc() 直接给出绝对 R2 URL。爬虫要绝对 URL，两种情况都成立。
+  const cover = session.frames[0];
+  const ogImage = cover
+    ? { url: frameSrc(cover.src), width: 960, height: 540, alt: cover.caption || title }
+    : { url: '/og.png', width: 1200, height: 630, alt: title };
+
   return {
-    title: `${displayTitle(session)} · AI Conference 2026 Compass`,
-    description: session.whyWatch ?? '在官方来源观看这场 AI 大会 session。本站不播放，仅跳转官方。',
+    title: `${title} · AI Conference 2026 Compass`,
+    description,
+    openGraph: {
+      type: 'article',
+      title,
+      description,
+      url: `/video/${session.id}/`,
+      images: [ogImage],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [ogImage.url],
+    },
   };
 }
 
