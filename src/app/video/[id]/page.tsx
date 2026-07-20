@@ -11,7 +11,7 @@ import {
 import type { Session } from '@/lib/schema';
 import { conferenceMeta, topicMeta } from '@/design/tokens';
 import { Button, Chip, ConfBadge, DurationTag, StatusBadge, TakeawayCard, TourView } from '@/components';
-import { VideoCard } from '@/app/catalog/VideoCard';
+import { VideoCard } from '@/components/VideoCard/VideoCard';
 import { Breadcrumb } from '@/app/_shared/Breadcrumb';
 import { ROLE_PRESETS } from '@/app/_landing/presets';
 import styles from './detail.module.css';
@@ -91,10 +91,8 @@ export default async function VideoDetailPage({
       <div className={styles.inner}>
         <Breadcrumb
           items={[
-            { label: '目录', href: '/catalog/' },
-            primaryTopic
-              ? { label: topicMeta[primaryTopic].label, href: `/topic/${primaryTopic}/` }
-              : { label: conferenceMeta[session.conferenceId].label },
+            { label: '导览', href: '/' },
+            { label: conferenceMeta[session.conferenceId].label },
             { label: title },
           ]}
         />
@@ -128,10 +126,9 @@ export default async function VideoDetailPage({
 
               {session.topics.length > 0 && (
                 <div className={styles.topics}>
+                  {/* 主题筛选页在当前发布规模下已下线，chip 仅作标注不再外链。 */}
                   {session.topics.map((t) => (
-                    <a key={t} href={`/topic/${t}/`} className={styles.topicChip}>
-                      <Chip>{topicMeta[t].label}</Chip>
-                    </a>
+                    <Chip key={t}>{topicMeta[t].label}</Chip>
                   ))}
                 </div>
               )}
@@ -139,7 +136,7 @@ export default async function VideoDetailPage({
 
             {/* 观看导览：有 tour 时是本页核心体验，钩子 hero 第一眼（承接层）。 */}
             {session.tour && (
-              <TourView tour={session.tour} officialUrl={session.officialUrl} />
+              <TourView tour={session.tour} officialUrl={session.officialUrl} frames={session.frames} />
             )}
 
             {/* 主行动：在官方来源观看（本站不播放，外链新标签 + noopener，§0/§6.2/§8.4）。 */}

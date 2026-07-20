@@ -16,7 +16,7 @@ import {
   type FilterState,
   type SortKey,
 } from './filters';
-import { VideoCard } from './VideoCard';
+import { VideoCard } from '@/components/VideoCard/VideoCard';
 import styles from './CatalogBrowser.module.css';
 
 /** 每页/每次加载的卡片数（design-spec §8.3 无限滚动 + 加载更多）。 */

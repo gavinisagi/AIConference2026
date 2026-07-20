@@ -56,8 +56,12 @@ def resolve_backend() -> str:
     return "stub"
 
 
-def _call(system: str, user: str, max_tokens: int = config.LLM_MAX_TOKENS) -> str:
-    """按当前后端调 LLM（含瞬时失败重试），返回模型文本。stub 后端不应走到这里。"""
+def _call(system: str, user: str, max_tokens: int = config.LLM_MAX_TOKENS, max_turns: int = 1) -> str:
+    """按当前后端调 LLM（含瞬时失败重试），返回模型文本。stub 后端不应走到这里。
+
+    max_turns：claude -p 的轮次上限。纯文本任务 1 轮即可；**视觉任务必须 >1**——
+    读图片需要模型调用 Read 工具，限死 1 轮会让调用直接失败。
+    """
     backend = resolve_backend()
     if backend == "stub":
         raise LLMError(f"当前后端为 {backend}，不应调用 _call")
@@ -67,7 +71,7 @@ def _call(system: str, user: str, max_tokens: int = config.LLM_MAX_TOKENS) -> st
         try:
             if backend == "api":
                 return _call_api(system, user, max_tokens)
-            return _call_claude_cli(system, user)
+            return _call_claude_cli(system, user, max_turns)
         except LLMError as e:
             last = e
             if attempt < LLM_RETRIES:
@@ -107,7 +111,7 @@ def _call_api(system: str, user: str, max_tokens: int) -> str:
     return "".join(parts).strip()
 
 
-def _call_claude_cli(system: str, user: str) -> str:
+def _call_claude_cli(system: str, user: str, max_turns: int = 1) -> str:
     """headless `claude -p`：走用户 Claude Code 登录，免 API key。
 
     system 作为附加系统提示，user 经 stdin 传入；--output-format json 取信封 .result。
@@ -119,7 +123,7 @@ def _call_claude_cli(system: str, user: str) -> str:
     cmd = [
         exe, "-p", "--output-format", "json",
         "--append-system-prompt", system,
-        "--max-turns", "1",
+        "--max-turns", str(max_turns),
     ]
     try:
         proc = subprocess.run(
@@ -416,6 +420,80 @@ def build_tour(payload: dict, dry_run: bool) -> dict | None:
     out.setdefault("whoShouldWatch", "")
     out.setdefault("ifShortOnTime", "")
     out.setdefault("mustWatch", [])
+    return out
+
+
+# --- 关键帧视觉分类 ----------------------------------------------------
+
+_FRAMES_SYS = (
+    "你是大会视频截图分析器。给定一张 contact sheet（多帧拼图，行主序）与各帧时间戳，"
+    "逐帧判断画面内容。严格要求：\n"
+    "1) type 取值：slide(幻灯片) | chart(图表) | code(代码) | demo_ui(产品界面/演示) | "
+    "speaker(只有讲者/舞台) | other。\n"
+    "2) keep=true 仅当画面主体是**可读的屏幕内容**（幻灯片/图表/代码/产品界面）且值得作为配图；"
+    "只有讲者、纯 logo、过场、模糊/黑帧一律 keep=false。\n"
+    "3) caption 用中文一句话描述画面上的**具体内容**（<=20字），不要写「一张幻灯片」这种空话。\n"
+    "4) 只输出 JSON 数组，元素 {\"t\":<秒>,\"type\":\"...\",\"keep\":true/false,\"caption\":\"...\"}。"
+)
+
+
+def classify_frames(sheet_path, timestamps: list[int], dry_run: bool) -> list[dict]:
+    """contact sheet + 时间戳 → 逐帧分类。dry_run/stub → 全部不保留。"""
+    if _use_stub(dry_run):
+        return [{"t": t, "type": "other", "keep": False, "caption": ""} for t in timestamps]
+    user = (
+        f"Read the image at {sheet_path} — 它是 {len(timestamps)} 帧的 contact sheet，"
+        f"行主序，对应时间戳(秒)：{timestamps}。逐帧输出。"
+    )
+    try:
+        arr = _parse_json_array(_call(_FRAMES_SYS, user, max_turns=6))
+    except LLMError:
+        return [{"t": t, "type": "other", "keep": False, "caption": ""} for t in timestamps]
+
+    by_t = {a.get("t"): a for a in arr if isinstance(a, dict)}
+    out = []
+    for t in timestamps:
+        a = by_t.get(t, {})
+        out.append({
+            "t": t,
+            "type": a.get("type") if a.get("type") in
+            ("slide", "chart", "code", "demo_ui", "speaker", "other") else "other",
+            "keep": a.get("keep") is True,
+            "caption": (a.get("caption") or "").strip()[:40],
+        })
+    return out
+
+
+# --- 会议级信号聚合 ----------------------------------------------------
+
+_DIGEST_SYS = (
+    "你是技术媒体主编。给定一场大会全部演讲的钩子与关键观点(带时间戳)，横切出这届大会的"
+    "【信号】——不是逐场复述，而是跨场归纳出「这个领域正在发生什么」。目标读者是想快速搞懂"
+    "AI 走向的从业者，3 分钟读完就拿到整届大会的 payload。\n"
+    "严格要求：\n"
+    "1) 每条信号必须来自输入的观点，sources 只能引用给定的 videoId 与其观点的 timestampSeconds，"
+    "不得编造 id/时间/数字。\n"
+    "2) 信号要具体、带数字或专有名词，避免「AI 很重要」这类空话。优先跨场共振的主题。\n"
+    "3) 5-7 条，按重要性排序。\n"
+    "4) 只输出 JSON：{\"headline\":\"一句话定调(<=30字)\",\"narrative\":\"2-3句说清这届大会的整体走向\","
+    "\"signals\":[{\"title\":\"<=12字短标题\",\"statement\":\"信号本身，一句话，带具体数字/名词\","
+    "\"whyItMatters\":\"为什么重要/意味着什么(1-2句)\","
+    "\"sources\":[{\"videoId\":\"...\",\"timestampSeconds\":123}]}]}"
+)
+
+
+def build_digest(payload: dict, dry_run: bool) -> dict | None:
+    """全会议观点 → 信号聚合。dry_run/stub → None（页面走降级不展示）。"""
+    if _use_stub(dry_run):
+        return None
+    try:
+        out = _parse_json(_call(_DIGEST_SYS, json.dumps(payload, ensure_ascii=False), max_tokens=8192))
+    except LLMError:
+        return None
+    if not isinstance(out.get("signals"), list) or not out["signals"]:
+        return None
+    out.setdefault("headline", "")
+    out.setdefault("narrative", "")
     return out
 
 

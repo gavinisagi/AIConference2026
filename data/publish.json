@@ -1,0 +1,19 @@
+{
+  "_comment": "发布开关：控制站点实际渲染哪些内容，与清洗进度解耦。生产由 DB 的 is_published 列驱动，此文件供 DATA_SOURCE=file 的本地/CI 构建。",
+  "conferences": {
+    "cursor-compile": true,
+    "ai-engineer": false,
+    "figma-config": false
+  },
+  "sessions": {
+    "4CAFK-rc26A": true,
+    "BEi1ryQPGbk": true,
+    "ByOF8qByGHU": true,
+    "fWa7uxyhVDE": true,
+    "I8YnwUV2C9w": true,
+    "rv_VS189aVI": true,
+    "yHNcSVgz54I": true,
+    "Z5M33oh-SAU": true,
+    "zxvyO5vnknI": true
+  }
+}

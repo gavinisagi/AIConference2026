@@ -76,6 +76,21 @@ export interface Speaker {
   org: string | null;
 }
 
+/**
+ * 留存的关键画面：流水线在「值得看画面」的时刻抽帧、视觉分类后保留的可读屏幕内容
+ * （幻灯片 / 图表 / 代码 / 产品界面）。纯讲者特写与黑帧不会留存，故本数组可能为空。
+ */
+export interface SessionFrame {
+  /** 该画面在原片中的时刻（秒），可生成深链。 */
+  timestampSeconds: number;
+  /** 站点内相对路径，如 /frames/<videoId>/t900.jpg；渲染时经 frameSrc() 拼上 R2 origin。 */
+  src: string;
+  /** 画面类型（slide / chart / code / demo_ui）。 */
+  kind: string;
+  /** 一句话描述画面上的具体内容。 */
+  caption: string;
+}
+
 /** 导览的观看模式：看画面 / 略读 / 听即可（依据画面内容与运动强度判定）。 */
 export const TOUR_MODES = ['watch', 'skim', 'listen'] as const;
 export type TourMode = (typeof TOUR_MODES)[number];
@@ -152,6 +167,38 @@ export interface Session {
   roles: Role[];
   /** 观看导览（清洗流水线产出；缺省 null，页面走详情降级）。 */
   tour: Tour | null;
+  /** 留存的关键画面（可读屏幕内容；无可用画面时为空数组）。 */
+  frames: SessionFrame[];
+}
+
+// ---------------------------------------------------------------------------
+// 会议级信号聚合（知识层：横切一届大会，回答「这个领域正在发生什么」）
+// ---------------------------------------------------------------------------
+
+/** 信号出处：回指某场演讲的具体时刻（沿用观点必须能回指的原则）。 */
+export interface DigestSource {
+  videoId: string;
+  timestampSeconds: number | null;
+}
+
+/** 一条跨场信号。 */
+export interface DigestSignal {
+  title: string;
+  statement: string;
+  whyItMatters: string;
+  sources: DigestSource[];
+}
+
+/**
+ * 会议信号聚合——不是逐场复述，而是横切归纳。
+ * 读者 3 分钟拿到整届大会 payload，再决定深入哪场。缺省为 undefined，页面不渲染该区。
+ */
+export interface ConferenceDigest {
+  conferenceId: ConferenceId;
+  talkCount: number;
+  headline: string;
+  narrative: string;
+  signals: DigestSignal[];
 }
 
 // ---------------------------------------------------------------------------
@@ -193,6 +240,8 @@ export interface NormalizedDataset {
   stats: SiteStats;
   conferences: Conference[];
   sessions: Session[];
+  /** 会议信号聚合（按大会一份；无清洗数据的大会缺省）。 */
+  digests: ConferenceDigest[];
 }
 
 // ---------------------------------------------------------------------------

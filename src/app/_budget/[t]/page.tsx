@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getAllSessions } from '@/lib/loader';
-import { VideoCard } from '@/app/catalog/VideoCard';
+import { VideoCard } from '@/components/VideoCard/VideoCard';
 import { LandingView } from '@/app/_landing/LandingView';
 import { SessionGrid } from '@/app/_landing/SessionGrid';
 import {

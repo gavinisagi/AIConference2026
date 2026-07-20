@@ -43,18 +43,21 @@ if (!existsSync(resolve(ROOT, 'node_modules'))) {
 //    因此必须先于 typecheck / build 生成。
 run('0/3 data (generate + schema)', 'node scripts/build-data.mjs');
 
+// 清理上一轮构建产物。必须在 typecheck 之前：.next/types/validator.ts 会引用上一次
+// 构建时存在的路由文件，路由增删/改名后这些陈旧类型会让 typecheck 假失败。
+// （同时也保证 build 从干净态开始，避免复用 .next 时 build-traces 偶发 ENOENT。）
+console.log('[check] 清理 .next / out');
+for (const dir of ['.next', 'out']) {
+  rmSync(resolve(ROOT, dir), { recursive: true, force: true });
+}
+
 // 1) lint
 run('1/3 lint', 'npm run lint');
 
 // 2) typecheck
 run('2/3 typecheck', 'npm run typecheck');
 
-// 3) build（静态导出）。先清上一轮产物：复用 .next 时 build-traces 偶发
-//    ENOENT(*.nft.json)（Windows 尤甚）导致重复运行假失败；从干净态构建保证幂等。
-console.log('[check] 3/3 build (static export) — cleaning .next/out first');
-for (const dir of ['.next', 'out']) {
-  rmSync(resolve(ROOT, dir), { recursive: true, force: true });
-}
-run('3/3 build', 'npm run build');
+// 3) build（静态导出）。.next/out 已在 typecheck 前清理，此处直接从干净态构建。
+run('3/3 build (static export)', 'npm run build');
 
 console.log('[check] all checks passed.');

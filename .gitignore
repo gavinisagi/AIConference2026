@@ -46,7 +46,7 @@ next-env.d.ts
 # 下载 / 抓取日志
 /data/*.log
 
-# 清洗后数据 / 转录文本：不入库，后续进数据库。
+# 清洗后数据 / 转录文本：不入库，全部走数据库（见 deploy/seed.sql）。
 /data/enrichments/*.json
 /data/editorial/*.json
 /data/digests/*.json
@@ -65,6 +65,7 @@ next-env.d.ts
 /data/figma_config_2026.json
 /data/cursor_compile_2026.json
 /data/catalog.csv
+
 
 # Paperclip 临时产物（请求、日志、临时脚本）
 /.pc_tmp/
@@ -86,3 +87,10 @@ __pycache__/
 # API keys / 本地环境
 .env
 .env.local
+
+# 部署用 SQL：由 scripts/export-sql.mjs 从数据源再生，不入库
+/deploy/*.sql
+
+# 关键画面：清洗产物、二进制，不入 git；生产走 R2（见 deploy/R2-frames.md）。
+# 本地仍由流水线写入 public/frames/ 供开发预览与上传，仅不进版本库。
+/public/frames/

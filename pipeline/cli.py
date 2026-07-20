@@ -26,7 +26,7 @@ for _stream in (sys.stdout, sys.stderr):
         except (ValueError, OSError):
             pass
 
-from . import config, emit, llm, media, qc, segment, state, subtitle, tour, transcribe, visual
+from . import config, digest, emit, frames, llm, media, qc, segment, state, subtitle, tour, transcribe, visual
 
 
 def _load(work: Path, name: str):
@@ -138,6 +138,14 @@ def run_video(video_id: str, args) -> bool:
     tour_out = _load(work, "tour.json")
     tour_data = tour_out if tour_out else None
 
+    # 6c) frames（关键帧留存：把可读的幻灯片/演示画面截下来，站点配图）
+    def _frames():
+        _dump(work, "frames.json",
+              frames.collect_frames(video_id, media_path, visual_out, tour_data, chapters, work, dry))
+    if not stage("frames", _frames):
+        return False
+    frames_data = _load(work, "frames.json") or []
+
     # 7) qc（自动质检）
     seg_index = segment.segment_index(asr)
     duration = asr["source"]["durationSeconds"]
@@ -160,7 +168,7 @@ def run_video(video_id: str, args) -> bool:
     def _emit():
         enrichment = emit.build_enrichment(
             video_id, draft, seg_index, asr, titled_chapters, dry,
-            speakers=speakers, visual=visual_out, tour=tour_data,
+            speakers=speakers, visual=visual_out, tour=tour_data, frames=frames_data,
         )
         path = emit.write_enrichment(video_id, enrichment)
         print(f"[{video_id}] emit → {path}  ({len(enrichment['takeaways'])} takeaways)")
@@ -347,6 +355,20 @@ def cmd_subtitle(args) -> int:
     return 0
 
 
+def cmd_digest(args) -> int:
+    """会议级信号聚合：横切该大会全部 enrichment → data/digests/<conferenceId>.json。"""
+    dry = args.dry_run or llm.resolve_backend() == "stub"
+    d = digest.generate_digest(args.conference_id, dry)
+    if not d:
+        print(f"未产出 digest（无 enrichment / 生成失败 / dry-run）", file=sys.stderr)
+        return 1
+    path = digest.write_digest(args.conference_id, d)
+    print(f"  digest → {path}  ({len(d['signals'])} 条信号，横切 {d['talkCount']} 场)")
+    for s in d["signals"]:
+        print(f"    · {s.get('title')} — {str(s.get('statement'))[:70]}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="pipeline.cli", description="视频清洗流水线")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -383,6 +405,11 @@ def build_parser() -> argparse.ArgumentParser:
     sb.add_argument("--media", help="显式指定视频路径(决定字幕写到哪+同名)")
     sb.add_argument("--dry-run", action="store_true", help="不翻译，只出英文")
     sb.set_defaults(func=cmd_subtitle)
+
+    dg = sub.add_parser("digest", help="会议级信号聚合(横切该大会全部 enrichment)")
+    dg.add_argument("conference_id", help="如 cursor-compile / ai-engineer / figma-config")
+    dg.add_argument("--dry-run", action="store_true")
+    dg.set_defaults(func=cmd_digest)
     return p
 
 

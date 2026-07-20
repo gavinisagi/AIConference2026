@@ -27,6 +27,8 @@ const SOURCE_PATH = resolve(ROOT, 'data/catalog.json');
 // 两个覆盖目录不存在或为空时，合并是空操作，输出与纯 catalog 派生字节一致。
 const ENRICH_DIR = resolve(ROOT, 'data/enrichments');
 const EDITORIAL_DIR = resolve(ROOT, 'data/editorial');
+// 会议级信号聚合（知识层）：data/digests/<conferenceId>.json，缺省则站点不渲染该区。
+const DIGEST_DIR = resolve(ROOT, 'data/digests');
 const OUTPUT_PATH = resolve(ROOT, 'src/data/dataset.json');
 const DATASET_VERSION = 1;
 
@@ -43,16 +45,45 @@ const DATA_SOURCE = process.env.DATA_SOURCE || 'file';
 const DATA_API_URL = process.env.DATA_API_URL || '';
 const DATA_API_TOKEN = process.env.DATA_API_TOKEN || '';
 
-/** 读取数据源 → { catalog: [], enrichments: Map, editorial: Map }。 */
+// 发布开关：数据库/本地配置控制「站点实际渲染哪些内容」，与清洗进度解耦。
+//   publish.conferences[id] === true   → 该会议已发布（缺省/false = 整会议隐藏）
+//   publish.sessions[videoId] === true → 该场已发布
+// 规则：publish 整体缺省 → 全部发布（开发默认）；
+//       给了 conferences 但没给 sessions → 已发布会议下的场次全发布；
+//       给了 sessions → 只发布显式为 true 的场次。
+const PUBLISH_PATH = resolve(ROOT, 'data/publish.json');
+
+/** 读取数据源 → { catalog: [], enrichments: Map, editorial: Map, publish }。 */
 async function readSource(warnings) {
   if (DATA_SOURCE === 'api') return readFromApi(warnings);
   if (DATA_SOURCE !== 'file') {
     throw new Error(`未知 DATA_SOURCE="${DATA_SOURCE}"（可选 file | api）`);
   }
+  let publish = null;
+  if (existsSync(PUBLISH_PATH)) {
+    try {
+      publish = JSON.parse(readFileSync(PUBLISH_PATH, 'utf8'));
+    } catch (e) {
+      warnings.push(`data/publish.json 无法解析，按「全部发布」处理（${e.message}）`);
+    }
+  }
   return {
     catalog: JSON.parse(readFileSync(SOURCE_PATH, 'utf8')),
     enrichments: loadOverrides(ENRICH_DIR, warnings),
     editorial: loadOverrides(EDITORIAL_DIR, warnings),
+    publish,
+  };
+}
+
+/** 依据 publish 配置判断某场是否应出现在站点。publish 为空 → 全部发布。 */
+function makePublishFilter(publish) {
+  if (!publish || typeof publish !== 'object') return () => true;
+  const confs = publish.conferences && typeof publish.conferences === 'object' ? publish.conferences : null;
+  const sess = publish.sessions && typeof publish.sessions === 'object' ? publish.sessions : null;
+  return (session) => {
+    if (confs && confs[session.conferenceId] !== true) return false;
+    if (sess) return sess[session.id] === true;
+    return true;
   };
 }
 
@@ -87,6 +118,8 @@ async function readFromApi(warnings) {
     catalog: payload.catalog,
     enrichments: toMap(payload.enrichments, 'enrichments'),
     editorial: toMap(payload.editorial, 'editorial'),
+    // 发布开关由 DB 的 is_published 列派生（CRUD 服务负责序列化成此形状）。
+    publish: payload.publish || null,
   };
 }
 
@@ -208,6 +241,8 @@ function normalizeRecord(raw, index) {
     roles: [],
     // 观看导览：清洗流水线产出，缺省 null（页面走详情降级）。
     tour: null,
+    // 留存的关键画面：缺省空数组（页面不渲染画面区）。
+    frames: [],
   };
 
   return { session, errors };
@@ -278,7 +313,82 @@ function sanitizeTakeaways(v, sessionId) {
   return out;
 }
 
+/**
+ * 读取并规范化会议信号聚合。只接受 conferenceId 在契约内、signals 非空的 digest；
+ * sources 仅保留真实存在的 session id（不让站点渲染死链）。
+ */
+function loadDigests(validSessionIds, warnings) {
+  const out = [];
+  if (!existsSync(DIGEST_DIR)) return out;
+  for (const name of readdirSync(DIGEST_DIR).sort()) {
+    if (!name.endsWith('.json')) continue;
+    let d;
+    try {
+      d = JSON.parse(readFileSync(resolve(DIGEST_DIR, name), 'utf8'));
+    } catch (e) {
+      warnings.push(`digests/${name}: 无法解析 JSON，已跳过（${e.message}）`);
+      continue;
+    }
+    const cid = d && d.conferenceId;
+    if (!CONFERENCES_BY_ID.has(cid)) {
+      warnings.push(`digests/${name}: conferenceId "${cid}" 不在契约内，忽略`);
+      continue;
+    }
+    const signals = [];
+    for (const s of Array.isArray(d.signals) ? d.signals : []) {
+      if (!s || !isNonEmptyString(s.title) || !isNonEmptyString(s.statement)) continue;
+      const sources = (Array.isArray(s.sources) ? s.sources : [])
+        .filter((x) => x && validSessionIds.has(x.videoId))
+        .map((x) => ({
+          videoId: x.videoId,
+          timestampSeconds:
+            typeof x.timestampSeconds === 'number' && x.timestampSeconds >= 0 ? x.timestampSeconds : null,
+        }));
+      signals.push({
+        title: s.title.trim(),
+        statement: s.statement.trim(),
+        whyItMatters: isNonEmptyString(s.whyItMatters) ? s.whyItMatters.trim() : '',
+        sources,
+      });
+    }
+    if (signals.length === 0) {
+      warnings.push(`digests/${name}: 无有效 signal，忽略`);
+      continue;
+    }
+    out.push({
+      conferenceId: cid,
+      talkCount: typeof d.talkCount === 'number' ? d.talkCount : 0,
+      headline: isNonEmptyString(d.headline) ? d.headline.trim() : '',
+      narrative: isNonEmptyString(d.narrative) ? d.narrative.trim() : '',
+      signals,
+    });
+  }
+  return out;
+}
+
 const TOUR_MODES = ['watch', 'skim', 'listen'];
+const FRAME_KINDS = ['slide', 'chart', 'code', 'demo_ui', 'mixed'];
+
+/**
+ * 规范化 frames 覆盖 → SessionFrame[]。
+ * src 必须是站点内 /frames/ 下的相对路径（不接受外链，避免热链与混合内容）；
+ * 逐条校验，非法条目跳过而非整组丢弃——少一张图不该让整场没有画面。
+ */
+function sanitizeFrames(v) {
+  if (!Array.isArray(v)) return null;
+  const out = [];
+  for (const f of v) {
+    if (!f || typeof f.src !== 'string' || !f.src.startsWith('/frames/')) continue;
+    if (typeof f.timestampSeconds !== 'number' || f.timestampSeconds < 0) continue;
+    out.push({
+      timestampSeconds: f.timestampSeconds,
+      src: f.src,
+      kind: FRAME_KINDS.includes(f.kind) ? f.kind : 'slide',
+      caption: typeof f.caption === 'string' ? f.caption.trim() : '',
+    });
+  }
+  return out;
+}
 
 /** 规范化 tour 覆盖 → Tour（严格投影；任一必填缺失/非法 → 返回 null 视为不覆盖）。 */
 function sanitizeTour(v) {
@@ -360,6 +470,11 @@ function applyOverride(session, ov, source, warnings) {
     if (tks) session.takeaways = tks;
     else warnings.push(`${at}: takeaways 非法，忽略`);
   }
+  if ('frames' in ov) {
+    const fr = sanitizeFrames(ov.frames);
+    if (fr) session.frames = fr;
+    else warnings.push(`${at}: frames 非法，忽略`);
+  }
   if ('tour' in ov) {
     const tour = sanitizeTour(ov.tour);
     if (tour) session.tour = tour;
@@ -398,6 +513,7 @@ function validateSession(s, index) {
     errors.push(`${at}: roles must be array of contract roles`);
   if (!Array.isArray(s.speakers)) errors.push(`${at}: speakers must be array`);
   if (!Array.isArray(s.takeaways)) errors.push(`${at}: takeaways must be array`);
+  if (!Array.isArray(s.frames)) errors.push(`${at}: frames must be array`);
   if (s.tour !== null) {
     if (typeof s.tour !== 'object') errors.push(`${at}: tour must be object or null`);
     else if (!isNonEmptyString(s.tour.hook)) errors.push(`${at}: tour.hook required`);
@@ -444,6 +560,22 @@ function build(source, overrideWarnings) {
     sessions.push(session);
   }
 
+  // 发布过滤：站点只渲染已发布内容（发布范围由 DB/publish.json 控制，与清洗进度解耦）。
+  const isPublished = makePublishFilter(source.publish);
+  const beforeCount = sessions.length;
+  const published = sessions.filter(isPublished);
+  if (published.length !== beforeCount) {
+    console.log(`[build-data] 发布过滤: ${published.length}/${beforeCount} 场进入站点`);
+  }
+  sessions.length = 0;
+  sessions.push(...published);
+
+  // 会议信号聚合（知识层）：sources 只保留真实 session，避免死链。
+  // 已发布场次为空的会议，其 digest 一并隐藏。
+  const digests = loadDigests(new Set(sessions.map((s) => s.id)), overrideWarnings).filter((d) =>
+    sessions.some((s) => s.conferenceId === d.conferenceId),
+  );
+
   // 覆盖告警走 stderr（不进 dataset.json，避免污染漂移比对）。
   for (const w of overrideWarnings) console.error(`[build-data] 覆盖告警: ${w}`);
 
@@ -487,6 +619,7 @@ function build(source, overrideWarnings) {
     },
     conferences,
     sessions,
+    digests,
     _droppedRecords: dropped, // 不可降级的坏记录（正常应为空）。
   };
 }
