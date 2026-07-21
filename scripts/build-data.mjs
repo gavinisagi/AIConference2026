@@ -292,6 +292,51 @@ function sanitizeSpeakers(v) {
   return out;
 }
 
+// ---------------------------------------------------------------------------
+// 中文正文引号规范化
+//
+// LLM 产出的中文正文一律用 ASCII 直引号（" 与 '），中文排版里应为全角引号。
+// 按 GB/T 15834，中文以双引号「“”」为主，单引号「‘’」只用于引号内嵌套；实测数据中
+// 不存在嵌套（无一条同时含两种引用型引号），故两种直引号统一转成 “”。
+//
+// 只作用于 enrichment / editorial / digest 这些「我们生成的正文」；catalog 是
+// YouTube 源事实，一律不碰（会议名 "AI Engineer World's Fair" 就在其中）。
+// ---------------------------------------------------------------------------
+
+/** 英文撇号：字母'字母（World's / don't）—— 不是引号，不得转换。 */
+const APOSTROPHE_RE = /(?<=[A-Za-z])'(?=[A-Za-z])/g;
+/** 撇号占位符：JSON 文本不会出现 NUL，借它把撇号临时摘出配对计算。 */
+const APOS_MARK = '\u0000';
+
+/** 引号不闭合而跳过规范化的条数——宁可保留原样，也不靠猜配对改坏文本。 */
+let unbalancedQuoteCount = 0;
+
+/** 直引号 → 中文双引号，按出现顺序交替开合。撇号保留；数量为奇数则整串不动。 */
+function normalizeQuotes(s) {
+  if (typeof s !== 'string' || (!s.includes('"') && !s.includes("'"))) return s;
+  const guarded = s.replace(APOSTROPHE_RE, APOS_MARK);
+  const quotes = guarded.match(/["']/g);
+  if (!quotes) return s;
+  if (quotes.length % 2 !== 0) {
+    unbalancedQuoteCount++;
+    return s;
+  }
+  let open = true;
+  const converted = guarded.replace(/["']/g, () => {
+    const ch = open ? '“' : '”';
+    open = !open;
+    return ch;
+  });
+  return converted.replaceAll(APOS_MARK, "'");
+}
+
+/** 正文字段清洗：去空白 + 引号规范化。非字符串/空串 → null。 */
+function prose(x) {
+  if (typeof x !== 'string') return null;
+  const t = x.trim();
+  return t ? normalizeQuotes(t) : null;
+}
+
 /** 规范化 takeaways 覆盖 → Takeaway[]（投影到契约字段，丢弃 evidence/confidence 等站点不消费字段）。非法 → null。 */
 function sanitizeTakeaways(v, sessionId) {
   if (!Array.isArray(v)) return null;
@@ -305,8 +350,8 @@ function sanitizeTakeaways(v, sessionId) {
     out.push({
       id,
       sessionId,
-      statement: tk.statement.trim(),
-      context: typeof tk.context === 'string' && tk.context.trim() ? tk.context.trim() : null,
+      statement: prose(tk.statement),
+      context: prose(tk.context),
       timestampSeconds: ts,
       roles,
     });
@@ -346,9 +391,9 @@ function loadDigests(validSessionIds, warnings) {
             typeof x.timestampSeconds === 'number' && x.timestampSeconds >= 0 ? x.timestampSeconds : null,
         }));
       signals.push({
-        title: s.title.trim(),
-        statement: s.statement.trim(),
-        whyItMatters: isNonEmptyString(s.whyItMatters) ? s.whyItMatters.trim() : '',
+        title: prose(s.title) ?? '',
+        statement: prose(s.statement) ?? '',
+        whyItMatters: prose(s.whyItMatters) ?? '',
         sources,
       });
     }
@@ -359,8 +404,8 @@ function loadDigests(validSessionIds, warnings) {
     out.push({
       conferenceId: cid,
       talkCount: typeof d.talkCount === 'number' ? d.talkCount : 0,
-      headline: isNonEmptyString(d.headline) ? d.headline.trim() : '',
-      narrative: isNonEmptyString(d.narrative) ? d.narrative.trim() : '',
+      headline: prose(d.headline) ?? '',
+      narrative: prose(d.narrative) ?? '',
       signals,
     });
   }
@@ -385,7 +430,7 @@ function sanitizeFrames(v) {
       timestampSeconds: f.timestampSeconds,
       src: f.src,
       kind: FRAME_KINDS.includes(f.kind) ? f.kind : 'slide',
-      caption: typeof f.caption === 'string' ? f.caption.trim() : '',
+      caption: prose(f.caption) ?? '',
     });
   }
   return out;
@@ -394,7 +439,7 @@ function sanitizeFrames(v) {
 /** 规范化 tour 覆盖 → Tour（严格投影；任一必填缺失/非法 → 返回 null 视为不覆盖）。 */
 function sanitizeTour(v) {
   if (!v || typeof v !== 'object') return null;
-  const str = (x) => (typeof x === 'string' && x.trim() ? x.trim() : null);
+  const str = prose; // 导览各字段均为正文（含 speaker 人名，撇号受保护）
   const num = (x) => (typeof x === 'number' && x >= 0 ? x : null);
   const hook = str(v.hook);
   if (!hook) return null; // 无钩子不成导览
@@ -463,7 +508,7 @@ function applyOverride(session, ov, source, warnings) {
   }
   if ('whyWatch' in ov) {
     if (ov.whyWatch === null || (typeof ov.whyWatch === 'string' && ov.whyWatch.trim())) {
-      session.whyWatch = ov.whyWatch === null ? null : ov.whyWatch.trim();
+      session.whyWatch = ov.whyWatch === null ? null : prose(ov.whyWatch);
     } else warnings.push(`${at}: whyWatch 须为非空字符串或 null，忽略`);
   }
   if ('takeaways' in ov) {
@@ -567,6 +612,11 @@ function build(source, overrideWarnings) {
   const published = sessions.filter(isPublished);
   if (published.length !== beforeCount) {
     console.log(`[build-data] 发布过滤: ${published.length}/${beforeCount} 场进入站点`);
+  }
+  if (unbalancedQuoteCount > 0) {
+    overrideWarnings.push(
+      `引号不闭合 ${unbalancedQuoteCount} 条，已保留原样未规范化（需人工检查原文）`,
+    );
   }
   sessions.length = 0;
   sessions.push(...published);
