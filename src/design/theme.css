@@ -18,7 +18,9 @@
   --surface-sunken: #F4F2ED;   /* 次级块、筛选栏底 */
   --ink: #1C1B19;              /* 主文本（近黑，微暖） */
   --ink-secondary: #57534E;    /* 次级文本 */
-  --ink-muted: #8A857D;        /* 元信息 / 占位 */
+  /* 元信息 / 占位。原 #8A857D 在纸面上仅 3.51:1，低于正文 4.5:1 基准；
+     本色大量用于 12–13px 小字，加深到 5.14:1 后满足 WCAG AA。 */
+  --ink-muted: #6F6A62;
   --hairline: #E7E4DE;         /* 分隔线 / 卡片描边 */
   --hairline-strong: #D8D4CC;  /* 输入框 / 强分隔 */
 

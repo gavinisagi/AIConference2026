@@ -42,8 +42,10 @@ export function CompileHub({ asHome = false }: { asHome?: boolean }) {
           </p>
         </header>
 
-        {/* 知识层：横切全会议的信号。读者 3 分钟拿到整届 payload，再决定深入哪场。 */}
-        {digest && <DigestPanel digest={digest} />}
+        {/* 知识层导语：一屏内交代「这届发生了什么」，把详细信号让到导览之后。
+            实测原先 7 条信号完整铺开占 3700px，首场演讲要滑到 4032px（约 4.8 屏）才出现，
+            首页读起来像长报告而非导览工具。 */}
+        {digest && <DigestIntro digest={digest} />}
 
         {withTour.length > 0 && (
           <section className={styles.section} aria-labelledby="featured">
@@ -74,6 +76,9 @@ export function CompileHub({ asHome = false }: { asHome?: boolean }) {
             </ul>
           </section>
         )}
+
+        {/* 详细信号：想读趋势的人往下看，不挡在导览前面。 */}
+        {digest && <DigestSignals digest={digest} />}
       </div>
     </main>
   );
@@ -99,14 +104,28 @@ function shortTitle(title: string): string {
  * 信号面板（知识层）——横切全会议归纳「这个领域正在发生什么」。
  * 每条信号带出处深链，沿用「观点必须能回指来源」的原则。
  */
-function DigestPanel({ digest }: { digest: ConferenceDigest }) {
+function DigestIntro({ digest }: { digest: ConferenceDigest }) {
+  return (
+    <section className={styles.digestIntro} aria-labelledby="digest-intro">
+      <h2 id="digest-intro" className={styles.sectionHead}>
+        这届大会发生了什么
+      </h2>
+      <p className={styles.digestHeadline}>{digest.headline}</p>
+      {digest.narrative && <p className={styles.digestNarrative}>{digest.narrative}</p>}
+      <a className={styles.digestJump} href="#signals">
+        展开 {digest.signals.length} 个信号 ↓
+      </a>
+    </section>
+  );
+}
+
+/** 详细信号列表：置于导览之后，供想读趋势的读者深入。 */
+function DigestSignals({ digest }: { digest: ConferenceDigest }) {
   return (
     <section className={styles.digest} aria-labelledby="signals">
       <h2 id="signals" className={styles.sectionHead}>
         这届大会发生了什么 · {digest.signals.length} 个信号
       </h2>
-      <p className={styles.digestHeadline}>{digest.headline}</p>
-      {digest.narrative && <p className={styles.digestNarrative}>{digest.narrative}</p>}
 
       <ol className={styles.signalList}>
         {digest.signals.map((sig, i) => (

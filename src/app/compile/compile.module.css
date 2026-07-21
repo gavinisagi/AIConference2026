@@ -56,7 +56,30 @@
   margin: 0;
 }
 
-/* ---- 知识层：会议信号聚合（首屏主角） ---- */
+/* 知识层导语：首屏交代「这届发生了什么」，详细信号让到导览之后。 */
+.digestIntro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-left: var(--accent-bar) solid var(--conf-cursor-compile);
+  border-radius: var(--radius-card);
+  padding: var(--space-24) var(--space-32);
+}
+.digestJump {
+  align-self: flex-start;
+  font-family: var(--font-mono);
+  font-size: var(--fs-body-s);
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid var(--accent-tint);
+  padding-bottom: 2px;
+  transition: border-color var(--motion-fast) var(--easing);
+}
+.digestJump:hover { border-color: var(--accent); }
+
+/* ---- 知识层：会议信号聚合 ---- */
 .digest {
   display: flex;
   flex-direction: column;
@@ -183,7 +206,8 @@
 }
 
 @media (max-width: 640px) {
-  .digest { padding: var(--space-24) var(--space-16); }
+  .digest,
+  .digestIntro { padding: var(--space-24) var(--space-16); }
   .signal { grid-template-columns: 1fr; gap: var(--space-4); }
 }
 
@@ -213,9 +237,15 @@
 }
 .featCard:hover { box-shadow: var(--shadow-card-hover); transform: translateY(-2px); }
 /* 封面：留存的关键画面，让卡片不再是纯文字 */
+/*
+ * height: auto 是必须的 —— <img> 的 height="360" 属性是 CSS height 的
+ * presentational hint，不显式覆盖就会压过 aspect-ratio，把 16:9 的幻灯片
+ * 挤成 381×360 近方形，object-fit: cover 再裁掉 41% 的画面宽度。
+ */
 .featCover {
   display: block;
   width: calc(100% + var(--space-48));
+  height: auto;
   margin: calc(var(--space-24) * -1) calc(var(--space-24) * -1) 0;
   aspect-ratio: 16 / 9;
   object-fit: cover;

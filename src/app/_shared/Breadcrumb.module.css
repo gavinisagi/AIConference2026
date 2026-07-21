@@ -1,6 +1,14 @@
 /* 面包屑（design-spec §4.4 / §6.2）——与 catalog 面包屑同一视觉语言。 */
 
+/*
+ * 横向不得溢出视口：末段是演讲全名（可能很长），过去 nowrap 且不可收缩，
+ * 在 390px 手机上把文档撑到 425px、整页出现横向滚动条。
+ * 现在改为 flex：前面各段保持原宽，末段可收缩并省略号截断。
+ */
 .crumb {
+  display: flex;
+  align-items: baseline;
+  max-width: 100%;
   font-family: var(--font-mono);
   font-size: var(--fs-meta);
   line-height: var(--lh-meta);
@@ -10,6 +18,14 @@
 
 .seg {
   white-space: nowrap;
+  flex: 0 0 auto;
+}
+/* 末段（当前页）：可收缩 + 截断，永远不把页面撑宽。 */
+.seg:last-child {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .crumb a {
@@ -21,10 +37,18 @@
   text-decoration: underline;
 }
 
+/* 分隔符原用 --hairline-strong（描边色），作为文字仅 1.42:1，几乎不可见。 */
 .sep {
-  color: var(--hairline-strong);
+  color: var(--ink-muted);
 }
 
 .crumb [aria-current='page'] {
   color: var(--ink);
+}
+
+/* 手机端只留「首段 / 当前页」，把宽度让给演讲标题。 */
+@media (max-width: 640px) {
+  .seg:not(:first-child):not(:last-child) {
+    display: none;
+  }
 }

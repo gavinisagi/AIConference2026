@@ -16,8 +16,8 @@
   align-items: center;
 }
 
-/* 中点分隔（· ），随文本色，克制 */
+/* 中点分隔（· ），克制但需可辨：--hairline-strong 是描边色，作为文字仅 1.48:1。 */
 .sep {
-  color: var(--hairline-strong);
+  color: var(--ink-muted);
   user-select: none;
 }
