@@ -26,44 +26,44 @@ R2 桶里的键结构与站点路径一致：`frames/<videoId>/tXXX.jpg`（即�
 
 > `<img>` 直接取图不需要配 CORS（CORS 只影响 fetch/XHR）。
 
-### 2. 建 API Token
+### 2. 上传关键画面
 
-R2 → Manage R2 API Tokens → Create，权限选 **Object Read & Write**，限定到该桶。
-记下 Access Key ID / Secret Access Key，以及 S3 端点
-`https://<accountid>.r2.cloudflarestorage.com`。
+先确保本地 `public/frames/` 有产物（跑过流水线 frames 阶段）。
 
-### 3. 上传关键画面
+把桶名写进 `.env.local`（从 `.env.example` 复制；已被 gitignore 挡住）：
 
-先确保本地 `public/frames/` 有产物（跑过流水线 frames 阶段）。然后：
-
-```bash
-export R2_ENDPOINT=https://<accountid>.r2.cloudflarestorage.com
-export R2_BUCKET=aiconf-frames
-export AWS_ACCESS_KEY_ID=<token Access Key ID>
-export AWS_SECRET_ACCESS_KEY=<token Secret Access Key>
-
-node scripts/upload-frames.mjs --dry-run   # 先看会传哪些
-node scripts/upload-frames.mjs             # 实际同步
+```
+R2_BUCKET=aiconf-frames
 ```
 
-脚本走 `aws s3 sync`（R2 是 S3 兼容端点），只传新增/变更，并给图片打
-一年 immutable 缓存头。没装 aws CLI 也可以用 rclone：
+然后登录并上传——**不需要装 AWS CLI，也不需要建 R2 API Token**，
+wrangler 的 OAuth 登录就够（部署 Pages 本来也要做这一步）：
 
 ```bash
-rclone sync public/frames <r2remote>:aiconf-frames/frames \
-  --header-upload "Cache-Control: public, max-age=31536000, immutable"
+npx wrangler login                          # 首次，浏览器授权
+node scripts/upload-frames.mjs --dry-run    # 先看会传哪些
+node scripts/upload-frames.mjs              # 实际上传
 ```
 
-### 4. 前端指向 R2
+脚本逐个 `wrangler r2 object put --remote`，并给图片打一年 immutable 缓存头。
+重跑是幂等的（同名覆盖），中断后直接重跑即可。
 
-Railway（或你的构建环境）加环境变量，值用第 1 步的公开域名（**不带尾斜杠**）：
+> **可选：文件量大时改用 `aws s3 sync`**（批量更快，且会删除远端多余对象）。
+> 需本机装有 aws CLI，并在 R2 → Manage R2 API Tokens 建 Token（Object Read & Write），
+> 然后在 `.env.local` 里补上 `R2_ENDPOINT` / `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`
+> ——四项配齐且 aws 可用时脚本会自动切到该后端，也可 `--backend=aws` 强制。
+
+### 3. 前端指向 R2
+
+在 `.env.local` 里填第 1 步拿到的公开域名（**不带尾斜杠**）：
 
 ```
 NEXT_PUBLIC_FRAMES_BASE=https://img.example.com
 ```
 
-重新构建，`<img>` 就会指向 R2。没配这个变量时站点仍能跑，只是图片回落到
-`/frames/...`（Railway 上没这些文件 → 图片 404，但页面正常）。
+`npm run build` 时 Next 会自动读取，`<img>` 与单场 OG 封面就都指向 R2。
+没配这个变量时站点仍能构建，只是图片回落到 `/frames/...`——本地有文件所以正常，
+但部署产物里没有这些二进制，线上会 404（页面本身不受影响）。
 
 ## 上线自检
 

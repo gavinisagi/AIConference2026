@@ -15,6 +15,7 @@
  * 本模块是规范化与枚举取值的“单一事实来源”；docs/data-contract.md 是人读契约，
  * src/lib/schema.ts 是站点侧的 TS 类型镜像。三者须保持一致。
  */
+import './load-env.mjs'; // 读 .env.local / .env（DATA_SOURCE / DATA_API_URL 等）
 import { readFileSync, writeFileSync, existsSync, readdirSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
