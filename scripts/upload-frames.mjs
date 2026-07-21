@@ -100,6 +100,24 @@ if (backend === 'aws') {
   process.exit(r.status ?? 1);
 }
 
+/** 同步睡眠（spawnSync 是同步的，退避不能用 setTimeout）。 */
+function sleepSync(ms) {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+}
+
+/**
+ * 该错误是否值得重试。
+ * 网络抖动（fetch failed / 超时 / 5xx）几十个文件的上传里几乎必然遇到，重试即可；
+ * 而「桶不存在」「未授权」是配置问题，重试三次只是白等——快速失败让用户去修配置。
+ */
+function isTransient(stderr) {
+  const s = (stderr || '').toLowerCase();
+  if (/does not exist|unauthor|forbidden|invalid|not found|unknown argument/.test(s)) return false;
+  return /fetch failed|connectivity|network|timeout|timed out|socket|econn|enotfound|eai_again|502|503|504|429/.test(s);
+}
+
+const MAX_ATTEMPTS = 4;
+
 // wrangler：逐个 put。--remote 确保打到真实 R2 而非本地模拟存储。
 let ok = 0;
 for (const [i, f] of files.entries()) {
@@ -109,23 +127,37 @@ for (const [i, f] of files.entries()) {
     ok++;
     continue;
   }
-  const r = spawnSync(
-    'npx',
-    shellArgs([
-      '--yes', 'wrangler@latest', 'r2', 'object', 'put', `${R2_BUCKET}/${f.key}`,
-      '--file', f.abs,
-      '--content-type', 'image/jpeg',
-      '--cache-control', CACHE_CONTROL,
-      '--remote',
-    ]),
-    { stdio: ['ignore', 'ignore', 'pipe'], shell: USE_SHELL, encoding: 'utf8' },
-  );
-  if (r.status === 0) {
-    ok++;
-    console.log(`  ${label} ✓`);
-  } else {
-    console.error(`  ${label} ✗\n${(r.stderr || '').trim()}`);
-    die(`上传中断。已成功 ${ok}/${files.length}。修复后重跑（已传的会被覆盖，安全幂等）。`);
+
+  let lastErr = '';
+  let done = false;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    const r = spawnSync(
+      'npx',
+      shellArgs([
+        '--yes', 'wrangler@latest', 'r2', 'object', 'put', `${R2_BUCKET}/${f.key}`,
+        '--file', f.abs,
+        '--content-type', 'image/jpeg',
+        '--cache-control', CACHE_CONTROL,
+        '--remote',
+      ]),
+      { stdio: ['ignore', 'ignore', 'pipe'], shell: USE_SHELL, encoding: 'utf8' },
+    );
+    if (r.status === 0) {
+      ok++;
+      console.log(`  ${label} ✓${attempt > 1 ? `（第 ${attempt} 次尝试）` : ''}`);
+      done = true;
+      break;
+    }
+    lastErr = (r.stderr || '').trim();
+    if (!isTransient(lastErr) || attempt === MAX_ATTEMPTS) break;
+    const backoff = 1000 * 2 ** (attempt - 1); // 1s → 2s → 4s
+    console.log(`  ${label} ⟳ 网络抖动，${backoff / 1000}s 后重试（${attempt}/${MAX_ATTEMPTS - 1}）`);
+    sleepSync(backoff);
+  }
+
+  if (!done) {
+    console.error(`  ${label} ✗\n${lastErr}`);
+    die(`上传中断。已成功 ${ok}/${files.length}。重跑即可（同名覆盖，幂等安全）。`);
   }
 }
 console.log(`[upload-frames] 完成：${ok}/${files.length}`);
