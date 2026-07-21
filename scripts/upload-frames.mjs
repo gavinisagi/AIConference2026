@@ -34,9 +34,20 @@ function die(msg) {
   process.exit(1);
 }
 
+// Windows 上 npx/aws 是 .cmd，spawn 必须走 shell；但走 shell 时 Node 会把 argv 直接
+// 拼成命令行字符串，含空格的参数（--cache-control 的值、含空格的文件路径）会被 cmd.exe
+// 二次拆分成多个参数。故在 win32 下自行加引号。
+const USE_SHELL = process.platform === 'win32';
+
+/** win32+shell 下给需要的参数加引号；其余平台原样返回（execve 不经 shell，无需转义）。 */
+function shellArgs(args) {
+  if (!USE_SHELL) return args;
+  return args.map((a) => (/[\s,;&|<>^"]/.test(a) ? `"${String(a).replace(/"/g, '\\"')}"` : a));
+}
+
 /** 本机是否有某个可执行命令。 */
 function hasCmd(cmd) {
-  const probe = spawnSync(cmd, ['--version'], { stdio: 'ignore', shell: process.platform === 'win32' });
+  const probe = spawnSync(cmd, ['--version'], { stdio: 'ignore', shell: USE_SHELL });
   return !probe.error;
 }
 
@@ -84,7 +95,7 @@ if (backend === 'aws') {
     '--cache-control', CACHE_CONTROL,
   ];
   if (dryRun) args.push('--dryrun');
-  const r = spawnSync('aws', args, { stdio: 'inherit', shell: process.platform === 'win32' });
+  const r = spawnSync('aws', shellArgs(args), { stdio: 'inherit', shell: USE_SHELL });
   if (r.error?.code === 'ENOENT') die('未找到 aws CLI。改用默认的 wrangler 后端即可。');
   process.exit(r.status ?? 1);
 }
@@ -100,14 +111,14 @@ for (const [i, f] of files.entries()) {
   }
   const r = spawnSync(
     'npx',
-    [
+    shellArgs([
       '--yes', 'wrangler@latest', 'r2', 'object', 'put', `${R2_BUCKET}/${f.key}`,
       '--file', f.abs,
       '--content-type', 'image/jpeg',
       '--cache-control', CACHE_CONTROL,
       '--remote',
-    ],
-    { stdio: ['ignore', 'ignore', 'pipe'], shell: process.platform === 'win32', encoding: 'utf8' },
+    ]),
+    { stdio: ['ignore', 'ignore', 'pipe'], shell: USE_SHELL, encoding: 'utf8' },
   );
   if (r.status === 0) {
     ok++;
