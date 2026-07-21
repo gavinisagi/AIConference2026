@@ -287,3 +287,29 @@
 .section {
   scroll-margin-top: 64px;
 }
+
+/*
+ * 手机端：5 个 chip 合计 410px 放不进 358px 容器，末项「关键观点」被切在边缘，
+ * 且无任何可滑动提示 —— 用户会以为导航只有 4 项。
+ * 去掉 chip 边框与内距（每个省 22px）改用紧凑文字链，390px 下可完整放下；
+ * 更窄的机型仍会溢出，故右侧加渐隐遮罩，让「还有内容、可横滑」一眼可见。
+ */
+@media (max-width: 640px) {
+  .tourNav {
+    gap: var(--space-12);
+    padding: var(--space-8) 0;
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 20px), transparent 100%);
+    mask-image: linear-gradient(to right, #000 calc(100% - 20px), transparent 100%);
+  }
+  .tourNavLink {
+    padding: 4px 0;
+    border: 0;
+    border-radius: 0;
+    color: var(--ink);
+    border-bottom: 1px solid var(--hairline-strong);
+  }
+  .tourNavLink:hover {
+    background: transparent;
+    border-bottom-color: var(--accent);
+  }
+}
