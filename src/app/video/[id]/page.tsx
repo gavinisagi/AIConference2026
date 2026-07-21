@@ -75,6 +75,31 @@ function officialAt(url: string, seconds: number | null): string {
   return `${url}${sep}t=${Math.floor(seconds)}s`;
 }
 
+/**
+ * 导览锚点栏 —— 吸顶，用于在长导览页里跨区跳转。
+ * 纯锚点无 JS（静态导出友好）；锚点目标靠 scroll-margin-top 避免被吸顶栏遮住。
+ */
+function TourNav({ session }: { session: Session }) {
+  const items: Array<{ href: string; label: string }> = [];
+  if (session.tour && session.tour.mustWatch.length > 0) items.push({ href: '#must', label: '必看片段' });
+  if (session.frames.length > 0) items.push({ href: '#frames', label: '关键画面' });
+  items.push({ href: '#time', label: '时间分配' });
+  items.push({ href: '#stops', label: '逐段导览' });
+  if (session.takeaways.length > 0) items.push({ href: '#takeaways', label: '关键观点' });
+  // 只有一两个区块时导航没有价值，反而占位。
+  if (items.length < 3) return null;
+
+  return (
+    <nav className={styles.tourNav} aria-label="导览分区">
+      {items.map((it) => (
+        <a key={it.href} href={it.href} className={styles.tourNavLink}>
+          {it.label}
+        </a>
+      ))}
+    </nav>
+  );
+}
+
 /** 相关推荐：优先同主题，回落同大会；排除自身，取前 6（design-spec §6.2）。 */
 function relatedSessions(all: readonly Session[], current: Session): Session[] {
   const primaryTopic = current.topics[0];
@@ -160,6 +185,10 @@ export default async function VideoDetailPage({
               )}
             </header>
 
+            {/* 导览页可达 9000px+，长滚动中容易失去位置：给一条吸顶锚点栏用于跨区跳转。
+                只列出该场真实存在的区块（无必看片段 / 无关键画面的场次不会出现死锚点）。 */}
+            {session.tour && <TourNav session={session} />}
+
             {/* 观看导览：有 tour 时是本页核心体验，钩子 hero 第一眼（承接层）。 */}
             {session.tour && (
               <TourView tour={session.tour} officialUrl={session.officialUrl} frames={session.frames} />
@@ -192,7 +221,7 @@ export default async function VideoDetailPage({
 
             {/* 关键观点（§6.1 观点卡复用）：真实 takeaways 缺失时不渲染，不编造（§7.1）。 */}
             {session.takeaways.length > 0 && (
-              <section className={styles.section} aria-labelledby="takeaways-head">
+              <section className={styles.section} id="takeaways" aria-labelledby="takeaways-head">
                 <h2 id="takeaways-head" className={styles.sectionHead}>
                   关键观点
                 </h2>

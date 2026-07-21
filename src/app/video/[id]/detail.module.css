@@ -240,3 +240,50 @@
     grid-template-columns: repeat(3, 1fr);
   }
 }
+
+/* ---- 导览锚点栏（吸顶） ----------------------------------------------
+ * 导览页可达 9000px+，长滚动中容易失去位置。纯锚点、无 JS（静态导出友好）。
+ * 手机端横向可滑，且自身 overflow 收在容器内，绝不把页面撑宽。
+ */
+.tourNav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  gap: var(--space-8);
+  align-items: center;
+  margin: 0 0 var(--space-24);
+  padding: var(--space-8) 0;
+  background: color-mix(in srgb, var(--paper) 92%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--hairline);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+.tourNav::-webkit-scrollbar { display: none; }
+
+.tourNavLink {
+  flex: 0 0 auto;
+  font-family: var(--font-sans);
+  font-size: var(--fs-body-s);
+  color: var(--ink-secondary);
+  text-decoration: none;
+  white-space: nowrap;
+  padding: 5px 11px;
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-chip);
+  transition: color var(--motion-fast) var(--easing),
+    border-color var(--motion-fast) var(--easing),
+    background var(--motion-fast) var(--easing);
+}
+.tourNavLink:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-tint);
+}
+
+/* 锚点目标不被吸顶栏遮住（关键观点区块）。 */
+.section {
+  scroll-margin-top: 64px;
+}
