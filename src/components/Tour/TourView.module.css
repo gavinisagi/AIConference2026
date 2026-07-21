@@ -279,3 +279,9 @@
   .stop { grid-template-columns: 1fr; gap: var(--space-8); }
   .jump { margin-left: 0; }
 }
+
+/* 锚点目标不被详情页吸顶导航遮住（必看片段 / 关键画面 / 时间分配 / 逐段导览）。 */
+.section,
+.band {
+  scroll-margin-top: 64px;
+}

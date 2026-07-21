@@ -79,7 +79,7 @@ export function TourView({
 
       {/* 必看片段：转化力最强，前置。 */}
       {tour.mustWatch.length > 0 && (
-        <section className={styles.section}>
+        <section className={styles.section} id="must">
           <h3 className={styles.sectionHead}>必看片段 · 直接跳看</h3>
           <div className={styles.mustList}>
             {tour.mustWatch.map((m, i) => (
@@ -104,7 +104,7 @@ export function TourView({
 
       {/* 关键画面：流水线留存的可读屏幕内容（幻灯片/图表/代码/界面），点击跳原片对应时刻。 */}
       {frames.length > 0 && (
-        <section className={styles.section}>
+        <section className={styles.section} id="frames">
           <h3 className={styles.sectionHead}>关键画面 · 点击跳到该处</h3>
           <ul className={styles.frameStrip}>
             {frames.map((f) => (
@@ -137,7 +137,7 @@ export function TourView({
       )}
 
       {/* 决策带：谁该看 + 时间占比 + 时间不够。 */}
-      <div className={styles.band}>
+      <div className={styles.band} id="time">
         {tour.whoShouldWatch && (
           <div className={styles.who}>
             <span className={styles.bandLabel}>谁该看</span>
@@ -171,7 +171,7 @@ export function TourView({
         )}
       </div>
 
-      <section className={styles.section}>
+      <section className={styles.section} id="stops">
         <h3 className={styles.sectionHead}>逐段导览</h3>
         <div className={styles.modes}>
           {(['watch', 'skim', 'listen'] as TourMode[]).map((m) => (

@@ -137,18 +137,26 @@
   min-width: 0;
 }
 /* 中英混排下不做 uppercase：会把 token / Cursor 喊成 TOKEN / CURSOR。 */
+/*
+ * 层级：标题 20 > 正文 16 > 为何重要 14 > 出处 13。
+ * 此前标题 14px 比它统领的正文 18px 还小，h3 被排成了小标签，层级倒置；
+ * 且 13/14 挤了五个角色，读起来是「一堆小的加一个大的」而非递降。
+ * 「产能过剩需求不涨」这类本就是标题句，故改用衬线体承担标题职责。
+ */
 .signalTitle {
-  font-family: var(--font-sans);
-  font-size: var(--fs-body-s);
-  letter-spacing: 0.02em;
-  font-weight: 700;
+  font-family: var(--font-serif);
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
+  font-weight: var(--fw-h3);
   color: var(--accent);
   margin: 0;
+  max-width: var(--reading-max);
+  text-wrap: balance;
 }
 .signalStatement {
   font-family: var(--font-serif);
-  font-size: var(--fs-body-l);
-  line-height: var(--lh-body-l);
+  font-size: var(--fs-body-m);
+  line-height: var(--lh-body-m);
   color: var(--ink);
   margin: 0;
   max-width: var(--reading-max);
@@ -164,7 +172,9 @@
   border-radius: var(--radius-btn);
   padding: var(--space-8) var(--space-12);
   margin: var(--space-4) 0 0;
-  max-width: var(--reading-max);
+  /* 14px 铺满 720px 是 51 字/行，比 16px 正文的 45 字还长 —— 次要信息不该比
+     正文更费眼，故按字号比收窄，让两者每行字数接近。 */
+  max-width: calc(var(--reading-max) * 0.88);
 }
 .signalWhyLabel {
   color: var(--accent);
