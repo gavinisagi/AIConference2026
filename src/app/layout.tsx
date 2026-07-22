@@ -17,7 +17,7 @@ const SITE_DESC =
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: `${SITE_NAME} — Cursor Compile 2026 观看导览`,
+    default: `${SITE_NAME} — AI 大会观看导览`,
     template: `%s · ${SITE_NAME}`,
   },
   description: SITE_DESC,
@@ -27,13 +27,13 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     locale: 'zh_CN',
     url: SITE_URL,
-    title: `${SITE_NAME} — Cursor Compile 2026 观看导览`,
+    title: `${SITE_NAME} — AI 大会观看导览`,
     description: SITE_DESC,
     images: [{ url: '/og.png', width: 1200, height: 630, alt: SITE_NAME }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: `${SITE_NAME} — Cursor Compile 2026 观看导览`,
+    title: `${SITE_NAME} — AI 大会观看导览`,
     description: SITE_DESC,
     images: ['/og.png'],
   },
