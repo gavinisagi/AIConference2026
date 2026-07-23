@@ -6,12 +6,8 @@ import { ConferenceHub } from '@/components/ConferenceHub/ConferenceHub';
 import { SiteChrome } from '@/components/SiteChrome/SiteChrome';
 
 /**
- * /c/{conferenceId} — 会议导览 hub，泛化路由（中文，默认 locale）。
- * 英文镜像见 /en/c/{conferenceId}（src/app/en/c/[conferenceId]/page.tsx）。
- *
- * 一场会议只要有 ≥1 已发布场次（data/publish.json / DB is_published）就会在此
- * 自动生成页面——新开一场会议无需新写路由或组件，重跑 build-data 即可。
- * 取代此前硬编码在 /compile 的做法（历史见 src/app/_compile/）。
+ * /en/c/{conferenceId} — 英文镜像。中文原版见 src/app/c/[conferenceId]/page.tsx，
+ * 逻辑完全一致，只是 locale='en'（非 [locale] 动态段方案，见 src/i18n/locale.ts）。
  */
 
 function publishedConferences() {
@@ -29,26 +25,25 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { conferenceId } = await params;
   const conf = publishedConferences().find((c) => c.id === conferenceId);
-  if (!conf) return { title: '会议导览 · AI Conference 2026 Compass' };
+  if (!conf) return { title: 'Conference guide · AI Conference 2026 Compass' };
   return {
-    title: `${conf.name} 导览 · AI Conference 2026 Compass`,
-    description: `${conf.name} 全部 ${conf.sessionCount} 场演讲的观看导览：这届大会的信号、每场的钩子与必看片段、逐段告诉你该看画面还是听就够。`,
+    title: `${conf.name} guide · AI Conference 2026 Compass`,
+    description: `A watch guide for all ${conf.sessionCount} talks at ${conf.name}: this conference's signals, each talk's hook and must-watch clips, and a segment-by-segment call on whether to watch the screen or just listen.`,
   };
 }
 
-export default async function ConferenceHubPage({
+export default async function ConferenceHubPageEn({
   params,
 }: {
   params: Promise<{ conferenceId: string }>;
 }) {
   const { conferenceId } = await params;
   if (!isConferenceId(conferenceId)) notFound();
-  // 未发布（无场次）的会议不渲染空壳页——与静态生成集合保持一致。
   if (!publishedConferences().some((c) => c.id === conferenceId)) notFound();
 
   return (
-    <SiteChrome locale="zh">
-      <ConferenceHub conferenceId={conferenceId} locale="zh" />
+    <SiteChrome locale="en">
+      <ConferenceHub conferenceId={conferenceId} locale="en" />
     </SiteChrome>
   );
 }

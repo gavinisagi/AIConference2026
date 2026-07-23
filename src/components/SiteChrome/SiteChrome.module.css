@@ -1,3 +1,16 @@
+/* 语言切换条：页面顶部一条极简细条，不抢内容，不 sticky（避免重蹈锚点栏的教训）。 */
+.langBar {
+  border-bottom: 1px solid var(--hairline);
+  background: var(--paper);
+}
+.langBarInner {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: var(--space-8) var(--page-margin-desktop);
+  display: flex;
+  justify-content: flex-end;
+}
+
 /* 站点级页脚：归属与免责（低调、不与内容抢注意力）。 */
 .siteFoot {
   background: var(--surface-sunken);
@@ -25,6 +38,7 @@
 }
 
 @media (max-width: 640px) {
+  .langBarInner { padding: var(--space-8) var(--page-margin-mobile); }
   .siteFoot {
     padding: var(--space-24) var(--page-margin-mobile);
     margin-top: var(--space-48);
