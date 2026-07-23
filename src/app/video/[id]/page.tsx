@@ -143,7 +143,7 @@ export default async function VideoDetailPage({
         <Breadcrumb
           items={[
             { label: '导览', href: '/' },
-            { label: conferenceMeta[session.conferenceId].label },
+            { label: conferenceMeta[session.conferenceId].label, href: `/c/${session.conferenceId}/` },
             { label: title },
           ]}
         />

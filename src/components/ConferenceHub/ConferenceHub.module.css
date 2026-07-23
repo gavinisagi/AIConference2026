@@ -1,0 +1,332 @@
+.page {
+  background: var(--paper);
+  min-height: 100vh;
+  padding: var(--space-32) var(--page-margin-desktop) var(--space-96);
+}
+.inner {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-48);
+}
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  padding-top: var(--space-16);
+}
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--conf-accent);
+  font-weight: 600;
+}
+.h1 {
+  font-family: var(--font-serif);
+  font-size: var(--fs-display);
+  line-height: var(--lh-display);
+  font-weight: var(--fw-display);
+  letter-spacing: var(--tracking-display);
+  color: var(--ink);
+  margin: 0;
+  text-wrap: balance;
+}
+.lead {
+  font-family: var(--font-serif);
+  font-size: var(--fs-body-l);
+  line-height: var(--lh-body-l);
+  color: var(--ink-secondary);
+  margin: 0;
+  max-width: var(--reading-max);
+}
+.lead b { color: var(--ink); font-weight: 600; }
+
+.section { display: flex; flex-direction: column; gap: var(--space-24); }
+.sectionHead {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  font-weight: 600;
+  margin: 0;
+}
+
+/* 知识层导语：首屏交代「这届发生了什么」，详细信号让到导览之后。 */
+.digestIntro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-left: var(--accent-bar) solid var(--conf-accent);
+  border-radius: var(--radius-card);
+  padding: var(--space-24) var(--space-32);
+}
+.digestJump {
+  align-self: flex-start;
+  font-family: var(--font-mono);
+  font-size: var(--fs-body-s);
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid var(--accent-tint);
+  padding-bottom: 2px;
+  transition: border-color var(--motion-fast) var(--easing);
+}
+.digestJump:hover { border-color: var(--accent); }
+
+/* ---- 知识层：会议信号聚合 ---- */
+.digest {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-card);
+  padding: var(--space-32);
+}
+.digestHeadline {
+  font-family: var(--font-serif);
+  font-size: var(--fs-h2);
+  line-height: var(--lh-h2);
+  font-weight: var(--fw-h2);
+  color: var(--ink);
+  margin: 0;
+  max-width: var(--reading-max);
+  text-wrap: balance;
+}
+.digestNarrative {
+  font-family: var(--font-serif);
+  font-size: var(--fs-body-m);
+  line-height: var(--lh-body-m);
+  color: var(--ink-secondary);
+  margin: 0 0 var(--space-8);
+  max-width: var(--reading-max);
+}
+
+.signalList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.signal {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: var(--space-16);
+  padding: var(--space-24) 0;
+  border-top: 1px solid var(--hairline);
+}
+.signalNo {
+  font-family: var(--font-mono);
+  font-size: var(--fs-body-s);
+  font-weight: 600;
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+  padding-top: 3px;
+}
+.signalBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  min-width: 0;
+}
+/* 中英混排下不做 uppercase：会把 token / Cursor 喊成 TOKEN / CURSOR。 */
+/*
+ * 层级：标题 20 > 正文 16 > 为何重要 14 > 出处 13。
+ * 此前标题 14px 比它统领的正文 18px 还小，h3 被排成了小标签，层级倒置；
+ * 且 13/14 挤了五个角色，读起来是「一堆小的加一个大的」而非递降。
+ * 「产能过剩需求不涨」这类本就是标题句，故改用衬线体承担标题职责。
+ */
+.signalTitle {
+  font-family: var(--font-serif);
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
+  font-weight: var(--fw-h3);
+  color: var(--accent);
+  margin: 0;
+  max-width: var(--reading-max);
+  text-wrap: balance;
+}
+.signalStatement {
+  font-family: var(--font-serif);
+  font-size: var(--fs-body-m);
+  line-height: var(--lh-body-m);
+  color: var(--ink);
+  margin: 0;
+  max-width: var(--reading-max);
+  text-wrap: pretty;
+}
+.signalWhy {
+  display: flex;
+  gap: var(--space-8);
+  font-size: var(--fs-body-s);
+  line-height: var(--lh-body-s);
+  color: var(--ink-secondary);
+  background: var(--surface-sunken);
+  border-radius: var(--radius-btn);
+  padding: var(--space-8) var(--space-12);
+  margin: var(--space-4) 0 0;
+  /* 14px 铺满 720px 是 51 字/行，比 16px 正文的 45 字还长 —— 次要信息不该比
+     正文更费眼，故按字号比收窄，让两者每行字数接近。 */
+  max-width: calc(var(--reading-max) * 0.88);
+}
+.signalWhyLabel {
+  color: var(--accent);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.sources {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-8);
+  margin-top: var(--space-4);
+}
+.sourcesLabel {
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+.sourceLink {
+  font-size: var(--fs-body-s);
+  color: var(--ink-secondary);
+  text-decoration: none;
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-chip);
+  padding: 3px 9px;
+  transition: color var(--motion-fast) var(--easing), border-color var(--motion-fast) var(--easing);
+}
+.sourceLink:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.sourceTime {
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 640px) {
+  .digest,
+  .digestIntro { padding: var(--space-24) var(--space-16); }
+  .signal { grid-template-columns: 1fr; gap: var(--space-4); }
+}
+
+/* 导览已就绪 —— 主推卡 */
+.featList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: var(--space-24);
+}
+.featCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  text-decoration: none;
+  color: inherit;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-left: var(--accent-bar) solid var(--conf-accent);
+  border-radius: var(--radius-card);
+  padding: var(--space-24);
+  box-shadow: var(--shadow-card);
+  transition: box-shadow var(--motion-base) var(--easing), transform var(--motion-base) var(--easing);
+  height: 100%;
+}
+.featCard:hover { box-shadow: var(--shadow-card-hover); transform: translateY(-2px); }
+/* 封面：留存的关键画面，让卡片不再是纯文字 */
+/*
+ * height: auto 是必须的 —— <img> 的 height="360" 属性是 CSS height 的
+ * presentational hint，不显式覆盖就会压过 aspect-ratio，把 16:9 的幻灯片
+ * 挤成 381×360 近方形，object-fit: cover 再裁掉 41% 的画面宽度。
+ */
+.featCover {
+  display: block;
+  width: calc(100% + var(--space-48));
+  height: auto;
+  margin: calc(var(--space-24) * -1) calc(var(--space-24) * -1) 0;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-bottom: 1px solid var(--hairline);
+  background: var(--surface-sunken);
+}
+.featTop { display: flex; align-items: center; justify-content: space-between; }
+.featBadge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-tint);
+  padding: 3px 9px;
+  border-radius: var(--radius-chip);
+}
+.featMeta {
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+.featTitle {
+  font-family: var(--font-serif);
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
+  font-weight: var(--fw-h3);
+  color: var(--ink);
+  margin: 0;
+  text-wrap: balance;
+}
+.featHook {
+  font-family: var(--font-serif);
+  font-size: var(--fs-body-m);
+  line-height: var(--lh-body-m);
+  color: var(--ink-secondary);
+  margin: 0;
+  flex: 1;
+}
+.featStats { display: flex; flex-direction: column; gap: var(--space-8); margin-top: var(--space-4); }
+.miniBar {
+  display: flex;
+  height: 8px;
+  border-radius: var(--radius-chip);
+  overflow: hidden;
+  border: 1px solid var(--hairline-strong);
+}
+.miniBar i { display: block; height: 100%; }
+.bw { background: var(--mode-watch-ink); }
+.bs { background: var(--mode-skim-ink); }
+.bl { background: var(--mode-listen-ink); }
+.featStatText {
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 全部场次网格 */
+.grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-24);
+}
+
+@media (max-width: 640px) {
+  .page { padding: var(--space-24) var(--page-margin-mobile) var(--space-64); }
+  .featList, .grid { grid-template-columns: 1fr; }
+}

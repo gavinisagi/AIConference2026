@@ -9,6 +9,7 @@
 """
 from __future__ import annotations
 
+import contextlib
 import json
 import os
 import shutil
@@ -23,6 +24,50 @@ from . import config
 # 否则单场瞬时错误会累积成大量假失败。指数退避。
 LLM_RETRIES = 3
 LLM_RETRY_BACKOFF_SECONDS = 8
+
+# 并发闸：任意时刻至多一个 claude -p 子进程在飞行中（跨进程文件锁）。
+#
+# subprocess.run(..., timeout=600) 自身超时是安全的——Python 会正确杀掉子进程。
+# 但若外部强行终止了正在等待它的父进程（如外层 timeout 命令、被中断的批处理脚本），
+# Windows 的 TerminateProcess 不会级联杀死子进程，claude.exe 就会变成孤儿留存。
+# 多次误操作叠加后曾在本机堆出十余个孤儿 claude -p 进程，抢占内存把交互中的
+# Claude Desktop 顶到无响应/崩溃。这把锁把「同时只准一个」做成硬约束，不依赖
+# 调用方守规矩——即便真出现孤儿或误触发的并发调用，也只会排队等待而非并发抢跑。
+_CLI_LOCK_PATH = config.WORK_DIR / ".claude-cli.lock"
+_CLI_LOCK_STALE_SECONDS = 700  # 单次 claude -p 上限 600s + 冗余，超过视为孤儿锁
+_CLI_LOCK_POLL_SECONDS = 2
+_CLI_LOCK_LOG_EVERY_SECONDS = 30
+
+
+@contextlib.contextmanager
+def _claude_cli_lock():
+    _CLI_LOCK_PATH.parent.mkdir(parents=True, exist_ok=True)
+    waited = 0
+    while True:
+        try:
+            fd = os.open(_CLI_LOCK_PATH, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            os.write(fd, str(os.getpid()).encode("utf-8"))
+            os.close(fd)
+            break
+        except FileExistsError:
+            try:
+                age = time.time() - os.path.getmtime(_CLI_LOCK_PATH)
+            except FileNotFoundError:
+                continue  # 锁在探测间隙被释放，重试获取
+            if age > _CLI_LOCK_STALE_SECONDS:
+                print(f"  [llm] 打破孤儿锁（{age:.0f}s 未释放，持有进程已消失）")
+                with contextlib.suppress(FileNotFoundError):
+                    os.remove(_CLI_LOCK_PATH)
+                continue
+            if waited % _CLI_LOCK_LOG_EVERY_SECONDS == 0:
+                print(f"  [llm] 等待并发闸（另一个 claude -p 在飞行中，已等 {waited}s）")
+            time.sleep(_CLI_LOCK_POLL_SECONDS)
+            waited += _CLI_LOCK_POLL_SECONDS
+    try:
+        yield
+    finally:
+        with contextlib.suppress(FileNotFoundError):
+            os.remove(_CLI_LOCK_PATH)
 
 ROLES = ("developer", "product-design", "founder-lead", "trend")
 TOPICS = ("agent", "ai-coding", "evals", "context", "design-to-code", "ai-product")
@@ -126,10 +171,11 @@ def _call_claude_cli(system: str, user: str, max_turns: int = 1) -> str:
         "--max-turns", str(max_turns),
     ]
     try:
-        proc = subprocess.run(
-            cmd, input=user, capture_output=True, text=True,
-            encoding="utf-8", timeout=600,
-        )
+        with _claude_cli_lock():
+            proc = subprocess.run(
+                cmd, input=user, capture_output=True, text=True,
+                encoding="utf-8", timeout=600,
+            )
     except subprocess.TimeoutExpired as e:
         raise LLMError("claude -p 超时（>600s）") from e
     if proc.returncode != 0:

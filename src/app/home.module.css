@@ -1,0 +1,95 @@
+.page {
+  background: var(--paper);
+  min-height: 100vh;
+  padding: var(--space-32) var(--page-margin-desktop) var(--space-96);
+}
+.inner {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-48);
+}
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  padding-top: var(--space-16);
+}
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 600;
+}
+.h1 {
+  font-family: var(--font-serif);
+  font-size: var(--fs-display);
+  line-height: var(--lh-display);
+  font-weight: var(--fw-display);
+  letter-spacing: var(--tracking-display);
+  color: var(--ink);
+  margin: 0;
+  text-wrap: balance;
+}
+.lead {
+  font-family: var(--font-serif);
+  font-size: var(--fs-body-l);
+  line-height: var(--lh-body-l);
+  color: var(--ink-secondary);
+  margin: 0;
+  max-width: var(--reading-max);
+}
+.lead b { color: var(--ink); font-weight: 600; }
+
+/* 会议卡：一场会议一张，导向该会议的 hub。 */
+.confList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--space-24);
+}
+.confCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  text-decoration: none;
+  color: inherit;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-card);
+  padding: var(--space-24);
+  box-shadow: var(--shadow-card);
+  transition: box-shadow var(--motion-base) var(--easing), transform var(--motion-base) var(--easing);
+  height: 100%;
+}
+.confCard:hover { box-shadow: var(--shadow-card-hover); transform: translateY(-2px); }
+.confCount {
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+.confTeaser {
+  font-family: var(--font-serif);
+  font-size: var(--fs-body-m);
+  line-height: var(--lh-body-m);
+  color: var(--ink-secondary);
+  margin: 0;
+  flex: 1;
+}
+.confCta {
+  font-family: var(--font-mono);
+  font-size: var(--fs-body-s);
+  color: var(--accent);
+}
+
+@media (max-width: 640px) {
+  .page { padding: var(--space-24) var(--page-margin-mobile) var(--space-64); }
+  .confList { grid-template-columns: 1fr; }
+}
