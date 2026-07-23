@@ -4,32 +4,27 @@ import { getDictionary } from '@/i18n/getDictionary';
 import { renderRich } from '@/i18n/rich';
 import { ConfBadge } from '@/components/ConfBadge/ConfBadge';
 import { SiteChrome } from '@/components/SiteChrome/SiteChrome';
-import styles from './home.module.css';
+import styles from '../home.module.css';
 
 /**
- * / — 站点首页（中文，默认 locale，无前缀）：多会议入口。
- *
- * 上线场次已跨会议（Cursor Compile + Figma Config），首页不再是某一会议的
- * 硬编码 hub（那是早期只有一场会议时的做法，见 src/app/_compile/），而是
- * 列出全部已发布会议、各自导向 /c/{conferenceId}。新开一场会议只需
- * data/publish.json 打开开关 + 重新构建，首页与路由自动补上，无需改代码。
- * 英文版见 /en（src/app/en/page.tsx），同一套组件，locale='en'。
+ * /en — 英文首页。中文原版见 src/app/page.tsx；两者共享同一份 home.module.css
+ * 与组件，只是显式传入 locale='en'（非 [locale] 动态段方案，见 src/i18n/locale.ts）。
  */
-const dict = getDictionary('zh');
+const dict = getDictionary('en');
 
 export const metadata: Metadata = {
   title: `${dict.site.name} — ${dict.site.tagline}`,
   description: dict.site.description,
 };
 
-export default function HomePage() {
+export default function HomePageEn() {
   const conferences = getConferences()
     .filter((c) => c.sessionCount > 0)
     .slice()
     .sort((a, b) => b.sessionCount - a.sessionCount);
 
   return (
-    <SiteChrome locale="zh">
+    <SiteChrome locale="en">
       <main className={styles.page}>
         <div className={styles.inner}>
           <header className={styles.hero}>
@@ -43,7 +38,7 @@ export default function HomePage() {
               const digest = getDigestByConference(conf.id);
               return (
                 <li key={conf.id}>
-                  <a className={styles.confCard} href={`/c/${conf.id}/`}>
+                  <a className={styles.confCard} href={`/en/c/${conf.id}/`}>
                     <ConfBadge conference={conf.id} />
                     <span className={styles.confCount}>{dict.home.sessionCount(conf.sessionCount)}</span>
                     {digest?.headline && <p className={styles.confTeaser}>{digest.headline}</p>}

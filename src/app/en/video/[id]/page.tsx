@@ -7,11 +7,10 @@ import { VideoDetailView } from '@/components/VideoDetailView/VideoDetailView';
 import { SiteChrome } from '@/components/SiteChrome/SiteChrome';
 
 /**
- * /video/{id} — 视频详情页（中文，默认 locale）。英文镜像见
- * /en/video/{id}（src/app/en/video/[id]/page.tsx）。两者共用
- * VideoDetailView，只是显式传入不同 locale。
+ * /en/video/{id} — 英文镜像。中文原版见 src/app/video/[id]/page.tsx，
+ * 逻辑完全一致，只是 locale='en'（非 [locale] 动态段方案，见 src/i18n/locale.ts）。
  */
-const dict = getDictionary('zh');
+const dict = getDictionary('en');
 
 export function generateStaticParams(): Array<{ id: string }> {
   return getAllSessions().map((s) => ({ id: s.id }));
@@ -28,9 +27,6 @@ export async function generateMetadata({
   const title = displayTitle(session, dict);
   const description = session.whyWatch ?? dict.video.defaultDescription;
 
-  // 单场 OG 封面：优先用该场留存的首张关键画面（16:9 真实内容，比通用图更有点击欲）；
-  // 无画面回落站点通用 og.png。相对 /frames 路径由 metadataBase 解析成绝对地址；配了
-  // R2 base 时 frameSrc() 直接给出绝对 R2 URL。爬虫要绝对 URL，两种情况都成立。
   const cover = session.frames[0];
   const ogImage = cover
     ? { url: frameSrc(cover.src), width: 960, height: 540, alt: cover.caption || title }
@@ -43,7 +39,7 @@ export async function generateMetadata({
       type: 'article',
       title,
       description,
-      url: `/video/${session.id}/`,
+      url: `/en/video/${session.id}/`,
       images: [ogImage],
     },
     twitter: {
@@ -55,7 +51,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function VideoDetailPage({
+export default async function VideoDetailPageEn({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -65,8 +61,8 @@ export default async function VideoDetailPage({
   if (!session) notFound();
 
   return (
-    <SiteChrome locale="zh">
-      <VideoDetailView session={session} locale="zh" />
+    <SiteChrome locale="en">
+      <VideoDetailView session={session} locale="en" />
     </SiteChrome>
   );
 }

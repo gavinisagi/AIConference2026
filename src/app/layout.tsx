@@ -1,13 +1,16 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import './globals.css';
-import styles from './layout.module.css';
 
 /**
  * 站点根布局。
  *
  * SITE_URL：部署域名（Railway 上设 NEXT_PUBLIC_SITE_URL）。metadataBase 决定
  * OG/Twitter 卡片里相对图片路径解析成的绝对地址——分享到 X / 小红书需要它。
+ *
+ * <html lang> 恒为 zh-CN：中文路由与 /en 镜像路由共用这一个根 layout（根 layout
+ * 不在任何 [locale] 动态段下，拿不到 locale，见 src/i18n/locale.ts）。语言切换条、
+ * 页脚翻译等 locale 相关内容下沉到 SiteChrome（各路由显式传入 locale 后渲染）。
  */
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ai-conference-compass.up.railway.app';
 const SITE_NAME = 'AI Conference Compass';
@@ -16,10 +19,11 @@ const SITE_DESC =
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: {
-    default: `${SITE_NAME} — AI 大会观看导览`,
-    template: `%s · ${SITE_NAME}`,
-  },
+  // 无 template：每个页面自己的 metadata.title 已经拼好完整标题（含站名后缀），
+  // 若再套 layout 的 template 会把站名重复拼两遍（实测 /video/{id} 曾变成
+  // "标题 · AI Conference 2026 Compass · AI Conference Compass"）。
+  // default 仅作兜底——理论上不会用到，因为站内每个路由都显式设置了 title。
+  title: `${SITE_NAME} — AI 大会观看导览`,
   description: SITE_DESC,
   applicationName: SITE_NAME,
   openGraph: {
@@ -41,25 +45,9 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
-  // 中文优先（design-spec §1.4）；专有名词保留英文原文。
   return (
     <html lang="zh-CN">
-      <body>
-        {children}
-        {/* 归属与免责：本站为第三方导览，不隶属于任何主办方，内容以官方原片为准。 */}
-        <footer className={styles.siteFoot}>
-          <div className={styles.siteFootInner}>
-            <p className={styles.footLine}>
-              本站是<b>第三方观看导览</b>，与 Cursor、Figma、AI Engineer 及各主办方<b>无隶属关系</b>。
-              所有演讲版权归原作者与主办方所有；本站不托管、不播放视频，仅提供指向官方原片的时间戳链接。
-            </p>
-            <p className={styles.footLine}>
-              导览由自动流水线生成（语音转写 → 结构化提炼 → 人工抽检），每条观点均可回指原片具体时刻。
-              可能存在转写或归纳误差，<b>请以官方原片为准</b>。
-            </p>
-          </div>
-        </footer>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

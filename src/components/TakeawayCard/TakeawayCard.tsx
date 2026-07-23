@@ -1,4 +1,6 @@
-import { topicMeta, type Conference, type Topic, type VideoStatus } from '@/design/tokens';
+import type { Conference, Topic, VideoStatus } from '@/design/tokens';
+import type { Locale } from '@/i18n/locale';
+import { getDictionary } from '@/i18n/getDictionary';
 import { Card } from '../Card/Card';
 import { Chip } from '../Chip/Chip';
 import { ConfBadge } from '../ConfBadge/ConfBadge';
@@ -12,6 +14,8 @@ export interface TakeawayCardProps {
   rank?: string;
   conference: Conference;
   status: VideoStatus;
+  /** 缺省 zh——仅为已退役页面（src/app/_*）兼容，实际路由一律显式传入。 */
+  locale?: Locale;
   /** 观点句：编辑提炼的一句话结论，卡片主角。 */
   quote: string;
   /** 支撑说明：为什么值得看 / 关键上下文（最多 2 行）。 */
@@ -33,6 +37,7 @@ export function TakeawayCard({
   rank,
   conference,
   status,
+  locale = 'zh',
   quote,
   support,
   speaker,
@@ -40,13 +45,14 @@ export function TakeawayCard({
   topics = [],
   officialHref,
 }: TakeawayCardProps) {
+  const dict = getDictionary(locale);
   return (
     <Card interactive recommended={status === 'recommended'}>
       <div className={styles.stack}>
         <div className={styles.sourceRow}>
           {rank && <span className={styles.rank}>{rank}</span>}
           <ConfBadge conference={conference} />
-          <StatusBadge status={status} />
+          <StatusBadge status={status} locale={locale} />
         </div>
 
         <p className={styles.quote}>{quote}</p>
@@ -57,7 +63,7 @@ export function TakeawayCard({
           items={[
             speaker,
             <DurationTag key="dur" minutes={minutes} />,
-            ...topics.map((t) => <Chip key={t}>{topicMeta[t].label}</Chip>),
+            ...topics.map((t) => <Chip key={t}>{dict.topics[t]}</Chip>),
           ]}
         />
 
@@ -69,10 +75,10 @@ export function TakeawayCard({
               rel="noopener noreferrer"
               className="t-body-s"
             >
-              看官方片段 ↗
+              {dict.takeawayCard.watchOfficialClip}
             </a>
           )}
-          <span className="t-body-s">展开视频详情</span>
+          <span className="t-body-s">{dict.takeawayCard.expandDetail}</span>
         </div>
       </div>
     </Card>

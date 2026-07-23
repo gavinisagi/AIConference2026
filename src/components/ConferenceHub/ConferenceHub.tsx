@@ -1,4 +1,3 @@
-import type { CSSProperties } from 'react';
 import {
   getConferenceById,
   getSessionsByConference,
@@ -9,6 +8,9 @@ import {
 } from '@/lib/loader';
 import type { ConferenceDigest, ConferenceId, Session } from '@/lib/schema';
 import { frameSrc } from '@/lib/assets';
+import type { Locale } from '@/i18n/locale';
+import { getDictionary, type Dictionary } from '@/i18n/getDictionary';
+import { renderRich } from '@/i18n/rich';
 import { VideoCard } from '@/components/VideoCard/VideoCard';
 import { Breadcrumb } from '@/app/_shared/Breadcrumb';
 import styles from './ConferenceHub.module.css';
@@ -16,12 +18,14 @@ import styles from './ConferenceHub.module.css';
 /**
  * ConferenceHub — 会议导览 hub（知识层信号 + 逐场导览）。
  *
- * 按 conferenceId 参数化，供 /c/[conferenceId] 复用；新开一场会议无需新写组件，
- * 只要该会议有已发布场次，路由会自动生成（见 app/c/[conferenceId]/page.tsx 的
- * generateStaticParams）。原 CompileHub 是本组件对 cursor-compile 的硬编码版本，
- * 现已泛化（历史见 src/app/_compile/）。
+ * 按 conferenceId 参数化，供 /c/[conferenceId] 与 /en/c/[conferenceId] 复用；
+ * 新开一场会议无需新写组件，只要该会议有已发布场次，路由会自动生成（见
+ * app/c/[conferenceId]/page.tsx 的 generateStaticParams）。locale 显式传入
+ * （非 [locale] 动态段方案，见 src/i18n/locale.ts），驱动 UI 框架文案；
+ * 演讲的钩子/观点/信号等 LLM 生成的中文正文不受 locale 影响，两种语言下同源。
  */
-export function ConferenceHub({ conferenceId }: { conferenceId: ConferenceId }) {
+export function ConferenceHub({ conferenceId, locale }: { conferenceId: ConferenceId; locale: Locale }) {
+  const dict = getDictionary(locale);
   const conf = getConferenceById(conferenceId);
   const all = [...getSessionsByConference(conferenceId)].sort(
     (a, b) => (a.playlistIndex ?? 999) - (b.playlistIndex ?? 999),
@@ -30,37 +34,33 @@ export function ConferenceHub({ conferenceId }: { conferenceId: ConferenceId }) 
   const rest = all.filter((s) => !s.tour);
   const digest = getDigestByConference(conferenceId);
 
-  // 强调色按会议动态取（--conf-ai-engineer / --conf-cursor-compile / --conf-figma-config
-  // 均已在 theme.css 定义），CSS 里统一引用 --conf-accent，不再硬编码某一会议的颜色。
-  const accentStyle = { '--conf-accent': `var(--conf-${conferenceId})` } as CSSProperties;
-
   return (
-    <main className={styles.page} style={accentStyle}>
+    <main className={styles.page}>
       <div className={styles.inner}>
-        <Breadcrumb items={[{ label: '导览', href: '/' }, { label: conf?.name ?? conferenceId }]} />
+        <Breadcrumb
+          ariaLabel={dict.breadcrumb.ariaLabel}
+          items={[{ label: dict.breadcrumb.home, href: locale === 'en' ? '/en/' : '/' }, { label: conf?.name ?? conferenceId }]}
+        />
 
         <header className={styles.hero}>
-          <span className={styles.eyebrow}>会议导览</span>
+          <span className={styles.eyebrow}>{dict.hub.eyebrow}</span>
           <h1 className={styles.h1}>{conf?.name ?? conferenceId}</h1>
-          <p className={styles.lead}>
-            {all.length} 场演讲。我们把每一场扒成观看导览——一句话钩子、谁该看、时间不够看哪段、
-            逐段告诉你该 <b>看画面</b> 还是 <b>略读</b> 或 <b>听就够</b>，配官方原片时间戳深链。
-          </p>
+          <p className={styles.lead}>{renderRich(dict.hub.lead(all.length))}</p>
         </header>
 
         {/* 知识层导语：一屏内交代「这届发生了什么」，把详细信号让到导览之后。
             实测原先信号完整铺开时首场演讲要滑好几屏才出现，首页读起来像长报告而非导览工具。 */}
-        {digest && <DigestIntro digest={digest} />}
+        {digest && <DigestIntro digest={digest} dict={dict} />}
 
         {withTour.length > 0 && (
           <section className={styles.section} aria-labelledby="featured">
             <h2 id="featured" className={styles.sectionHead}>
-              逐场导览 · {withTour.length} 场
+              {dict.hub.featuredHeading(withTour.length)}
             </h2>
             <ul className={styles.featList}>
               {withTour.map((s) => (
                 <li key={s.id}>
-                  <FeaturedTour session={s} />
+                  <FeaturedTour session={s} dict={dict} locale={locale} />
                 </li>
               ))}
             </ul>
@@ -70,12 +70,12 @@ export function ConferenceHub({ conferenceId }: { conferenceId: ConferenceId }) 
         {rest.length > 0 && (
           <section className={styles.section} aria-labelledby="all">
             <h2 id="all" className={styles.sectionHead}>
-              全部场次{withTour.length > 0 ? ' · 导览整理中' : ''}
+              {withTour.length > 0 ? dict.hub.allSessionsHeadingWithProgress : dict.hub.allSessionsHeading}
             </h2>
             <ul className={styles.grid}>
               {rest.map((s) => (
                 <li key={s.id}>
-                  <VideoCard session={s} />
+                  <VideoCard session={s} locale={locale} />
                 </li>
               ))}
             </ul>
@@ -83,7 +83,7 @@ export function ConferenceHub({ conferenceId }: { conferenceId: ConferenceId }) 
         )}
 
         {/* 详细信号：想读趋势的人往下看，不挡在导览前面。 */}
-        {digest && <DigestSignals digest={digest} />}
+        {digest && <DigestSignals digest={digest} dict={dict} />}
       </div>
     </main>
   );
@@ -109,27 +109,27 @@ function shortTitle(title: string): string {
  * 信号面板导语（知识层）——横切全会议归纳「这个领域正在发生什么」。
  * 每条信号带出处深链，沿用「观点必须能回指来源」的原则。
  */
-function DigestIntro({ digest }: { digest: ConferenceDigest }) {
+function DigestIntro({ digest, dict }: { digest: ConferenceDigest; dict: Dictionary }) {
   return (
     <section className={styles.digestIntro} aria-labelledby="digest-intro">
       <h2 id="digest-intro" className={styles.sectionHead}>
-        这届大会发生了什么
+        {dict.hub.digestIntroHeading}
       </h2>
       <p className={styles.digestHeadline}>{digest.headline}</p>
       {digest.narrative && <p className={styles.digestNarrative}>{digest.narrative}</p>}
       <a className={styles.digestJump} href="#signals">
-        展开 {digest.signals.length} 个信号 ↓
+        {dict.hub.expandSignals(digest.signals.length)}
       </a>
     </section>
   );
 }
 
 /** 详细信号列表：置于导览之后，供想读趋势的读者深入。 */
-function DigestSignals({ digest }: { digest: ConferenceDigest }) {
+function DigestSignals({ digest, dict }: { digest: ConferenceDigest; dict: Dictionary }) {
   return (
     <section className={styles.digest} aria-labelledby="signals">
       <h2 id="signals" className={styles.sectionHead}>
-        这届大会发生了什么 · {digest.signals.length} 个信号
+        {dict.hub.digestSignalsHeading(digest.signals.length)}
       </h2>
 
       <ol className={styles.signalList}>
@@ -141,13 +141,13 @@ function DigestSignals({ digest }: { digest: ConferenceDigest }) {
               <p className={styles.signalStatement}>{sig.statement}</p>
               {sig.whyItMatters && (
                 <p className={styles.signalWhy}>
-                  <span className={styles.signalWhyLabel}>为何重要</span>
+                  <span className={styles.signalWhyLabel}>{dict.hub.whyItMatters}</span>
                   {sig.whyItMatters}
                 </p>
               )}
               {sig.sources.length > 0 && (
                 <div className={styles.sources}>
-                  <span className={styles.sourcesLabel}>出处</span>
+                  <span className={styles.sourcesLabel}>{dict.hub.sources}</span>
                   {sig.sources.map((src, j) => {
                     const s = getSessionById(src.videoId);
                     if (!s) return null;
@@ -161,7 +161,7 @@ function DigestSignals({ digest }: { digest: ConferenceDigest }) {
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        {shortTitle(displayTitle(s))}
+                        {shortTitle(displayTitle(s, dict))}
                         {m !== null && sec !== null && (
                           <span className={styles.sourceTime}>
                             {' '}
@@ -182,7 +182,7 @@ function DigestSignals({ digest }: { digest: ConferenceDigest }) {
 }
 
 /** 导览已就绪的场次卡：突出钩子 + 必看点 + 看/略/听占比，整卡进详情页。 */
-function FeaturedTour({ session }: { session: Session }) {
+function FeaturedTour({ session, dict, locale }: { session: Session; dict: Dictionary; locale: Locale }) {
   const tour = session.tour!;
   const agg = { watch: 0, skim: 0, listen: 0 };
   for (const st of tour.stops) agg[st.howTo] += Math.max(0, st.endSeconds - st.startSeconds);
@@ -190,26 +190,27 @@ function FeaturedTour({ session }: { session: Session }) {
   const pct = (n: number) => Math.round((n / total) * 100);
 
   const cover = session.frames[0];
+  const videoHref = locale === 'en' ? `/en/video/${session.id}/` : `/video/${session.id}/`;
 
   return (
-    <a className={styles.featCard} href={`/video/${session.id}/`}>
+    <a className={styles.featCard} href={videoHref}>
       {/* 封面用该场留存的首张关键画面；无画面则不占位（不放占位图）。 */}
       {cover && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           className={styles.featCover}
           src={frameSrc(cover.src)}
-          alt={cover.caption || displayTitle(session)}
+          alt={cover.caption || displayTitle(session, dict)}
           loading="lazy"
           width={640}
           height={360}
         />
       )}
       <div className={styles.featTop}>
-        <span className={styles.featBadge}>观看导览</span>
+        <span className={styles.featBadge}>{dict.hub.tourBadge}</span>
         <span className={styles.featMeta}>{displayDuration(session)}</span>
       </div>
-      <h3 className={styles.featTitle}>{displayTitle(session)}</h3>
+      <h3 className={styles.featTitle}>{displayTitle(session, dict)}</h3>
       <p className={styles.featHook}>{tour.hook}</p>
       <div className={styles.featStats}>
         <span className={styles.miniBar} aria-hidden="true">
@@ -218,8 +219,7 @@ function FeaturedTour({ session }: { session: Session }) {
           <i style={{ width: `${pct(agg.listen)}%` }} className={styles.bl} />
         </span>
         <span className={styles.featStatText}>
-          看 {pct(agg.watch)}% · 略 {pct(agg.skim)}% · 听 {pct(agg.listen)}%
-          {tour.mustWatch.length > 0 && ` · ${tour.mustWatch.length} 个必看点`}
+          {dict.hub.proportion(pct(agg.watch), pct(agg.skim), pct(agg.listen), tour.mustWatch.length)}
         </span>
       </div>
     </a>

@@ -10,6 +10,7 @@
  * scripts/check 触发）。
  */
 import rawDataset from '@/data/dataset.json';
+import { getDictionary, type Dictionary } from '@/i18n/getDictionary';
 import {
   type Conference,
   type ConferenceDigest,
@@ -120,9 +121,9 @@ export function getSessionsByRole(role: Role): readonly Session[] {
 // ---------------------------------------------------------------------------
 
 /** 标题展示兜底：源标题为空时给出占位（不编造内容，仅标注未命名）。 */
-export function displayTitle(session: Session): string {
+export function displayTitle(session: Session, dict: Dictionary = getDictionary('zh')): string {
   const t = session.title.trim();
-  return t.length > 0 ? t : '（未命名 session）';
+  return t.length > 0 ? t : dict.loader.untitledSession;
 }
 
 /**
@@ -148,6 +149,6 @@ export function hasWhyWatch(session: Session): boolean {
  * 深度解读展示口径：已产出条数为 0 时返回 '进行中'（design-spec §4.1/§5.1），
  * 否则返回条数字符串——不编造占位数。
  */
-export function displayDeepReadStatus(): string {
-  return STATS.deepReadCount > 0 ? String(STATS.deepReadCount) : '进行中';
+export function displayDeepReadStatus(dict: Dictionary = getDictionary('zh')): string {
+  return STATS.deepReadCount > 0 ? String(STATS.deepReadCount) : dict.loader.deepReadInProgress;
 }

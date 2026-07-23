@@ -1,0 +1,14 @@
+.link {
+  font-family: var(--font-mono);
+  font-size: var(--fs-body-s);
+  color: var(--ink-secondary);
+  text-decoration: none;
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-chip);
+  padding: 3px 10px;
+  transition: color var(--motion-fast) var(--easing), border-color var(--motion-fast) var(--easing);
+}
+.link:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}

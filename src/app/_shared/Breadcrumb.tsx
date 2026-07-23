@@ -10,6 +10,8 @@ export interface Crumb {
 export interface BreadcrumbProps {
   /** 自左向右的路径段。末项为当前页（design-spec §4.4：`目录 / {主题|角色} / 当前`）。 */
   items: readonly Crumb[];
+  /** nav 的 aria-label，按语言传入（dict.breadcrumb.ariaLabel）；缺省中文。 */
+  ariaLabel?: string;
 }
 
 /**
@@ -18,9 +20,9 @@ export interface BreadcrumbProps {
  * 详情页与落地页共用：`目录 / {主题|角色} / 当前`。等宽体、克制。
  * 末项以 aria-current="page" 标注，不作链接；中间段可点回退到上一层。
  */
-export function Breadcrumb({ items }: BreadcrumbProps) {
+export function Breadcrumb({ items, ariaLabel = '面包屑' }: BreadcrumbProps) {
   return (
-    <nav className={styles.crumb} aria-label="面包屑">
+    <nav className={styles.crumb} aria-label={ariaLabel}>
       {items.map((item, i) => {
         const last = i === items.length - 1;
         return (
