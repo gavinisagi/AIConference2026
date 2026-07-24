@@ -25,49 +25,66 @@ from . import config
 LLM_RETRIES = 3
 LLM_RETRY_BACKOFF_SECONDS = 8
 
-# 并发闸：任意时刻至多一个 claude -p 子进程在飞行中（跨进程文件锁）。
+# 并发闸：任意时刻至多 N 个 claude -p 子进程在飞行中（跨进程文件锁，N 个编号槽位）。
 #
 # subprocess.run(..., timeout=600) 自身超时是安全的——Python 会正确杀掉子进程。
 # 但若外部强行终止了正在等待它的父进程（如外层 timeout 命令、被中断的批处理脚本），
 # Windows 的 TerminateProcess 不会级联杀死子进程，claude.exe 就会变成孤儿留存。
 # 多次误操作叠加后曾在本机堆出十余个孤儿 claude -p 进程，抢占内存把交互中的
-# Claude Desktop 顶到无响应/崩溃。这把锁把「同时只准一个」做成硬约束，不依赖
-# 调用方守规矩——即便真出现孤儿或误触发的并发调用，也只会排队等待而非并发抢跑。
-_CLI_LOCK_PATH = config.WORK_DIR / ".claude-cli.lock"
+# Claude Desktop 顶到无响应/崩溃。这把锁把「同时至多 N 个」做成硬约束，不依赖
+# 调用方守规矩——即便真出现孤儿或误触发的并发调用，超额部分也只会排队而非抢跑。
+#
+# N 默认 1（历史行为不变）。PIPELINE_MAX_CONCURRENT_CLI 可临时调高——仅用于
+# 时间紧张的批量任务（如 i18n_en 大批渲染），且前提是当前无外部强杀风险
+# （孤儿堆积的根因是「强杀父进程」，不是「并发」本身）。调用方用完应改回 1。
+_CLI_LOCK_DIR = config.WORK_DIR
 _CLI_LOCK_STALE_SECONDS = 700  # 单次 claude -p 上限 600s + 冗余，超过视为孤儿锁
 _CLI_LOCK_POLL_SECONDS = 2
 _CLI_LOCK_LOG_EVERY_SECONDS = 30
 
 
+def _max_concurrent_cli() -> int:
+    try:
+        n = int(os.environ.get("PIPELINE_MAX_CONCURRENT_CLI", "1"))
+    except ValueError:
+        return 1
+    return max(1, n)
+
+
 @contextlib.contextmanager
 def _claude_cli_lock():
-    _CLI_LOCK_PATH.parent.mkdir(parents=True, exist_ok=True)
+    _CLI_LOCK_DIR.mkdir(parents=True, exist_ok=True)
+    n = _max_concurrent_cli()
     waited = 0
-    while True:
-        try:
-            fd = os.open(_CLI_LOCK_PATH, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
-            os.write(fd, str(os.getpid()).encode("utf-8"))
-            os.close(fd)
-            break
-        except FileExistsError:
+    held_path = None
+    while held_path is None:
+        for slot in range(n):
+            path = _CLI_LOCK_DIR / f".claude-cli-{slot}.lock"
             try:
-                age = time.time() - os.path.getmtime(_CLI_LOCK_PATH)
-            except FileNotFoundError:
-                continue  # 锁在探测间隙被释放，重试获取
-            if age > _CLI_LOCK_STALE_SECONDS:
-                print(f"  [llm] 打破孤儿锁（{age:.0f}s 未释放，持有进程已消失）")
-                with contextlib.suppress(FileNotFoundError):
-                    os.remove(_CLI_LOCK_PATH)
-                continue
+                fd = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+                os.write(fd, str(os.getpid()).encode("utf-8"))
+                os.close(fd)
+                held_path = path
+                break
+            except FileExistsError:
+                try:
+                    age = time.time() - os.path.getmtime(path)
+                except FileNotFoundError:
+                    continue  # 锁在探测间隙被释放，下一轮会抢到
+                if age > _CLI_LOCK_STALE_SECONDS:
+                    print(f"  [llm] 打破孤儿锁 slot={slot}（{age:.0f}s 未释放，持有进程已消失）")
+                    with contextlib.suppress(FileNotFoundError):
+                        os.remove(path)
+        if held_path is None:
             if waited % _CLI_LOCK_LOG_EVERY_SECONDS == 0:
-                print(f"  [llm] 等待并发闸（另一个 claude -p 在飞行中，已等 {waited}s）")
+                print(f"  [llm] 等待并发闸（{n} 个槽位均在飞行中，已等 {waited}s）")
             time.sleep(_CLI_LOCK_POLL_SECONDS)
             waited += _CLI_LOCK_POLL_SECONDS
     try:
         yield
     finally:
         with contextlib.suppress(FileNotFoundError):
-            os.remove(_CLI_LOCK_PATH)
+            os.remove(held_path)
 
 ROLES = ("developer", "product-design", "founder-lead", "trend")
 TOPICS = ("agent", "ai-coding", "evals", "context", "design-to-code", "ai-product")
@@ -600,3 +617,108 @@ def _stub_reduce(all_claims: list[dict], title: str) -> dict:
         } for c in top],
         "_stub": True,
     }
+
+
+# --- 英文渲染（保结构原生二次提取）---------------------------------------
+#
+# 不是「中译英」。源转录本来就是英文，中文稿已是离原话一跳的产物；若再中译英
+# 就成了 英→中→英 的往返，讲者的原创措辞会被磨掉（"token-maxing" 往返后
+# 可能变成 "how many tokens are burned"）。
+#
+# 故这里让模型**读英文原句**重写英文散文，但**锁死中文版已有的骨架**
+# （条目数量、顺序、时间戳、evidenceSegmentIds、看/略/听模式均不变）。
+# 好处：英文原汁原味，且中英结构严格对齐——切换语言落到同一段、同一时刻、
+# 同一批关键画面；frames 与 mustWatch 的绑定也不会错位。
+
+_RENDER_EN_SYS = (
+    "You produce the English version of a Chinese conference-talk guide.\n"
+    "Each item is a group of related fields that share one transcript excerpt. "
+    "`zh` maps field name -> existing Chinese text. Return the SAME field names.\n"
+    "Each item has a `mode`:\n"
+    "- mode=\"ground\": you also get `source` — verbatim English transcript of that exact "
+    "moment. Write the English FROM `source`, preferring the speaker's own wording and "
+    "coinages verbatim. Do NOT translate the Chinese literally: it is already one hop "
+    "from the original, and a round trip would erase the speaker's phrasing. Keep the "
+    "same meaning, scope and length band as each Chinese field; add no claim that is "
+    "absent from `source`. If `source` genuinely cannot support a field, omit that "
+    "field — never invent.\n"
+    "- mode=\"translate\": there is no transcript source (these describe on-screen "
+    "images, not speech). Render the Chinese faithfully into natural English. Always "
+    "produce text for every field in these items.\n"
+    "Always:\n"
+    "1) Natural English typography: straight quotes, no full-width punctuation.\n"
+    "2) Keep product/company/technical names as-is (Figma, Cursor, agent, token, evals).\n"
+    "3) Return ONLY a JSON array, one element per input item, same order and count, "
+    "and DO NOT omit any item: [{\"i\":<input i>,\"en\":{\"<field>\":\"...\"}}]"
+)
+
+# 每批组数。分组后每场约 19–22 组，设 25 可让绝大多数场次**一批跑完**——
+# 每多一批就多一次 claude -p 往返（实测每次约 90s），批次数是总耗时的主因。
+# claude -p 后端不接受 max_tokens，输出长度不可控，靠补漏重试兜底。
+RENDER_EN_BATCH = 25
+
+
+def _render_en_pass(items: list[dict], indices: list[int], out: list[dict]) -> None:
+    """对 indices 指向的组跑一遍渲染，把拿到的字段并进 out（就地，不覆盖已有）。"""
+    for base in range(0, len(indices), RENDER_EN_BATCH):
+        batch = indices[base:base + RENDER_EN_BATCH]
+        payload = []
+        for pos, idx in enumerate(batch):
+            it = items[idx]
+            src = it.get("source") or ""
+            # 只送本组仍缺的字段——补漏轮不必重译已成功的。
+            need = {k: v for k, v in (it.get("zh") or {}).items() if k not in out[idx]}
+            if not need:
+                continue
+            entry = {"i": pos, "mode": "ground" if src else "translate", "zh": need}
+            if src:
+                entry["source"] = src
+            payload.append(entry)
+        if not payload:
+            continue
+        try:
+            arr = _parse_json_array(_call(_RENDER_EN_SYS, json.dumps(payload, ensure_ascii=False)))
+        except LLMError as e:
+            print(f"  [render-en] 一批失败，该批回落中文：{str(e)[:80]}")
+            continue
+        for item in arr:
+            if not (isinstance(item, dict) and isinstance(item.get("i"), int)):
+                continue
+            pos = item["i"]
+            en = item.get("en")
+            if not (0 <= pos < len(batch)) or not isinstance(en, dict):
+                continue
+            target = out[batch[pos]]
+            for k, v in en.items():
+                if isinstance(v, str) and v.strip() and k in (items[batch[pos]].get("zh") or {}):
+                    target[k] = v.strip()
+
+
+def render_en_batch(items: list[dict], dry_run: bool) -> list[dict]:
+    """把 [{zh:{字段:中文}, source}] 批量渲染成英文，返回等长的 [{字段:英文}]。
+
+    对齐纪律沿用 translate_batch：按 i 配对、字段名回显配对，缺失的字段不出现在
+    结果里，上层据此逐字段回落中文——不编造、不错位、单批失败不影响其余批次。
+
+    实测模型会静默漏条（claude -p 不接受 max_tokens，输出长度不可控），故做一轮
+    补漏重试：只把首轮没拿到的字段再送一次。仍拿不到的才回落中文。
+    """
+    if _use_stub(dry_run) or not items:
+        return [{} for _ in items]
+
+    out: list[dict] = [{} for _ in items]
+    _render_en_pass(items, list(range(len(items))), out)
+
+    def missing_count() -> int:
+        return sum(len(set(it.get("zh") or {}) - set(o)) for it, o in zip(items, out))
+
+    if missing_count():
+        print(f"  [render-en] 首轮漏 {missing_count()} 个字段，补漏重试")
+        incomplete = [i for i, (it, o) in enumerate(zip(items, out))
+                      if set(it.get("zh") or {}) - set(o)]
+        _render_en_pass(items, incomplete, out)
+
+    still = missing_count()
+    if still:
+        print(f"  [render-en] 仍有 {still} 个字段未渲染，回落中文")
+    return out

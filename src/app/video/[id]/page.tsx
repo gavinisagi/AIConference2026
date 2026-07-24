@@ -39,6 +39,9 @@ export async function generateMetadata({
   return {
     title: `${title} · AI Conference 2026 Compass`,
     description,
+    alternates: {
+      languages: { 'zh-CN': `/video/${session.id}/`, en: `/en/video/${session.id}/` },
+    },
     openGraph: {
       type: 'article',
       title,

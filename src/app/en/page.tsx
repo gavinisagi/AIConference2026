@@ -15,6 +15,7 @@ const dict = getDictionary('en');
 export const metadata: Metadata = {
   title: `${dict.site.name} — ${dict.site.tagline}`,
   description: dict.site.description,
+  alternates: { languages: { 'zh-CN': '/', en: '/en/' } },
 };
 
 export default function HomePageEn() {
@@ -35,7 +36,7 @@ export default function HomePageEn() {
 
           <ul className={styles.confList}>
             {conferences.map((conf) => {
-              const digest = getDigestByConference(conf.id);
+              const digest = getDigestByConference(conf.id, 'en');
               return (
                 <li key={conf.id}>
                   <a className={styles.confCard} href={`/en/c/${conf.id}/`}>

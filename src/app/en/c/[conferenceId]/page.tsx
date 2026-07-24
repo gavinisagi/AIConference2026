@@ -29,6 +29,9 @@ export async function generateMetadata({
   return {
     title: `${conf.name} guide · AI Conference 2026 Compass`,
     description: `A watch guide for all ${conf.sessionCount} talks at ${conf.name}: this conference's signals, each talk's hook and must-watch clips, and a segment-by-segment call on whether to watch the screen or just listen.`,
+    alternates: {
+      languages: { 'zh-CN': `/c/${conferenceId}/`, en: `/en/c/${conferenceId}/` },
+    },
   };
 }
 

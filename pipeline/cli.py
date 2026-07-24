@@ -26,7 +26,10 @@ for _stream in (sys.stdout, sys.stderr):
         except (ValueError, OSError):
             pass
 
-from . import config, digest, emit, frames, llm, media, qc, segment, state, subtitle, tour, transcribe, visual
+from . import (
+    config, digest, emit, frames, i18n_en, llm, media, qc, segment, state,
+    subtitle, tour, transcribe, visual,
+)
 
 
 def _load(work: Path, name: str):
@@ -165,14 +168,31 @@ def run_video(video_id: str, args) -> bool:
     titled_chapters = [{**c, "title": titles.get(c["index"]) or c["title"]} for c in chapters]
 
     # 8) emit（投影 → data/enrichments/<id>.json）
+    enrichment_out: dict = {}
+
     def _emit():
-        enrichment = emit.build_enrichment(
+        nonlocal enrichment_out
+        enrichment_out = emit.build_enrichment(
             video_id, draft, seg_index, asr, titled_chapters, dry,
             speakers=speakers, visual=visual_out, tour=tour_data, frames=frames_data,
         )
-        path = emit.write_enrichment(video_id, enrichment)
-        print(f"[{video_id}] emit → {path}  ({len(enrichment['takeaways'])} takeaways)")
+        path = emit.write_enrichment(video_id, enrichment_out)
+        print(f"[{video_id}] emit → {path}  ({len(enrichment_out['takeaways'])} takeaways)")
     if not stage("emit", _emit):
+        return False
+
+    # 9) i18n_en（保结构原生英文渲染 → data/i18n/en/<id>.json）
+    #    非中译英：读英文原句重写，锁死中文骨架。见 pipeline/i18n_en.py。
+    def _i18n_en():
+        # emit 被跳过（已成功）时 enrichment_out 为空，从磁盘读回既有产物。
+        enr = enrichment_out or json.loads(
+            (config.ENRICH_DIR / f"{video_id}.json").read_text(encoding="utf-8")
+        )
+        payload = i18n_en.build_en(video_id, enr, asr, dry)
+        path = i18n_en.write_en(video_id, payload)
+        got, total = len(payload.get("fields", {})), payload.get("slotCount", 0)
+        print(f"[{video_id}] i18n_en → {path}  ({got}/{total} 槽位渲染成功)")
+    if not stage("i18n_en", _i18n_en):
         return False
 
     print(f"[{video_id}] ✓ 完成")

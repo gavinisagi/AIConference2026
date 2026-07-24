@@ -80,7 +80,7 @@ export function VideoDetailView({ session, locale }: { session: Session; locale:
   const dict = getDictionary(locale);
   const title = displayTitle(session, dict);
   const isAnalyzing = session.status === 'analyzing';
-  const related = relatedSessions(getAllSessions(), session);
+  const related = relatedSessions(getAllSessions(locale), session);
   const homeHref = locale === 'en' ? '/en/' : '/';
   const confHref = locale === 'en' ? `/en/c/${session.conferenceId}/` : `/c/${session.conferenceId}/`;
 

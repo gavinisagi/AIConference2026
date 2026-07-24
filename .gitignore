@@ -58,6 +58,10 @@ next-env.d.ts
 # 站点数据集：构建产物，由 scripts/build-data.mjs 从数据源生成（DATA_SOURCE=file|api），
 # 不入库。CI/部署在 build 前执行 `node scripts/build-data.mjs`。
 /src/data/dataset.json
+/src/data/dataset.en.json
+
+# 英文渲染产物：与 enrichments 同为清洗产物，不入库（由流水线 i18n_en 阶段再生）
+/data/i18n/
 
 # yt-dlp 原始抓取 dump：冗余（data/catalog.json 是合并后的 canonical 源，
 # build 只读它；dump 可用已提交的 download_*.py 重跑）。

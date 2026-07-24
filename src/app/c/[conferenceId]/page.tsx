@@ -33,6 +33,9 @@ export async function generateMetadata({
   return {
     title: `${conf.name} 导览 · AI Conference 2026 Compass`,
     description: `${conf.name} 全部 ${conf.sessionCount} 场演讲的观看导览：这届大会的信号、每场的钩子与必看片段、逐段告诉你该看画面还是听就够。`,
+    alternates: {
+      languages: { 'zh-CN': `/c/${conferenceId}/`, en: `/en/c/${conferenceId}/` },
+    },
   };
 }
 

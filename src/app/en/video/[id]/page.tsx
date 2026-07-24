@@ -22,7 +22,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const session = getSessionById(id);
+  const session = getSessionById(id, 'en');
   if (!session) return { title: dict.video.notFoundTitle };
   const title = displayTitle(session, dict);
   const description = session.whyWatch ?? dict.video.defaultDescription;
@@ -35,6 +35,9 @@ export async function generateMetadata({
   return {
     title: `${title} · AI Conference 2026 Compass`,
     description,
+    alternates: {
+      languages: { 'zh-CN': `/video/${session.id}/`, en: `/en/video/${session.id}/` },
+    },
     openGraph: {
       type: 'article',
       title,
@@ -57,7 +60,7 @@ export default async function VideoDetailPageEn({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const session = getSessionById(id);
+  const session = getSessionById(id, 'en');
   if (!session) notFound();
 
   return (

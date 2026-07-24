@@ -17,6 +17,9 @@ DATA_DIR = ROOT / "data"
 CATALOG_PATH = DATA_DIR / "catalog.json"
 ENRICH_DIR = DATA_DIR / "enrichments"                # 产出目录（入库）
 EDITORIAL_DIR = DATA_DIR / "editorial"
+# 英文渲染产物：与 enrichment 同为清洗产物，但独立成目录——emit 阶段重写
+# enrichment 时不会波及英文版（重跑清洗不丢译文/英文稿）。
+I18N_EN_DIR = DATA_DIR / "i18n" / "en"
 
 PIPELINE_DIR = ROOT / "pipeline"
 WORK_DIR = PIPELINE_DIR / "work"                     # 每视频中间产物（gitignore）
@@ -124,5 +127,5 @@ def work_dir(video_id: str) -> Path:
 
 
 def ensure_dirs() -> None:
-    for d in (WORK_DIR, ARTIFACTS_DIR, LOGS_DIR, ENRICH_DIR):
+    for d in (WORK_DIR, ARTIFACTS_DIR, LOGS_DIR, ENRICH_DIR, I18N_EN_DIR):
         d.mkdir(parents=True, exist_ok=True)

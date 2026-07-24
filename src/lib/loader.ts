@@ -10,6 +10,8 @@
  * scripts/check 触发）。
  */
 import rawDataset from '@/data/dataset.json';
+import rawDatasetEn from '@/data/dataset.en.json';
+import type { Locale } from '@/i18n/locale';
 import { getDictionary, type Dictionary } from '@/i18n/getDictionary';
 import {
   type Conference,
@@ -26,12 +28,27 @@ import {
 
 // dataset.json 由构建期生成并通过 schema 校验；此处仍做防御性过滤。
 const dataset = rawDataset as unknown as NormalizedDataset;
+const datasetEn = rawDatasetEn as unknown as NormalizedDataset;
 
 const SESSIONS: readonly Session[] = Object.freeze(
   (Array.isArray(dataset.sessions) ? dataset.sessions : []).filter(isValidSession),
 );
 
+/**
+ * 英文数据集：与中文同构，仅散文字段换成英文渲染结果（缺失处已在构建期逐字段
+ * 回落中文）。结构完全一致，故按 locale 整体切换即可，组件无需感知双语。
+ */
+const SESSIONS_EN: readonly Session[] = Object.freeze(
+  (Array.isArray(datasetEn.sessions) ? datasetEn.sessions : []).filter(isValidSession),
+);
+
 const SESSIONS_BY_ID: ReadonlyMap<string, Session> = new Map(SESSIONS.map((s) => [s.id, s]));
+const SESSIONS_EN_BY_ID: ReadonlyMap<string, Session> = new Map(SESSIONS_EN.map((s) => [s.id, s]));
+
+/** 按 locale 选数据集。默认 zh —— 已退役页面（src/app/_*）不传也能编译。 */
+function sessionsOf(locale: Locale = 'zh'): readonly Session[] {
+  return locale === 'en' ? SESSIONS_EN : SESSIONS;
+}
 
 const CONFERENCES: readonly Conference[] = Object.freeze(
   Array.isArray(dataset.conferences) ? dataset.conferences : [],
@@ -44,6 +61,9 @@ const CONFERENCES_BY_ID: ReadonlyMap<string, Conference> = new Map(
 // 会议信号聚合（缺省为空数组 → 页面不渲染该区）。
 const DIGESTS: readonly ConferenceDigest[] = Object.freeze(
   Array.isArray(dataset.digests) ? dataset.digests : [],
+);
+const DIGESTS_EN: readonly ConferenceDigest[] = Object.freeze(
+  Array.isArray(datasetEn.digests) ? datasetEn.digests : [],
 );
 
 // --- 统计口径（缺省时给出安全兜底，UI 再决定是否显示 — 占位）。 ---
@@ -64,13 +84,13 @@ const STATS: SiteStats = dataset.stats ?? EMPTY_STATS;
 // ---------------------------------------------------------------------------
 
 /** 全部有效 session（已过滤坏记录）。 */
-export function getAllSessions(): readonly Session[] {
-  return SESSIONS;
+export function getAllSessions(locale: Locale = 'zh'): readonly Session[] {
+  return sessionsOf(locale);
 }
 
 /** 按 id 取单条 session；不存在返回 undefined。 */
-export function getSessionById(id: string): Session | undefined {
-  return SESSIONS_BY_ID.get(id);
+export function getSessionById(id: string, locale: Locale = 'zh'): Session | undefined {
+  return (locale === 'en' ? SESSIONS_EN_BY_ID : SESSIONS_BY_ID).get(id);
 }
 
 /** 全部大会（含色标与场次数）。 */
@@ -87,8 +107,12 @@ export function getConferenceById(id: string): Conference | undefined {
  * 会议信号聚合（知识层）：横切该大会全部清洗产物归纳的信号。
  * 无清洗数据的大会返回 undefined，页面不渲染该区（优雅降级）。
  */
-export function getDigestByConference(conferenceId: ConferenceId): ConferenceDigest | undefined {
-  return DIGESTS.find((d) => d.conferenceId === conferenceId);
+export function getDigestByConference(
+  conferenceId: ConferenceId,
+  locale: Locale = 'zh',
+): ConferenceDigest | undefined {
+  const pool = locale === 'en' ? DIGESTS_EN : DIGESTS;
+  return pool.find((d) => d.conferenceId === conferenceId);
 }
 
 /** 站点统计口径（totalSessions=941 / totalHours=409）。 */
@@ -102,8 +126,11 @@ export function getTopicCounts(): readonly TopicCount[] {
 }
 
 /** 按大会筛选。 */
-export function getSessionsByConference(conferenceId: ConferenceId): readonly Session[] {
-  return SESSIONS.filter((s) => s.conferenceId === conferenceId);
+export function getSessionsByConference(
+  conferenceId: ConferenceId,
+  locale: Locale = 'zh',
+): readonly Session[] {
+  return sessionsOf(locale).filter((s) => s.conferenceId === conferenceId);
 }
 
 /** 按主题筛选（主题为近似归类）。 */

@@ -27,12 +27,12 @@ import styles from './ConferenceHub.module.css';
 export function ConferenceHub({ conferenceId, locale }: { conferenceId: ConferenceId; locale: Locale }) {
   const dict = getDictionary(locale);
   const conf = getConferenceById(conferenceId);
-  const all = [...getSessionsByConference(conferenceId)].sort(
+  const all = [...getSessionsByConference(conferenceId, locale)].sort(
     (a, b) => (a.playlistIndex ?? 999) - (b.playlistIndex ?? 999),
   );
   const withTour = all.filter((s) => s.tour);
   const rest = all.filter((s) => !s.tour);
-  const digest = getDigestByConference(conferenceId);
+  const digest = getDigestByConference(conferenceId, locale);
 
   return (
     <main className={styles.page}>
