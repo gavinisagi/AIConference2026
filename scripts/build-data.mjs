@@ -31,6 +31,10 @@ const EDITORIAL_DIR = resolve(ROOT, 'data/editorial');
 // 会议级信号聚合（知识层）：data/digests/<conferenceId>.json，缺省则站点不渲染该区。
 const DIGEST_DIR = resolve(ROOT, 'data/digests');
 const OUTPUT_PATH = resolve(ROOT, 'src/data/dataset.json');
+// 英文数据集：与中文同构，散文字段替换为 data/i18n/en/ 里的英文渲染结果。
+// 站点按 locale 取用（见 src/lib/loader.ts）；缺失字段逐条回落中文。
+const I18N_EN_DIR = resolve(ROOT, 'data/i18n/en');
+const OUTPUT_EN_PATH = resolve(ROOT, 'src/data/dataset.en.json');
 const DATASET_VERSION = 1;
 
 // ---------------------------------------------------------------------------
@@ -702,6 +706,96 @@ function validateDataset(ds) {
 }
 
 // ---------------------------------------------------------------------------
+// 英文数据集（locale=en）
+// ---------------------------------------------------------------------------
+
+/** 读 data/i18n/en/<videoId>.json → Map(videoId → { path串: 英文 })。 */
+function loadEnFields(warnings) {
+  const m = new Map();
+  if (!existsSync(I18N_EN_DIR)) return m;
+  for (const name of readdirSync(I18N_EN_DIR)) {
+    if (!name.endsWith('.json')) continue;
+    try {
+      const payload = JSON.parse(readFileSync(resolve(I18N_EN_DIR, name), 'utf8'));
+      const fields = payload && typeof payload.fields === 'object' ? payload.fields : null;
+      if (fields) m.set(name.slice(0, -5), fields);
+    } catch (e) {
+      warnings.push(`i18n/en/${name}: 无法解析，忽略（${e.message}）`);
+    }
+  }
+  return m;
+}
+
+/**
+ * 由中文数据集派生英文数据集。
+ *
+ * 逐字段替换：英文缺失（渲染失败/模型留空）时**保留中文原文**——页面上出现中文
+ * 比出现空白或编造内容诚实。结构（时间戳、条目数、模式、关键帧）完全不变，
+ * 故中英两版严格对齐，切换语言落在同一段、同一时刻。
+ */
+function buildEnDataset(ds, enByVideo) {
+  const pick = (fields, path, zh) => {
+    const v = fields ? fields[path] : undefined;
+    return typeof v === 'string' && v.trim() ? v : zh;
+  };
+  const sessions = ds.sessions.map((s) => {
+    const f = enByVideo.get(s.id);
+    if (!f) return s;
+    const tour = s.tour
+      ? {
+          ...s.tour,
+          hook: pick(f, 'tour/hook', s.tour.hook),
+          whoShouldWatch: pick(f, 'tour/whoShouldWatch', s.tour.whoShouldWatch),
+          ifShortOnTime: pick(f, 'tour/ifShortOnTime', s.tour.ifShortOnTime),
+          mustWatch: s.tour.mustWatch.map((m, i) => ({
+            ...m,
+            label: pick(f, `tour/mustWatch/${i}/label`, m.label),
+            why: pick(f, `tour/mustWatch/${i}/why`, m.why),
+          })),
+          stops: s.tour.stops.map((st, i) => ({
+            ...st,
+            title: pick(f, `tour/stops/${i}/title`, st.title),
+            what: pick(f, `tour/stops/${i}/what`, st.what),
+            keyPoint: pick(f, `tour/stops/${i}/keyPoint`, st.keyPoint),
+            howToReason: pick(f, `tour/stops/${i}/howToReason`, st.howToReason),
+          })),
+        }
+      : s.tour;
+    return {
+      ...s,
+      whyWatch: s.whyWatch === null ? null : pick(f, 'whyWatch', s.whyWatch),
+      takeaways: s.takeaways.map((tk, i) => ({
+        ...tk,
+        statement: pick(f, `takeaways/${i}/statement`, tk.statement),
+        context: tk.context === null ? null : pick(f, `takeaways/${i}/context`, tk.context),
+      })),
+      frames: s.frames.map((fr, i) => ({
+        ...fr,
+        caption: pick(f, `frames/${i}/caption`, fr.caption),
+      })),
+      tour,
+    };
+  });
+  // digest 是会议级（非按视频），英文版存 _digest-<conferenceId>.json。
+  const digests = ds.digests.map((d) => {
+    const f = enByVideo.get(`_digest-${d.conferenceId}`);
+    if (!f) return d;
+    return {
+      ...d,
+      headline: pick(f, 'headline', d.headline),
+      narrative: pick(f, 'narrative', d.narrative),
+      signals: d.signals.map((sig, i) => ({
+        ...sig,
+        title: pick(f, `signals/${i}/title`, sig.title),
+        statement: pick(f, `signals/${i}/statement`, sig.statement),
+        whyItMatters: pick(f, `signals/${i}/whyItMatters`, sig.whyItMatters),
+      })),
+    };
+  });
+  return { ...ds, sessions, digests };
+}
+
+// ---------------------------------------------------------------------------
 // 入口
 // ---------------------------------------------------------------------------
 async function main() {
@@ -734,6 +828,16 @@ async function main() {
   console.log(
     `[build-data] wrote src/data/dataset.json (源=${DATA_SOURCE}): ${ds.stats.totalSessions} sessions, ` +
       `${ds.stats.totalHours}h, deepRead=${ds.stats.deepReadCount}.`,
+  );
+
+  // 英文数据集：i18n/en 尚未产出时也要写，内容等同中文（站点 /en 不至于 404）。
+  const enByVideo = loadEnFields(overrideWarnings);
+  const dsEn = buildEnDataset(ds, enByVideo);
+  writeFileSync(OUTPUT_EN_PATH, JSON.stringify(dsEn, null, 2) + '\n');
+  const covered = ds.sessions.filter((s) => enByVideo.has(s.id)).length;
+  console.log(
+    `[build-data] wrote src/data/dataset.en.json: ${covered}/${ds.sessions.length} 场有英文渲染` +
+      `${covered < ds.sessions.length ? '（其余逐字段回落中文）' : ''}`,
   );
   console.log(
     '[build-data] topic approx counts: ' +

@@ -20,6 +20,7 @@ const dict = getDictionary('zh');
 export const metadata: Metadata = {
   title: `${dict.site.name} — ${dict.site.tagline}`,
   description: dict.site.description,
+  alternates: { languages: { 'zh-CN': '/', en: '/en/' } },
 };
 
 export default function HomePage() {
