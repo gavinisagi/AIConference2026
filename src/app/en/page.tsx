@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
-import { getAllSessions, getConferences } from '@/lib/loader';
+import { getAllSessions } from '@/lib/loader';
 import { getDictionary } from '@/i18n/getDictionary';
-import { ConfBadge } from '@/components/ConfBadge/ConfBadge';
 import { SiteChrome } from '@/components/SiteChrome/SiteChrome';
 import { SessionPicker } from '@/components/SessionPicker/SessionPicker';
 import { buildPickerProps } from '@/components/SessionPicker/buildPickerProps';
@@ -22,10 +21,6 @@ export const metadata: Metadata = {
 
 export default function HomePageEn() {
   const sessions = getAllSessions('en');
-  const conferences = getConferences()
-    .filter((c) => c.sessionCount > 0)
-    .slice()
-    .sort((a, b) => b.sessionCount - a.sessionCount);
 
   return (
     <SiteChrome locale="en">
@@ -36,19 +31,6 @@ export default function HomePageEn() {
             <h1 className={styles.h1}>{dict.home.headline(sessions.length)}</h1>
             <p className={styles.lead}>{dict.home.subLead}</p>
           </header>
-
-          <ul className={styles.confRail}>
-            {conferences.map((conf) => (
-              <li key={conf.id}>
-                <a className={styles.confLink} href={`/en/c/${conf.id}/`}>
-                  <ConfBadge conference={conf.id} />
-                  <span className={styles.confCount}>
-                    {dict.home.sessionCount(conf.sessionCount)}
-                  </span>
-                </a>
-              </li>
-            ))}
-          </ul>
 
           <SessionPicker {...buildPickerProps(sessions, dict, 'en')} />
         </div>

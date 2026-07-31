@@ -1,8 +1,9 @@
-import type { SessionFrame, Tour, TourMode } from '@/lib/schema';
+import type { SessionFrame, Tour } from '@/lib/schema';
 import type { Locale } from '@/i18n/locale';
 import { getDictionary } from '@/i18n/getDictionary';
 import { renderRich } from '@/i18n/rich';
 import { frameSrc } from '@/lib/assets';
+import { watchSplit } from '@/lib/watchStats';
 import { TourDepths, type BarSegment } from './TourDepths';
 import styles from './TourView.module.css';
 
@@ -58,23 +59,31 @@ export function TourView({
   const modeLabel = dict.tour.modeLabel;
   const modeHint = dict.tour.modeHint;
 
-  const agg: Record<TourMode, number> = { watch: 0, skim: 0, listen: 0 };
-  for (const st of tour.stops) agg[st.howTo] += Math.max(0, st.endSeconds - st.startSeconds);
-  const total = agg.watch + agg.skim + agg.listen || 1;
+  // 「盯屏 X 分钟」「必看点数」「播放列表时长」三个数全部出自这一份 split——
+  // 不允许各区块各算各的（stops.howTo 与 mustWatch 区间此前独立聚合，
+  // 曾在同一屏出现"必看 0 分钟"又"播放列表 11 min"的自相矛盾）。
+  const split = watchSplit(tour);
   const durationSec = tour.stops.reduce((mx, s) => Math.max(mx, s.endSeconds), 0);
-  const watchMin = minutesOf(agg.watch);
+  const watchMin = split.watchMinutes;
   const totalMin = minutesOf(durationSec);
   const mustWatchMin = minutesOf(
     tour.mustWatch.reduce((sum, m) => sum + Math.max(0, m.endSeconds - m.startSeconds), 0),
   );
 
-  // 顶部常驻时间轴：一格一站，宽度按时长占比，点击跳原片。
+  // 顶部常驻时间轴：一格一站，宽度按时长占比，点击跳原片；落在必看并集区间内的
+  // 站一律显示为「看」色，即便该站自身 howTo 标的是 skim/listen（并集口径，见上）。
+  const watchRanges: { startSeconds: number; endSeconds: number }[] = [
+    ...tour.stops.filter((s) => s.howTo === 'watch'),
+    ...tour.mustWatch,
+  ];
+  const inWatchUnion = (s: number, e: number) =>
+    watchRanges.some((r) => r.startSeconds < e && r.endSeconds > s);
   const barSegments: BarSegment[] = tour.stops.map((st) => ({
-    pct: Math.max(1, ((st.endSeconds - st.startSeconds) / total) * 100),
+    pct: Math.max(1, ((st.endSeconds - st.startSeconds) / split.totalSeconds) * 100),
     start: mmss(st.startSeconds),
     title: `${mmss(st.startSeconds)}–${mmss(st.endSeconds)} ${st.title}`,
     href: at(officialUrl, st.startSeconds),
-    mode: st.howTo,
+    mode: st.howTo === 'watch' || inWatchUnion(st.startSeconds, st.endSeconds) ? 'watch' : st.howTo,
   }));
 
   /* ---- 档位 1：TL;DR —— 关键观点 + 谁该看 + 建议 ---- */
@@ -130,7 +139,7 @@ export function TourView({
           <span className={styles.sideHead}>{dict.tour.ourAdvice}</span>
           <span className={styles.adviceText}>
             {dict.tour.adviceLine(totalMin, watchMin)}
-            {agg.watch / total <= 0.2 && ` ${dict.tour.adviceCommute}`}
+            {split.watchPct <= 10 && ` ${dict.tour.adviceCommute}`}
           </span>
           {tour.ifShortOnTime && <span className={styles.adviceText}>{tour.ifShortOnTime}</span>}
         </div>
@@ -147,7 +156,7 @@ export function TourView({
           {tour.stops.map((st, i) => (
             <li key={i} className={styles.stop}>
               <div className={styles.stime}>
-                {mmss(st.startSeconds)}
+                {mmss(st.startSeconds)}{' '}
                 <span className={styles.to}>– {mmss(st.endSeconds)}</span>
                 <span className={`${styles.badge} ${styles[`badge_${st.howTo}`]}`}>
                   {modeLabel[st.howTo]}
@@ -296,7 +305,7 @@ export function TourView({
           <span className={styles.sideHead}>{dict.tour.ourAdvice}</span>
           <span className={styles.adviceText}>
             {dict.tour.adviceLine(totalMin, watchMin)}
-            {agg.watch / total <= 0.2 && ` ${dict.tour.adviceCommute}`}
+            {split.watchPct <= 10 && ` ${dict.tour.adviceCommute}`}
           </span>
         </div>
       </aside>
@@ -305,8 +314,7 @@ export function TourView({
 
   return (
     <div className={styles.tour}>
-      {/* 钩子 hero：进来第一眼就是它。 */}
-      <p className={styles.hookHero}>{tour.hook}</p>
+      {/* 钩子已升级为页面 h1（VideoDetailView），这里不再重复渲染一遍。 */}
 
       {/* 一行硬统计：全片多长 · 真正值得盯屏多久 · 几个必看点。 */}
       <p className={styles.statline}>

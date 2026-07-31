@@ -72,13 +72,19 @@
   margin-bottom: var(--space-12);
 }
 .title {
-  margin: 0 0 var(--space-16);
-  font-family: var(--font-serif);
+  margin: 0 0 var(--space-8);
   font-size: var(--fs-h2);
-  line-height: var(--lh-h2);
-  font-weight: var(--fw-h2);
+  line-height: 1.35;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   color: var(--ink);
-  text-wrap: balance;
+  text-wrap: pretty;
+}
+.originalTitle {
+  margin: 0 0 var(--space-16);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-muted);
 }
 .metaRow {
   display: flex;

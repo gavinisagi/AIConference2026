@@ -10,7 +10,8 @@ import { conferenceMeta } from '@/design/tokens';
 import type { Locale } from '@/i18n/locale';
 import { getDictionary } from '@/i18n/getDictionary';
 import { Button, Chip, ConfBadge, DurationTag, StatusBadge, TakeawayCard, TourView } from '@/components';
-import { VideoCard } from '@/components/VideoCard/VideoCard';
+import { SessionRows } from '@/components/SessionPicker/SessionRows';
+import { buildPickerProps } from '@/components/SessionPicker/buildPickerProps';
 import { Breadcrumb } from '@/app/_shared/Breadcrumb';
 import styles from './VideoDetailView.module.css';
 
@@ -32,32 +33,6 @@ function officialAt(url: string, seconds: number | null): string {
   if (seconds === null || seconds <= 0) return url;
   const sep = url.includes('?') ? '&' : '?';
   return `${url}${sep}t=${Math.floor(seconds)}s`;
-}
-
-/**
- * 导览锚点栏 —— 吸顶，用于在长导览页里跨区跳转。
- * 纯锚点无 JS（静态导出友好）；锚点目标靠 scroll-margin-top 避免被吸顶栏遮住。
- */
-function TourNav({ session, locale }: { session: Session; locale: Locale }) {
-  const dict = getDictionary(locale);
-  const items: Array<{ href: string; label: string }> = [];
-  if (session.tour && session.tour.mustWatch.length > 0) items.push({ href: '#must', label: dict.video.nav.mustWatch });
-  if (session.frames.length > 0) items.push({ href: '#frames', label: dict.video.nav.frames });
-  items.push({ href: '#time', label: dict.video.nav.time });
-  items.push({ href: '#stops', label: dict.video.nav.stops });
-  if (session.takeaways.length > 0) items.push({ href: '#takeaways', label: dict.video.nav.takeaways });
-  // 只有一两个区块时导航没有价值，反而占位。
-  if (items.length < 3) return null;
-
-  return (
-    <nav className={styles.tourNav} aria-label={dict.video.nav.ariaLabel}>
-      {items.map((it) => (
-        <a key={it.href} href={it.href} className={styles.tourNavLink}>
-          {it.label}
-        </a>
-      ))}
-    </nav>
-  );
 }
 
 /** 相关推荐：优先同主题，回落同大会；排除自身，取前 6（design-spec §6.2）。 */
@@ -91,6 +66,11 @@ export function VideoDetailView({ session, locale }: { session: Session; locale:
       ? dict.video.whyWatchAnalyzing
       : dict.video.whyWatchPending;
 
+  // 中文钩子是本站的核心交付物，永远是最大的那行字；英文原标题退居等宽小字。
+  // 无 tour 时没有钩子，回落到原标题作为唯一标题（不降级出空标题）。
+  const hook = session.tour?.hook;
+  const originalLine = [session.title, session.speakers[0]?.name].filter(Boolean).join(' · ');
+
   return (
     <main className={styles.page}>
       <div className={styles.inner}>
@@ -99,7 +79,7 @@ export function VideoDetailView({ session, locale }: { session: Session; locale:
           items={[
             { label: dict.breadcrumb.home, href: homeHref },
             { label: conferenceMeta[session.conferenceId].label, href: confHref },
-            { label: title },
+            { label: hook || title },
           ]}
         />
 
@@ -112,7 +92,11 @@ export function VideoDetailView({ session, locale }: { session: Session; locale:
                 <StatusBadge status={session.status} locale={locale} />
               </div>
 
-              <h1 className={styles.title}>{title}</h1>
+              {/* 中文钩子是核心交付物，永远是本页最大的一行字；英文原标题退居
+                  下方等宽小字（此前反过来，英文标题占了 h1，是本轮重设计要
+                  解决的问题之一，实现时做反了——2026-08 修正）。 */}
+              <h1 className={styles.title}>{hook || title}</h1>
+              {hook && originalLine && <p className={styles.originalTitle}>{originalLine}</p>}
 
               <div className={styles.metaRow}>
                 {session.durationSeconds !== null && session.durationMinutes !== null ? (
@@ -123,7 +107,8 @@ export function VideoDetailView({ session, locale }: { session: Session; locale:
                 {session.publishedDate && (
                   <span className={styles.metaMono}>{session.publishedDate}</span>
                 )}
-                {session.speakers.length > 0 && (
+                {/* 有 hook 时讲者已并入原标题小字行（originalLine），这里不重复。 */}
+                {!hook && session.speakers.length > 0 && (
                   <span className={styles.speaker}>
                     {session.speakers.map((sp) => sp.name).join(' · ')}
                   </span>
@@ -140,27 +125,27 @@ export function VideoDetailView({ session, locale }: { session: Session; locale:
               )}
             </header>
 
-            {/* 导览页可达 9000px+，长滚动中容易失去位置：给一条吸顶锚点栏用于跨区跳转。
-                只列出该场真实存在的区块（无必看片段 / 无关键画面的场次不会出现死锚点）。 */}
-            {session.tour && <TourNav session={session} locale={locale} />}
-
-            {/* 观看导览：有 tour 时是本页核心体验，钩子 hero 第一眼（承接层）。 */}
+            {/* 观看导览：有 tour 时是本页核心体验，三档阅读深度承接一切
+                （旧版吸顶锚点栏 TourNav 与三档 tab 并存会打架，已删除）。 */}
             {session.tour && (
               <TourView tour={session.tour} officialUrl={session.officialUrl} frames={session.frames} locale={locale} />
             )}
 
-            {/* 主行动：在官方来源观看（本站不播放，外链新标签 + noopener，§0/§6.2/§8.4）。 */}
-            <section className={styles.actionBlock} aria-label={dict.video.watchSectionAriaLabel}>
-              <a
-                href={session.officialUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.watchLink}
-              >
-                <Button variant="primary">{dict.video.watchButton}</Button>
-              </a>
-              <p className={styles.watchNote}>{dict.video.watchNote}</p>
-            </section>
+            {/* 主行动：在官方来源观看。有 tour 时「跳看原片」档已经给了同一个入口，
+                这里重复一份反而是噪音，故只在无导览的降级页面出现（§0/§6.2/§8.4）。 */}
+            {!session.tour && (
+              <section className={styles.actionBlock} aria-label={dict.video.watchSectionAriaLabel}>
+                <a
+                  href={session.officialUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.watchLink}
+                >
+                  <Button variant="primary">{dict.video.watchButton}</Button>
+                </a>
+                <p className={styles.watchNote}>{dict.video.watchNote}</p>
+              </section>
+            )}
 
             {/* 为什么值得看：无 tour 时的核心增值；缺省走诚实占位（§6.2 / §7.1）。 */}
             {!session.tour && (
@@ -174,8 +159,11 @@ export function VideoDetailView({ session, locale }: { session: Session; locale:
             </section>
             )}
 
-            {/* 关键观点（§6.1 观点卡复用）：真实 takeaways 缺失时不渲染，不编造（§7.1）。 */}
-            {session.takeaways.length > 0 && (
+            {/* 关键观点（§6.1 观点卡复用）：真实 takeaways 缺失时不渲染，不编造（§7.1）。
+                有 tour 时「30 秒结论」档已经给出经编辑重写的关键观点，这里的
+                session.takeaways 是提取阶段的原始英文证据句，与之重复且质量更低，
+                此前漏加 !session.tour 守卫导致两处同时出现，已修正。 */}
+            {!session.tour && session.takeaways.length > 0 && (
               <section className={styles.section} id="takeaways" aria-labelledby="takeaways-head">
                 <h2 id="takeaways-head" className={styles.sectionHead}>
                   {dict.video.takeawaysHeading}
@@ -288,19 +276,18 @@ export function VideoDetailView({ session, locale }: { session: Session; locale:
           )}
         </div>
 
-        {/* 相关推荐：同主题/同大会 3–6 条，复用 VideoCard（§6.2）。 */}
+        {/* 相关推荐：同主题/同大会 3–6 条。复用主列表的行样式（SessionRows），
+            不再是另一套「英文标题 + 三行摘要」卡片——同一个产品只该有一套
+            列表视觉语言（2026-08 修正）。 */}
         {related.length > 0 && (
           <section className={styles.relatedSection} aria-labelledby="related-head">
             <h2 id="related-head" className={styles.sectionHead}>
               {dict.video.relatedHeading}
             </h2>
-            <ul className={styles.relatedGrid}>
-              {related.map((s) => (
-                <li key={s.id}>
-                  <VideoCard session={s} locale={locale} />
-                </li>
-              ))}
-            </ul>
+            <SessionRows
+              rows={buildPickerProps(related, dict, locale).rows}
+              mustWatchMinLabel={dict.picker.mustWatchMin}
+            />
           </section>
         )}
       </div>

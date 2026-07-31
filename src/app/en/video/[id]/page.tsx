@@ -24,7 +24,7 @@ export async function generateMetadata({
   const { id } = await params;
   const session = getSessionById(id, 'en');
   if (!session) return { title: dict.video.notFoundTitle };
-  const title = displayTitle(session, dict);
+  const title = session.tour?.hook || displayTitle(session, dict);
   const description = session.whyWatch ?? dict.video.defaultDescription;
 
   const cover = session.frames[0];

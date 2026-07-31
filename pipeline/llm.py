@@ -450,8 +450,43 @@ _TOUR_SYS = (
     "}\n"
     "要求：stops 覆盖全片、按时间顺序、5-8 站；howTo=watch 用于有现场演示/值得看画面的段"
     "(参考 visualDependency 与 visualMoments)，skim 用于幻灯片图表，listen 用于纯口头论述。"
-    "mustWatch 取 1-3 个最有价值的画面/演示。只输出 JSON。"
+    "mustWatch 取 1-3 个最有价值的画面/演示。\n"
+    "重要：visualDependency / visualMoments / mustWatch / howTo 等只是**输入数据的字段名**，"
+    "是给你看的标注，不是可以写进正文的内容。howToReason / what / keyPoint / hook 等所有正文"
+    "字段必须是读者能看懂的自然语言句子，禁止出现任何英文字段名或「该章节 xxx 为否」这类"
+    "复述输入结构的句子——要说的是画面本身的内容和判断依据，不是数据长什么样。"
+    "只输出 JSON。"
 )
+
+# 内部字段名的黑名单：正文里出现这些 token 基本可以确定是把输入结构复述进了输出，
+# 而不是恰好用到了这个英文词（都是驼峰/下划线拼接的内部标识符，不会自然出现在
+# 中文技术写作里）。
+_LEAKED_FIELD_NAMES = (
+    "visualDependency", "visualMoments", "mustWatch", "howTo", "howToReason",
+    "keyPoint", "chapterIndex", "chapterTitle", "evidenceSegmentIds", "segmentId",
+    "timestampSeconds", "startSeconds", "endSeconds", "whyWatch", "whoShouldWatch",
+    "ifShortOnTime", "speakerScope",
+)
+
+
+def _tour_text_fields(out: dict) -> list[str]:
+    fields = [out.get("hook"), out.get("whoShouldWatch"), out.get("ifShortOnTime")]
+    for m in out.get("mustWatch") or []:
+        if isinstance(m, dict):
+            fields += [m.get("label"), m.get("why")]
+    for s in out.get("stops") or []:
+        if isinstance(s, dict):
+            fields += [s.get("title"), s.get("what"), s.get("keyPoint"), s.get("howToReason")]
+    return [f for f in fields if isinstance(f, str)]
+
+
+def _find_leaked_field_name(out: dict) -> str | None:
+    """扫描导览正文，命中任一内部字段名 token 即返回该 token（供重试提示引用）。"""
+    for text in _tour_text_fields(out):
+        for name in _LEAKED_FIELD_NAMES:
+            if name in text:
+                return name
+    return None
 
 
 def build_tour(payload: dict, dry_run: bool) -> dict | None:
@@ -473,12 +508,29 @@ def build_tour(payload: dict, dry_run: bool) -> dict | None:
             "whoShouldWatch": "", "ifShortOnTime": "", "mustWatch": [], "stops": stops,
         }
 
+    user = json.dumps(payload, ensure_ascii=False)
     try:
-        out = _parse_json(_call(_TOUR_SYS, json.dumps(payload, ensure_ascii=False)))
+        out = _parse_json(_call(_TOUR_SYS, user))
     except LLMError:
         return None
     if not isinstance(out.get("stops"), list) or not out["stops"]:
         return None
+
+    # 正文泄露内部字段名：重试一次，把命中的 token 明确点出来让模型改写；
+    # 仍失败就放行（好过整场导览直接判失败），留给人工抽检。
+    leaked = _find_leaked_field_name(out)
+    if leaked:
+        retry_user = (
+            user + f"\n\n【上一次输出在正文里出现了字段名 \"{leaked}\"，这是禁止的——"
+            "改写成描述画面/判断依据本身的自然语言句子，不要提及任何字段名。】"
+        )
+        try:
+            retried = _parse_json(_call(_TOUR_SYS, retry_user))
+            if isinstance(retried.get("stops"), list) and retried["stops"] and not _find_leaked_field_name(retried):
+                out = retried
+        except LLMError:
+            pass  # 重试失败也放行原始结果，好过整场导览判失败。
+
     out.setdefault("hook", payload.get("whyWatch") or "")
     out.setdefault("whoShouldWatch", "")
     out.setdefault("ifShortOnTime", "")
@@ -503,6 +555,39 @@ _AUDIENCE_SYS = (
     "fit=not_recommended；判断不出就不要编造，省略这一条。\n"
     "3) 只输出 JSON 数组，不要外层包裹。"
 )
+
+
+_ROLES_SYS = (
+    "你在给一场大会演讲挑选「最贴切」的目标角色标签，供筛选器用——目的是帮读者快速排除"
+    "不该看的场次，不是列举所有沾边的角色。输入含一句话钩子、谁该看、时间不够看哪段、"
+    "几条关键观点。严格输出 JSON 数组，1-2 个元素（多数场次只有 1 个最贴切），"
+    "取自集合 developer, product-design, founder-lead, trend：\n"
+    "- developer：内容是具体的工程实现/代码/架构/工具用法，主要读者是要动手做的工程师。\n"
+    "- product-design：内容是产品/设计决策、用户体验、设计系统，主要读者是产品或设计角色。\n"
+    "- founder-lead：内容是团队/组织/战略/商业化决策，主要读者是创始人或负责人。\n"
+    "- trend：内容是行业趋势观察、不涉及具体怎么做，主要读者是想了解方向但不动手的人。\n"
+    "只在内容明确同时对两类角色都有实质价值时才给 2 个；拿不准就只给最主要的 1 个。"
+    "只输出 JSON 数组，不要外层包裹。"
+)
+
+
+def reclassify_roles(payload: dict, dry_run: bool) -> list[str]:
+    """把「谁该看」重新收紧成 1-2 个最贴切角色，替代 reduce 阶段过度宽松的多标签。
+
+    dry_run/stub → 空列表（调用方须回落原有 draft.roles，不覆盖成空）。
+    """
+    if _use_stub(dry_run):
+        return []
+    try:
+        arr = _parse_json_array(_call(_ROLES_SYS, json.dumps(payload, ensure_ascii=False)))
+    except LLMError:
+        return []
+    out = [r for r in arr if r in ROLES]
+    seen = []
+    for r in out:
+        if r not in seen:
+            seen.append(r)
+    return seen[:2]
 
 
 def build_audience(payload: dict, dry_run: bool) -> list[dict]:

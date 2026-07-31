@@ -27,7 +27,7 @@ export type Topic =
 
 /** 颜色 token（镜像 theme.css，暖纸档案调）。 */
 export const color = {
-  paper: '#E7E4DB',
+  paper: '#F4F2EC',
   surface: '#F4F2EC',
   surfaceSunken: '#EFEDE5',
   ink: '#1A1814',

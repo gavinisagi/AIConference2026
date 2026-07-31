@@ -141,13 +141,22 @@ def run_video(video_id: str, args) -> bool:
     tour_out = _load(work, "tour.json")
     tour_data = tour_out if tour_out else None
 
-    # 6b2) audience（把 whoShouldWatch 一句话重组成分角色结构化列表；不重新转录）
+    # 6b2) audience（把 whoShouldWatch 一句话重组成分角色结构化列表 + 收紧 roles；不重新转录）
     def _audience():
         _dump(work, "audience.json", audience.generate_audience(tour_data, draft, dry))
     if not stage("audience", _audience):
         return False
+    audience_out = _load(work, "audience.json")
+    # 兼容旧产物：早期版本 audience.json 是裸数组（只有 entries，没有 roles）。
+    if isinstance(audience_out, list):
+        audience_out = {"entries": audience_out, "roles": []}
+    audience_out = audience_out or {"entries": [], "roles": []}
     if tour_data is not None:
-        tour_data["audience"] = _load(work, "audience.json") or []
+        tour_data["audience"] = audience_out.get("entries") or []
+    # roles 为空说明重分类未产出（dry-run/失败）——回落 reduce 阶段原有的宽松标签，
+    # 不覆盖成空（宁可不够精确，也不能让筛选器无角色可选）。
+    if audience_out.get("roles"):
+        draft["roles"] = audience_out["roles"]
 
     # 6c) frames（关键帧留存：把可读的幻灯片/演示画面截下来，站点配图）
     def _frames():

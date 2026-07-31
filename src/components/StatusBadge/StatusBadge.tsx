@@ -17,6 +17,10 @@ export interface StatusBadgeProps {
  */
 export function StatusBadge({ status, locale = 'zh', className }: StatusBadgeProps) {
   const dict = getDictionary(locale);
+  // indexed 是"已产出基础清洗但尚无编辑推荐/分析标记"的默认态——当前全站
+  // 167 场清一色 indexed，徽章逢卡必现、信息量为零，纯视觉噪音。只在真正
+  // 有区分度的两态（推荐先看 / 解读中）时才渲染。
+  if (status === 'indexed') return null;
   const cls = [styles.badge, styles[status], className].filter(Boolean).join(' ');
   return (
     <span className={cls}>
@@ -25,7 +29,6 @@ export function StatusBadge({ status, locale = 'zh', className }: StatusBadgePro
           ★
         </span>
       )}
-      {status === 'indexed' && <span className={styles.dot} aria-hidden="true" />}
       {status === 'analyzing' && <span className={styles.pulse} aria-hidden="true" />}
       {dict.status[status]}
     </span>

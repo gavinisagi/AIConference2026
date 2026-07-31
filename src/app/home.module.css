@@ -47,39 +47,6 @@
 }
 .lead b { color: var(--ink); font-weight: 600; }
 
-/* 会议快捷入口：横向一排，不再是占半屏的卡片墙。 */
-.confRail {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-8);
-}
-.confLink {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-8);
-  text-decoration: none;
-  color: inherit;
-  border: 1px solid var(--hairline-strong);
-  padding: 7px 12px;
-  transition: background var(--motion-fast) var(--easing);
-}
-.confLink:hover { background: var(--surface-sunken); }
-.confLink:focus-visible {
-  outline: var(--focus-ring) solid var(--accent);
-  outline-offset: 2px;
-}
-
-.confCount {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--ink-muted);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
 @media (max-width: 900px) {
   /* 副标题在窄屏挪到标题下方，不再占右栏。 */
   .hero {

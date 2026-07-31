@@ -20,7 +20,8 @@ export interface VideoCardProps {
  */
 export function VideoCard({ session, locale = 'zh' }: VideoCardProps) {
   const dict = getDictionary(locale);
-  const title = displayTitle(session, dict);
+  // 中文钩子优先——与详情页 h1 / 首页列表同一优先级，不让英文原标题抢标题位。
+  const title = session.tour?.hook || displayTitle(session, dict);
   const minutes = session.durationMinutes;
   const videoHref = locale === 'en' ? `/en/video/${session.id}/` : `/video/${session.id}/`;
 

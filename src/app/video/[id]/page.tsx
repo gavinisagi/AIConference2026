@@ -25,7 +25,9 @@ export async function generateMetadata({
   const { id } = await params;
   const session = getSessionById(id);
   if (!session) return { title: dict.video.notFoundTitle };
-  const title = displayTitle(session, dict);
+  // 中文钩子是核心交付物，社交卡片/搜索结果标题也该用它，不是英文原标题
+  // （与页面 h1 同一优先级，见 VideoDetailView.tsx）。
+  const title = session.tour?.hook || displayTitle(session, dict);
   const description = session.whyWatch ?? dict.video.defaultDescription;
 
   // 单场 OG 封面：优先用该场留存的首张关键画面（16:9 真实内容，比通用图更有点击欲）；

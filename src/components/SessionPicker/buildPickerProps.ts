@@ -31,7 +31,7 @@ export function buildPickerProps(
   locale: Locale,
 ): PickerProps {
   const rows: PickerRow[] = sessions.map((s) => {
-    const split = watchSplit(s);
+    const split = watchSplit(s.tour);
     const shape = watchShape(split);
 
     // 「谁该看」优先用 audience 的结构化角色（更具体），无则回落契约 roles 枚举。
@@ -62,7 +62,7 @@ export function buildPickerProps(
       conferenceId: s.conferenceId,
       roleKeys: s.roles,
       topicKeys: s.topics,
-      sceneKeys: SCENES.filter((sc) => matchesScene(s, split, sc)),
+      sceneKeys: SCENES.filter((sc) => matchesScene(split, sc)),
       durationSeconds: s.durationSeconds ?? Number.MAX_SAFE_INTEGER,
       playlistIndex: s.playlistIndex ?? 9999,
     };
