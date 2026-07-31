@@ -11,8 +11,12 @@
   }
 }
 
+/* 详情页专用宽度，不用全站通用的 --content-max(1200px)——「读完」档是正文+
+   关键画面两栏（readGrid），1200px 的外层容器比 layoutSingle 自己的 1290px
+   上限更窄，实际生效的还是更窄那个，两栏依旧被挤扁。这里直接放宽到与
+   layoutSingle 一致。 */
 .inner {
-  max-width: var(--content-max);
+  max-width: 1290px;
   margin: 0 auto;
 }
 
@@ -30,10 +34,13 @@
   }
 }
 
-/* 有 tour 时：单列、限阅读宽、居中——导览是主角，元信息降为脚注。 */
+/* 有 tour 时：单列、居中——导览是主角，元信息降为脚注。
+   860px 是给纯文字阅读列宽的老口径；三档 tab 里「读完」档是正文+关键画面
+   两栏布局（readGrid，见 TourView.module.css），860px 把两栏一起挤扁了，
+   画面缩略图、逐段正文都显得局促。放宽到 1290px（+50%），双栏各自有呼吸空间。 */
 .layoutSingle {
   display: block;
-  max-width: 860px;
+  max-width: 1290px;
   margin: 0 auto;
 }
 
