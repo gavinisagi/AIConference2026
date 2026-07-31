@@ -486,6 +486,49 @@ def build_tour(payload: dict, dry_run: bool) -> dict | None:
     return out
 
 
+# --- 受众重组（结构化「谁该看」）----------------------------------------
+# 不重新转录：只把 tour 阶段已产出的 whoShouldWatch/ifShortOnTime 与全片
+# takeaways 喂回去，让模型把「一句话谁该看」重组成 {who, why} 列表，
+# 并按需给出一条「不适合谁」——比重新提取全片内容便宜得多。
+
+_AUDIENCE_SYS = (
+    "你在把一份「谁该看」的一句话总结，重组成分角色的结构化列表，供导览页展示。"
+    "输入含该场的一句话钩子、谁该看、时间不够看哪段、几条关键观点、话题标签。"
+    "严格输出 JSON 数组，2-4 个元素，元素形如 "
+    '{"who":"<=10字的角色/人群","why":"该角色为何该看，<=30字，须具体不空泛","fit":"recommended"|"not_recommended"}。'
+    "要求：\n"
+    "1) 前几项 fit=recommended，按最该看到较该看排序，why 要落到具体收获（引用观点里的实质内容），不要写"
+    "「适合关心该领域的人」这类空话。\n"
+    "2) 若能合理判断出「这场明显不适合谁」（如内容太基础/太前沿/无落地案例/纯理论），追加恰好 1 条 "
+    "fit=not_recommended；判断不出就不要编造，省略这一条。\n"
+    "3) 只输出 JSON 数组，不要外层包裹。"
+)
+
+
+def build_audience(payload: dict, dry_run: bool) -> list[dict]:
+    """谁该看 → 结构化 {who,why,fit}[]。dry_run/stub 或输入过薄 → 空列表（页面走原句降级）。"""
+    if _use_stub(dry_run):
+        return []
+    who = payload.get("whoShouldWatch")
+    if not isinstance(who, str) or not who.strip():
+        return []
+    try:
+        arr = _parse_json_array(_call(_AUDIENCE_SYS, json.dumps(payload, ensure_ascii=False)))
+    except LLMError:
+        return []
+    out = []
+    for a in arr:
+        if not isinstance(a, dict):
+            continue
+        w = a.get("who")
+        y = a.get("why")
+        if not (isinstance(w, str) and w.strip() and isinstance(y, str) and y.strip()):
+            continue
+        fit = a.get("fit") if a.get("fit") in ("recommended", "not_recommended") else "recommended"
+        out.append({"who": w.strip(), "why": y.strip(), "fit": fit})
+    return out
+
+
 # --- 关键帧视觉分类 ----------------------------------------------------
 
 _FRAMES_SYS = (

@@ -3,13 +3,18 @@ import type { Locale } from '@/i18n/locale';
 import { getDictionary } from '@/i18n/getDictionary';
 import { renderRich } from '@/i18n/rich';
 import { frameSrc } from '@/lib/assets';
+import { TourDepths, type BarSegment } from './TourDepths';
 import styles from './TourView.module.css';
 
 /**
  * TourView — 观看导览（承接层核心体验）。
- * 静态渲染：钩子 / 谁该看 + 时间占比 / 时间不够看哪段 / 必看片段 / 逐段 watch·skim·listen。
- * 所有深链外跳官方源带时间戳（本站不播放）。locale 驱动 UI 框架文案；tour 本身
- * （hook/whyWatch/stops 等）是流水线生成的中文正文，不受 locale 影响。
+ *
+ * 分三档阅读深度（见 TourDepths）：
+ *   TL;DR   — 关键观点 + 谁该看 + 我们的建议，30 秒内决定看不看；
+ *   读完    — 逐段导览 + 关键画面侧栏，不看原片也能拿到内容；
+ *   跳看    — 必看播放列表 + 其余可跳段落 + 官方原片入口。
+ * 本组件负责在服务端渲染这三块，切换逻辑在客户端。所有深链外跳官方源带时间戳
+ * （本站不播放）。locale 驱动 UI 框架文案与正文（英文版数据集已整体替换）。
  */
 
 function mmss(sec: number): string {
@@ -57,149 +62,101 @@ export function TourView({
   for (const st of tour.stops) agg[st.howTo] += Math.max(0, st.endSeconds - st.startSeconds);
   const total = agg.watch + agg.skim + agg.listen || 1;
   const durationSec = tour.stops.reduce((mx, s) => Math.max(mx, s.endSeconds), 0);
+  const watchMin = minutesOf(agg.watch);
+  const totalMin = minutesOf(durationSec);
+  const mustWatchMin = minutesOf(
+    tour.mustWatch.reduce((sum, m) => sum + Math.max(0, m.endSeconds - m.startSeconds), 0),
+  );
 
-  return (
-    <div className={styles.tour}>
-      {/* 钩子 hero：进来第一眼就是它。 */}
-      <p className={styles.hookHero}>{tour.hook}</p>
+  // 顶部常驻时间轴：一格一站，宽度按时长占比，点击跳原片。
+  const barSegments: BarSegment[] = tour.stops.map((st) => ({
+    pct: Math.max(1, ((st.endSeconds - st.startSeconds) / total) * 100),
+    start: mmss(st.startSeconds),
+    title: `${mmss(st.startSeconds)}–${mmss(st.endSeconds)} ${st.title}`,
+    href: at(officialUrl, st.startSeconds),
+    mode: st.howTo,
+  }));
 
-      {/* 一行硬统计：全片多长 · 真正值得盯屏多久 · 几个必看点。 */}
-      <p className={styles.statline}>
-        {renderRich(dict.tour.statFullLength(minutesOf(durationSec)))}
-        <span className={styles.statDot}>·</span>
-        {renderRich(dict.tour.statWatchLength(minutesOf(agg.watch)), styles.statWatch)}
-        {tour.mustWatch.length > 0 && (
+  /* ---- 档位 1：TL;DR —— 关键观点 + 谁该看 + 建议 ---- */
+  const panelTldr = (
+    <div className={styles.tldrGrid}>
+      <div className={styles.tldrMain}>
+        {tour.stops.some((s) => s.keyPoint) && (
           <>
-            <span className={styles.statDot}>·</span>
-            {renderRich(dict.tour.statMustWatch(tour.mustWatch.length))}
+            <span className={styles.miniHead}>{dict.video.takeawaysHeading}</span>
+            <ol className={styles.pointList}>
+              {tour.stops
+                .filter((s) => s.keyPoint)
+                .map((s, i) => (
+                  <li key={i} className={styles.point}>
+                    <p className={styles.pointText}>{s.keyPoint}</p>
+                    <a
+                      className={styles.pointAt}
+                      href={at(officialUrl, s.startSeconds)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {mmss(s.startSeconds)} – {mmss(s.endSeconds)}
+                    </a>
+                  </li>
+                ))}
+            </ol>
           </>
         )}
-      </p>
-
-      {/* 必看片段：转化力最强，前置。 */}
-      {tour.mustWatch.length > 0 && (
-        <section className={styles.section} id="must">
-          <h3 className={styles.sectionHead}>{dict.tour.mustWatchHeading}</h3>
-          <div className={styles.mustList}>
-            {tour.mustWatch.map((m, i) => (
-              <a
-                key={i}
-                href={at(officialUrl, m.startSeconds)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.mustCard}
-              >
-                <div className={styles.mustTop}>
-                  <span className={styles.tc}>{mmss(m.startSeconds)}–{mmss(m.endSeconds)}</span>
-                  {m.live && <span className={styles.live}>{dict.tour.liveBadge}</span>}
-                  <b>{m.label}</b>
-                </div>
-                {m.why && <p className={styles.mustWhy}>{m.why}</p>}
-              </a>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* 关键画面：流水线留存的可读屏幕内容（幻灯片/图表/代码/界面），点击跳原片对应时刻。 */}
-      {frames.length > 0 && (
-        <section className={styles.section} id="frames">
-          <h3 className={styles.sectionHead}>{dict.tour.framesHeading}</h3>
-          <ul className={styles.frameStrip}>
-            {frames.map((f) => (
-              <li key={f.src} className={styles.frameItem}>
-                <a
-                  href={at(officialUrl, f.timestampSeconds)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={styles.frameLink}
-                >
-                  {/* 静态导出：用原生 img 避免 next/image 的运行时优化依赖。 */}
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    className={styles.frameImg}
-                    src={frameSrc(f.src)}
-                    alt={f.caption || dict.tour.frameAlt(mmss(f.timestampSeconds))}
-                    loading="lazy"
-                    width={480}
-                    height={270}
-                  />
-                  <span className={styles.frameMeta}>
-                    <span className={styles.frameTime}>{mmss(f.timestampSeconds)}</span>
-                    {f.caption && <span className={styles.frameCaption}>{f.caption}</span>}
-                  </span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {/* 决策带：谁该看 + 时间占比 + 时间不够。 */}
-      <div className={styles.band} id="time">
-        {tour.whoShouldWatch && (
-          <div className={styles.who}>
-            <span className={styles.bandLabel}>{dict.tour.whoShouldWatch}</span>
-            <span>{tour.whoShouldWatch}</span>
-          </div>
-        )}
-
-        <div>
-          <span className={styles.bandLabel}>{dict.tour.timeAllocation}</span>
-          <div className={styles.propbar} role="img" aria-label={dict.tour.timeAllocationAria}>
-            {(['watch', 'skim', 'listen'] as TourMode[]).map((m) => (
-              <span
-                key={m}
-                className={styles[`prop_${m}`]}
-                style={{ width: `${(agg[m] / total) * 100}%` }}
-              />
-            ))}
-          </div>
-          <div className={styles.propLegend}>
-            <span><i className={styles.prop_watch} /> {dict.tour.legendWatch(mmss(agg.watch))}</span>
-            <span><i className={styles.prop_skim} /> {dict.tour.legendSkim(mmss(agg.skim))}</span>
-            <span><i className={styles.prop_listen} /> {dict.tour.legendListen(mmss(agg.listen))}</span>
-          </div>
-        </div>
-
-        {tour.ifShortOnTime && (
-          <div className={styles.short}>
-            <span className={styles.shortLabel}>{dict.tour.shortOnTime}</span>
-            <span>{tour.ifShortOnTime}</span>
-          </div>
-        )}
       </div>
-
-      <section className={styles.section} id="stops">
-        <h3 className={styles.sectionHead}>{dict.tour.stopsHeading}</h3>
-        <div className={styles.modes}>
-          {(['watch', 'skim', 'listen'] as TourMode[]).map((m) => (
-            <span key={m} className={styles.modeItem}>
-              <span className={`${styles.badge} ${styles[`badge_${m}`]}`}>{modeLabel[m]}</span>
-              {modeHint[m]}
-            </span>
-          ))}
+      <aside className={styles.tldrSide}>
+        {/* audience 有结构化列表时用它（含「不适合谁」）；否则回落 whoShouldWatch 单句。 */}
+        {tour.audience.length > 0 ? (
+          <div className={styles.sideBlock}>
+            <span className={styles.sideHead}>{dict.tour.whoShouldWatch}</span>
+            {tour.audience.map((a, i) => (
+              <div key={i} className={styles.audItem}>
+                <span className={a.fit === 'not_recommended' ? styles.audWhoNo : styles.audWho}>
+                  {a.fit === 'not_recommended' ? `${dict.tour.notRecommended} · ${a.who}` : a.who}
+                </span>
+                <span className={styles.audWhy}>{a.why}</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          tour.whoShouldWatch && (
+            <div className={styles.sideBlock}>
+              <span className={styles.sideHead}>{dict.tour.whoShouldWatch}</span>
+              <span className={styles.audWhy}>{tour.whoShouldWatch}</span>
+            </div>
+          )
+        )}
+        <div className={styles.advice}>
+          <span className={styles.sideHead}>{dict.tour.ourAdvice}</span>
+          <span className={styles.adviceText}>
+            {dict.tour.adviceLine(totalMin, watchMin)}
+            {agg.watch / total <= 0.2 && ` ${dict.tour.adviceCommute}`}
+          </span>
+          {tour.ifShortOnTime && <span className={styles.adviceText}>{tour.ifShortOnTime}</span>}
         </div>
+      </aside>
+    </div>
+  );
 
+  /* ---- 档位 2：读完 —— 逐段导览 + 关键画面侧栏 ---- */
+  const panelRead = (
+    <div className={styles.readGrid}>
+      <div className={styles.readMain}>
+        <span className={styles.miniHead}>{dict.tour.readerCount(tour.stops.length)}</span>
         <ol className={styles.stops}>
           {tour.stops.map((st, i) => (
             <li key={i} className={styles.stop}>
               <div className={styles.stime}>
                 {mmss(st.startSeconds)}
-                <span className={styles.to}>→ {mmss(st.endSeconds)}</span>
-              </div>
-              <div className={styles.stbody}>
+                <span className={styles.to}>– {mmss(st.endSeconds)}</span>
                 <span className={`${styles.badge} ${styles[`badge_${st.howTo}`]}`}>
                   {modeLabel[st.howTo]}
                 </span>
+              </div>
+              <div className={styles.stbody}>
                 <h4 className={styles.stTitle}>{st.title}</h4>
                 {st.what && <p className={styles.what}>{st.what}</p>}
-                {st.keyPoint && (
-                  <p className={styles.key}>
-                    <span className={styles.keyLabel}>{dict.tour.keyPointLabel}</span>
-                    {st.keyPoint}
-                  </p>
-                )}
+                {st.keyPoint && <p className={styles.key}>{st.keyPoint}</p>}
                 <div className={styles.strow}>
                   {st.howToReason && <span className={styles.reason}>{st.howToReason}</span>}
                   <a
@@ -212,13 +169,179 @@ export function TourView({
                   </a>
                 </div>
                 {displayableSpeaker(st.speaker) && (
-                  <div className={styles.spk}>{dict.tour.speaker(displayableSpeaker(st.speaker)!)}</div>
+                  <div className={styles.spk}>
+                    {dict.tour.speaker(displayableSpeaker(st.speaker)!)}
+                  </div>
                 )}
               </div>
             </li>
           ))}
         </ol>
-      </section>
+      </div>
+      {frames.length > 0 && (
+        <aside className={styles.frameRail}>
+          <span className={styles.railHead}>
+            <span>{dict.tour.framesHeading}</span>
+            <span className={styles.railCount}>{frames.length}</span>
+          </span>
+          <div className={styles.railList}>
+            {frames.map((f) => (
+              <a
+                key={f.src}
+                className={styles.railItem}
+                href={at(officialUrl, f.timestampSeconds)}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {/* 静态导出：用原生 img 避免 next/image 的运行时优化依赖。 */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  className={styles.railImg}
+                  src={frameSrc(f.src)}
+                  alt={f.caption || dict.tour.frameAlt(mmss(f.timestampSeconds))}
+                  loading="lazy"
+                  width={224}
+                  height={126}
+                />
+                <span className={styles.railMeta}>
+                  <span className={styles.railTime}>{mmss(f.timestampSeconds)}</span>
+                  {f.caption && <span className={styles.railCaption}>{f.caption}</span>}
+                </span>
+              </a>
+            ))}
+          </div>
+        </aside>
+      )}
+    </div>
+  );
+
+  /* ---- 档位 3：跳看原片 —— 必看播放列表 + 其余可跳 + 官方入口 ---- */
+  const restStops = tour.stops.filter((s) => s.howTo !== 'watch');
+  const panelWatch = (
+    <div className={styles.watchGrid}>
+      <div className={styles.watchMain}>
+        {tour.mustWatch.length > 0 ? (
+          <>
+            <div className={styles.playlistHead}>
+              <span className={styles.playlistTitle}>
+                {dict.tour.playlistHeading(tour.mustWatch.length, mustWatchMin)}
+              </span>
+              <span className={styles.playlistNote}>{dict.tour.playlistNote}</span>
+            </div>
+            <ol className={styles.mustList}>
+              {tour.mustWatch.map((m, i) => (
+                <li key={i} className={styles.mustRow}>
+                  <span className={styles.mustBody}>
+                    <span className={styles.mustTime}>
+                      {mmss(m.startSeconds)} – {mmss(m.endSeconds)}
+                      {m.live && <span className={styles.live}>{dict.tour.liveBadge}</span>}
+                    </span>
+                    <span className={styles.mustLabel}>{m.label}</span>
+                    {m.why && <span className={styles.mustWhy}>{m.why}</span>}
+                  </span>
+                  <a
+                    className={styles.playBtn}
+                    href={at(officialUrl, m.startSeconds)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {dict.tour.play}
+                  </a>
+                </li>
+              ))}
+            </ol>
+          </>
+        ) : (
+          <span className={styles.miniHead}>{dict.tour.mustWatchHeading}</span>
+        )}
+
+        {restStops.length > 0 && (
+          <div className={styles.restBlock}>
+            <span className={styles.miniHead}>{dict.tour.restHeading}</span>
+            {restStops.map((s, i) => (
+              <div key={i} className={styles.restRow}>
+                <span className={styles.restTime}>
+                  {mmss(s.startSeconds)} – {mmss(s.endSeconds)}
+                </span>
+                <span className={`${styles.badge} ${styles[`badge_${s.howTo}`]}`}>
+                  {modeLabel[s.howTo]}
+                </span>
+                <span className={styles.restTitle}>{s.title}</span>
+                <a
+                  className={styles.restJump}
+                  href={at(officialUrl, s.startSeconds)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {dict.tour.jump}
+                </a>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <aside className={styles.watchSide}>
+        <span className={styles.sideHead}>{dict.tour.officialSourceHeading}</span>
+        <a
+          className={styles.officialBtn}
+          href={officialUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {dict.video.watchButton}
+        </a>
+        <span className={styles.officialNote}>{dict.video.watchNote}</span>
+        <div className={styles.advice}>
+          <span className={styles.sideHead}>{dict.tour.ourAdvice}</span>
+          <span className={styles.adviceText}>
+            {dict.tour.adviceLine(totalMin, watchMin)}
+            {agg.watch / total <= 0.2 && ` ${dict.tour.adviceCommute}`}
+          </span>
+        </div>
+      </aside>
+    </div>
+  );
+
+  return (
+    <div className={styles.tour}>
+      {/* 钩子 hero：进来第一眼就是它。 */}
+      <p className={styles.hookHero}>{tour.hook}</p>
+
+      {/* 一行硬统计：全片多长 · 真正值得盯屏多久 · 几个必看点。 */}
+      <p className={styles.statline}>
+        {renderRich(dict.tour.statFullLength(totalMin))}
+        <span className={styles.statDot}>·</span>
+        {renderRich(dict.tour.statWatchLength(watchMin), styles.statWatch)}
+        {tour.mustWatch.length > 0 && (
+          <>
+            <span className={styles.statDot}>·</span>
+            {renderRich(dict.tour.statMustWatch(tour.mustWatch.length))}
+          </>
+        )}
+      </p>
+
+      <TourDepths
+        tabs={[
+          {
+            key: 'tldr',
+            label: dict.tour.depth.tldrLabel,
+            hint: dict.tour.depth.tldrHint(tour.stops.filter((s) => s.keyPoint).length),
+          },
+          { key: 'read', label: dict.tour.depth.readLabel, hint: dict.tour.depth.readHint },
+          {
+            key: 'watch',
+            label: dict.tour.depth.watchLabel,
+            hint: dict.tour.depth.watchHint(mustWatchMin || watchMin),
+          },
+        ]}
+        segments={barSegments}
+        legendMustWatch={dict.tour.legendMustWatch(watchMin)}
+        legendRest={dict.tour.legendRest}
+        barAriaLabel={dict.tour.segmentBarAria}
+        tabsAriaLabel={dict.tour.depth.ariaLabel}
+        panels={{ tldr: panelTldr, read: panelRead, watch: panelWatch }}
+      />
     </div>
   );
 }

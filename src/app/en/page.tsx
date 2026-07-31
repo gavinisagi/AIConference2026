@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
-import { getConferences, getDigestByConference } from '@/lib/loader';
+import { getAllSessions, getConferences } from '@/lib/loader';
 import { getDictionary } from '@/i18n/getDictionary';
-import { renderRich } from '@/i18n/rich';
 import { ConfBadge } from '@/components/ConfBadge/ConfBadge';
 import { SiteChrome } from '@/components/SiteChrome/SiteChrome';
+import { SessionPicker } from '@/components/SessionPicker/SessionPicker';
+import { buildPickerProps } from '@/components/SessionPicker/buildPickerProps';
 import styles from '../home.module.css';
 
 /**
@@ -11,6 +12,7 @@ import styles from '../home.module.css';
  * 与组件，只是显式传入 locale='en'（非 [locale] 动态段方案，见 src/i18n/locale.ts）。
  */
 const dict = getDictionary('en');
+const ARCHIVE_MONTH = '2026.07';
 
 export const metadata: Metadata = {
   title: `${dict.site.name} — ${dict.site.tagline}`,
@@ -19,6 +21,7 @@ export const metadata: Metadata = {
 };
 
 export default function HomePageEn() {
+  const sessions = getAllSessions('en');
   const conferences = getConferences()
     .filter((c) => c.sessionCount > 0)
     .slice()
@@ -29,26 +32,25 @@ export default function HomePageEn() {
       <main className={styles.page}>
         <div className={styles.inner}>
           <header className={styles.hero}>
-            <span className={styles.eyebrow}>{dict.home.eyebrow}</span>
-            <h1 className={styles.h1}>AI Conference Compass</h1>
-            <p className={styles.lead}>{renderRich(dict.home.lead())}</p>
+            <span className={styles.eyebrow}>{dict.home.archiveLine(ARCHIVE_MONTH)}</span>
+            <h1 className={styles.h1}>{dict.home.headline(sessions.length)}</h1>
+            <p className={styles.lead}>{dict.home.subLead}</p>
           </header>
 
-          <ul className={styles.confList}>
-            {conferences.map((conf) => {
-              const digest = getDigestByConference(conf.id, 'en');
-              return (
-                <li key={conf.id}>
-                  <a className={styles.confCard} href={`/en/c/${conf.id}/`}>
-                    <ConfBadge conference={conf.id} />
-                    <span className={styles.confCount}>{dict.home.sessionCount(conf.sessionCount)}</span>
-                    {digest?.headline && <p className={styles.confTeaser}>{digest.headline}</p>}
-                    <span className={styles.confCta}>{dict.home.viewTour}</span>
-                  </a>
-                </li>
-              );
-            })}
+          <ul className={styles.confRail}>
+            {conferences.map((conf) => (
+              <li key={conf.id}>
+                <a className={styles.confLink} href={`/en/c/${conf.id}/`}>
+                  <ConfBadge conference={conf.id} />
+                  <span className={styles.confCount}>
+                    {dict.home.sessionCount(conf.sessionCount)}
+                  </span>
+                </a>
+              </li>
+            ))}
           </ul>
+
+          <SessionPicker {...buildPickerProps(sessions, dict, 'en')} />
         </div>
       </main>
     </SiteChrome>

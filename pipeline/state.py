@@ -12,7 +12,7 @@ from contextlib import contextmanager
 
 from . import config
 
-STAGES = ("probe", "transcribe", "segment", "extract", "aggregate", "speaker", "visual", "tour", "frames", "qc", "emit", "i18n_en")
+STAGES = ("probe", "transcribe", "segment", "extract", "aggregate", "speaker", "visual", "tour", "audience", "frames", "qc", "emit", "i18n_en")
 
 PENDING, RUNNING, SUCCEEDED, FAILED, SKIPPED = "pending", "running", "succeeded", "failed", "skipped"
 

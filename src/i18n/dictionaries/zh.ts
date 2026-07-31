@@ -42,6 +42,41 @@ export const zh = {
     ],
     sessionCount: (n: number) => `${n} 场演讲`,
     viewTour: '查看导览 →',
+    archiveLine: (month: string) => `档案 · 更新至 ${month}`,
+    headline: (n: number) => `${n} 场演讲，逐段标出值得看的那几分钟。`,
+    subLead: '每场附逐段导览与必看片段，可直接跳到原片对应时间。',
+  },
+  /**
+   * 首页选片器（facet 筛选 + 排序 + 结果行）。
+   *
+   * 这一组**全部是纯字符串**——SessionPicker 是客户端组件，函数不能跨
+   * 服务端→客户端边界（React 会直接报错）。故需要插值的文案改用 {placeholder}
+   * 占位符，由客户端做字符串替换；其余按行文案在服务端预先算好后传入。
+   */
+  picker: {
+    facetConference: '会议',
+    facetScene: '场景',
+    facetRole: '谁该看',
+    facetTopic: '主题',
+    all: '全部',
+    scenes: {
+      commute: '通勤路上听',
+      quick: '20 分钟内看完',
+      deep: '值得认真看',
+    },
+    sorts: {
+      shortestWatch: '必看最短',
+      shortestTotal: '全片最短',
+      conferenceOrder: '会议顺序',
+    },
+    resultLine: '当前 {shown} 场 / 共 {total} 场 · 橙点为未读',
+    emptyState: '没有符合这些条件的场次。放宽任一条件试试。',
+    whoLabel: '谁该看 · ',
+    mustWatchMin: 'min 必看',
+    fullLength: '全片 {m} min',
+    modeCommute: '可当播客听',
+    modeMixed: '半听半看',
+    modeScreen: '需要盯屏',
   },
   breadcrumb: {
     home: '导览',
@@ -111,6 +146,33 @@ export const zh = {
       skim: '幻灯片图表 / 扫读即可',
       listen: '口头论述 / 听就够',
     },
+    /** 三档阅读深度（详情页顶部 tab）。 */
+    depth: {
+      tldrLabel: '30 秒结论',
+      tldrHint: (n: number) => `${n} 条关键观点`,
+      readLabel: '3 分钟读完',
+      readHint: '逐段导览 + 关键画面',
+      watchLabel: '跳看原片',
+      watchHint: (m: number) => `必看播放列表 ${m} min`,
+      ariaLabel: '阅读深度',
+    },
+    legendMustWatch: (m: number) => `橙色 = 推荐必看的 ${m} 分钟`,
+    legendRest: '其余读导览就够',
+    segmentBarAria: '分段时间轴，点击跳到该段',
+    playlistHeading: (n: number, m: number) => `必看播放列表 · ${n} 段 · 共 ${m} min`,
+    playlistNote: '按顺序跳看，每段都给了为何必看',
+    restHeading: '其余段落 · 可跳过',
+    jump: '跳到',
+    play: '▶ 播放',
+    officialSourceHeading: '官方原片',
+    ourAdvice: '我们的建议',
+    adviceLine: (total: number, watch: number) =>
+      `${total} 分钟里约 ${watch} 分钟需要盯屏，其余部分读导览即可。`,
+    adviceCommute: '本片无明显视觉依赖，适合通勤时当播客听完。',
+    notRecommended: '不适合',
+    relatedHeading: '同主题的其他演讲',
+    relatedWatchMin: (m: number) => `盯屏 ${m} min`,
+    readerCount: (stops: number) => `逐段导览 · ${stops} 段`,
     mustWatchHeading: '必看片段 · 直接跳看',
     liveBadge: 'Live 实操',
     framesHeading: '关键画面 · 点击跳到该处',

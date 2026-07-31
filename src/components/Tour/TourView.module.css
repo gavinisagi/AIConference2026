@@ -285,3 +285,255 @@
 .band {
   scroll-margin-top: 64px;
 }
+
+/* ==========================================================================
+   三档阅读深度的面板布局（2026-07 改版）。
+   共同骨架：主栏 + 右侧窄栏；窄屏一律塌成单列，右栏移到主栏之后。
+   ========================================================================== */
+
+.miniHead {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--ink-faint);
+  display: block;
+  padding-bottom: var(--space-12);
+  border-bottom: 1px solid var(--hairline);
+}
+.sideHead {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--ink-faint);
+  display: block;
+}
+
+/* ---- 档位 1：TL;DR ---- */
+.tldrGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: var(--space-48);
+  align-items: start;
+}
+.tldrMain { display: flex; flex-direction: column; gap: var(--space-16); }
+.pointList { list-style: none; margin: 0; padding: 0; }
+.point {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: var(--space-16) 0;
+  border-bottom: 1px solid var(--hairline);
+}
+.pointText {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.6;
+  color: var(--ink);
+  text-wrap: pretty;
+}
+.pointAt {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-faint);
+  text-decoration: none;
+  align-self: flex-start;
+}
+.pointAt:hover { color: var(--accent); text-decoration: underline; }
+
+.tldrSide { display: flex; flex-direction: column; gap: var(--space-24); }
+.sideBlock { display: flex; flex-direction: column; gap: var(--space-8); }
+.audItem {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+.audWho { font-size: 15px; font-weight: 500; color: var(--ink); }
+/* 「不适合谁」用中性灰而非红色——它是选片信息，不是错误状态。 */
+.audWhoNo { font-size: 15px; font-weight: 500; color: var(--ink-muted); }
+.audWhy { font-size: 13px; line-height: 1.65; color: var(--ink-muted); text-wrap: pretty; }
+
+.advice {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  padding: var(--space-16);
+  background: var(--surface-sunken);
+}
+.adviceText { font-size: 14px; line-height: 1.8; color: var(--ink-secondary); text-wrap: pretty; }
+
+/* ---- 档位 2：读完（逐段 + 画面侧栏）---- */
+.readGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: var(--space-32);
+  align-items: start;
+}
+.readMain { display: flex; flex-direction: column; gap: var(--space-16); min-width: 0; }
+
+.frameRail {
+  position: sticky;
+  top: 132px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  min-width: 0;
+}
+.railHead {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--ink-faint);
+}
+.railCount { font-variant-numeric: tabular-nums; }
+.railList { display: flex; flex-direction: column; border-top: 1px solid var(--hairline); }
+.railItem {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: var(--space-12);
+  align-items: start;
+  padding: var(--space-12) 0;
+  border-bottom: 1px solid var(--hairline);
+  text-decoration: none;
+  color: inherit;
+  transition: background var(--motion-fast) var(--easing);
+}
+.railItem:hover { background: #EAE7DD; }
+.railImg {
+  width: 112px;
+  height: 63px;
+  object-fit: cover;
+  display: block;
+  border: 1px solid var(--hairline-strong);
+  background: var(--ink);
+}
+.railMeta { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.railTime { font-family: var(--font-mono); font-size: 12px; color: var(--accent); }
+.railCaption { font-size: 13px; line-height: 1.55; color: var(--ink); text-wrap: pretty; }
+
+/* ---- 档位 3：跳看原片（必看播放列表）---- */
+.watchGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: var(--space-48);
+  align-items: start;
+}
+.watchMain { display: flex; flex-direction: column; gap: var(--space-24); min-width: 0; }
+
+.playlistHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-16);
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--ink);
+  padding-bottom: 10px;
+}
+.playlistTitle {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--ink);
+}
+.playlistNote { font-family: var(--font-mono); font-size: 11px; color: var(--ink-faint); }
+
+.mustRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 96px;
+  gap: var(--space-16);
+  align-items: center;
+  padding: var(--space-16) 0;
+  border-bottom: 1px solid var(--hairline);
+  list-style: none;
+}
+.mustBody { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.mustTime {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+.mustLabel { font-size: 19px; font-weight: 500; line-height: 1.5; color: var(--ink); }
+.playBtn {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 8px 12px;
+  background: var(--ink);
+  color: var(--surface);
+  text-align: center;
+  text-decoration: none;
+}
+.playBtn:hover { background: var(--accent); color: var(--surface); text-decoration: none; }
+
+.restBlock { display: flex; flex-direction: column; gap: var(--space-8); }
+.restRow {
+  display: grid;
+  grid-template-columns: 110px auto minmax(0, 1fr) 60px;
+  gap: var(--space-12);
+  align-items: center;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+.restTime {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-secondary);
+  white-space: nowrap;
+}
+.restTitle { font-size: 15px; color: var(--ink); line-height: 1.5; min-width: 0; }
+.restJump {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-align: right;
+  color: var(--accent);
+  text-decoration: none;
+}
+.restJump:hover { text-decoration: underline; }
+
+.watchSide { display: flex; flex-direction: column; gap: var(--space-12); }
+.officialBtn {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  padding: 12px var(--space-16);
+  background: var(--accent);
+  color: var(--surface);
+  text-align: center;
+  text-decoration: none;
+}
+.officialBtn:hover { background: var(--ink); color: var(--surface); text-decoration: none; }
+.officialNote { font-size: 12px; line-height: 1.7; color: var(--ink-muted); }
+
+/* ---- 窄屏：三档面板一律单列，侧栏跟在主栏后面 ---- */
+@media (max-width: 900px) {
+  .tldrGrid,
+  .readGrid,
+  .watchGrid {
+    grid-template-columns: 1fr;
+    gap: var(--space-32);
+  }
+  /* 侧栏不再 sticky（单列下会挡住正文）。 */
+  .frameRail { position: static; }
+  .railItem { grid-template-columns: 96px minmax(0, 1fr); }
+  .railImg { width: 96px; height: 54px; }
+  .pointText { font-size: 17px; }
+  .mustLabel { font-size: 17px; }
+}
+
+@media (max-width: 640px) {
+  .mustRow { grid-template-columns: 1fr; row-gap: var(--space-12); }
+  .playBtn { justify-self: start; padding: 8px var(--space-24); }
+  /* 「其余段落」四列在手机上必然挤爆，改成两行。 */
+  .restRow {
+    grid-template-columns: auto auto minmax(0, 1fr);
+    row-gap: 6px;
+  }
+  .restTitle { grid-column: 1 / -1; }
+  .restJump { grid-row: 1; grid-column: 3; }
+}

@@ -109,6 +109,11 @@ def collect_slots(enrichment: dict, asr: dict) -> list[dict]:
         head,
     ))
 
+    # audience 是重组产物、无直接原句，但仍在同一场演讲的语域内，用开头转录
+    # 做上下文有助于措辞贴合讲者用语（同 _top 组）。
+    for i, a in enumerate(tour.get("audience") or []):
+        add(_group(["tour", "audience", i], a, ("who", "why"), head))
+
     for i, tk in enumerate(enrichment.get("takeaways") or []):
         add(_group(["takeaways", i], tk, ("statement", "context"),
                    _source_by_evidence(asr, tk.get("evidenceSegmentIds"))))

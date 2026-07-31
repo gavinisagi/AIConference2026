@@ -116,6 +116,13 @@ export interface TourMustWatch {
   why: string;
 }
 
+/** 受众条目：谁该看 + 为何，或明确「不适合谁」。 */
+export interface TourAudienceEntry {
+  who: string;
+  why: string;
+  fit: 'recommended' | 'not_recommended';
+}
+
 /**
  * 观看导览（承接层核心资产）——不是 summary，是「推荐别人看」的观看指南。
  * 由清洗流水线 tour 阶段产出，缺省为 null（页面走详情降级）。
@@ -123,10 +130,16 @@ export interface TourMustWatch {
 export interface Tour {
   /** 一句话钩子（feed 也会复用）。 */
   hook: string;
-  /** 谁最该看。 */
+  /** 谁最该看（单句，供无 audience 时降级展示）。 */
   whoShouldWatch: string;
   /** 时间不够看哪段。 */
   ifShortOnTime: string;
+  /**
+   * whoShouldWatch 的结构化重组：分角色列表，可含至多一条「不适合谁」。
+   * 由 audience 阶段基于 whoShouldWatch 二次生成（不重新转录），可能为空数组
+   * （页面走 whoShouldWatch 单句降级，不编造）。
+   */
+  audience: TourAudienceEntry[];
   mustWatch: TourMustWatch[];
   stops: TourStop[];
 }

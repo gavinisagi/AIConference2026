@@ -1,0 +1,224 @@
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-32);
+}
+
+/* ---- facet 筛选：标签在左、选项右侧成行折行 ---- */
+.facets {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+.facet {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  gap: var(--space-16);
+  align-items: start;
+}
+.facetLabel {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--ink-faint);
+  padding-top: 7px;
+}
+.facetOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip,
+.chipActive {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 5px 11px;
+  white-space: nowrap;
+  cursor: pointer;
+  border: 1px solid var(--hairline-strong);
+  background: transparent;
+  color: var(--ink-secondary);
+  border-radius: 0;
+  transition: background var(--motion-fast) var(--easing), color var(--motion-fast) var(--easing);
+}
+.chip:hover { background: var(--surface-sunken); color: var(--ink); }
+.chipActive {
+  background: var(--ink);
+  color: var(--surface);
+  border-color: var(--ink);
+}
+.chip:focus-visible,
+.chipActive:focus-visible,
+.sort:focus-visible,
+.sortActive:focus-visible {
+  outline: var(--focus-ring) solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---- 结果条：计数 + 排序 ---- */
+.resultBar {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-16);
+  flex-wrap: wrap;
+  padding: 0 4px 10px;
+  border-bottom: 1px solid var(--ink);
+}
+.resultLine {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--ink);
+}
+.sorts { display: flex; gap: var(--space-16); }
+.sort,
+.sortActive {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-faint);
+  border-bottom: 1px solid transparent;
+}
+.sort:hover { color: var(--ink-secondary); }
+.sortActive { color: var(--ink); border-bottom-color: var(--ink); }
+
+.empty {
+  font-size: var(--fs-body-m);
+  color: var(--ink-muted);
+  margin: 0;
+  padding: var(--space-32) 4px;
+}
+
+/* ---- 结果行 ---- */
+.list { list-style: none; margin: 0; padding: 0; }
+
+.row {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) 210px 118px;
+  gap: 22px;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+  border-bottom: 1px solid var(--hairline);
+  padding: 20px 4px;
+  transition: background var(--motion-fast) var(--easing);
+}
+.row:hover { background: #EAE7DD; }
+.row:focus-visible {
+  outline: var(--focus-ring) solid var(--accent);
+  outline-offset: -2px;
+}
+
+.dotSeen,
+.dotUnseen {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: block;
+  justify-self: center;
+}
+.dotUnseen { background: var(--accent); }
+.dotSeen { background: var(--hairline-strong); }
+
+.rowMain {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+.hook {
+  font-size: 21px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--ink);
+  text-wrap: pretty;
+}
+.who {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-faint);
+}
+
+.rowMid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.roleText {
+  font-size: 13px;
+  color: var(--ink-muted);
+  line-height: 1.5;
+}
+.topics { display: flex; flex-wrap: wrap; gap: 5px; }
+.topicTag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 2px 7px;
+  white-space: nowrap;
+  border: 1px solid var(--hairline);
+  color: var(--ink-secondary);
+}
+
+.rowEnd {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  text-align: right;
+}
+/* 「必看 N min」是本站核心承诺，字号最大；全片时长退居次要。 */
+.watchMin {
+  font-family: var(--font-mono);
+  font-size: 19px;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.watchMinUnit { font-size: 10px; color: var(--ink-faint); }
+.fullLen {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.shape {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+/* ---- 窄屏：四列塌成两行，眼签与钩子同排 ---- */
+@media (max-width: 900px) {
+  .row {
+    grid-template-columns: 14px minmax(0, 1fr) auto;
+    gap: 14px;
+    row-gap: 10px;
+    padding: 16px 4px;
+  }
+  .rowMid {
+    grid-column: 2 / -1;
+  }
+  .rowEnd {
+    grid-row: 1;
+    grid-column: 3;
+    align-self: start;
+  }
+  .hook { font-size: 17px; }
+  .watchMin { font-size: 16px; }
+}
+
+@media (max-width: 640px) {
+  .facet {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  .facetLabel { padding-top: 0; }
+}

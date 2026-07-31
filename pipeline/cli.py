@@ -27,7 +27,7 @@ for _stream in (sys.stdout, sys.stderr):
             pass
 
 from . import (
-    config, digest, emit, frames, i18n_en, llm, media, qc, segment, state,
+    audience, config, digest, emit, frames, i18n_en, llm, media, qc, segment, state,
     subtitle, tour, transcribe, visual,
 )
 
@@ -141,6 +141,14 @@ def run_video(video_id: str, args) -> bool:
     tour_out = _load(work, "tour.json")
     tour_data = tour_out if tour_out else None
 
+    # 6b2) audience（把 whoShouldWatch 一句话重组成分角色结构化列表；不重新转录）
+    def _audience():
+        _dump(work, "audience.json", audience.generate_audience(tour_data, draft, dry))
+    if not stage("audience", _audience):
+        return False
+    if tour_data is not None:
+        tour_data["audience"] = _load(work, "audience.json") or []
+
     # 6c) frames（关键帧留存：把可读的幻灯片/演示画面截下来，站点配图）
     def _frames():
         _dump(work, "frames.json",
@@ -183,6 +191,11 @@ def run_video(video_id: str, args) -> bool:
 
     # 9) i18n_en（保结构原生英文渲染 → data/i18n/en/<id>.json）
     #    非中译英：读英文原句重写，锁死中文骨架。见 pipeline/i18n_en.py。
+    if args.skip_i18n_en:
+        print(f"[{video_id}] i18n_en: 跳过（--skip-i18n-en，后续单独补跑）")
+        print(f"[{video_id}] ✓ 完成（中文）")
+        return True
+
     def _i18n_en():
         # emit 被跳过（已成功）时 enrichment_out 为空，从磁盘读回既有产物。
         enr = enrichment_out or json.loads(
@@ -400,6 +413,7 @@ def build_parser() -> argparse.ArgumentParser:
     r.add_argument("--media", help="显式指定媒体文件路径")
     r.add_argument("--dry-run", action="store_true", help="LLM 走确定性桩")
     r.add_argument("--force", action="store_true", help="忽略已成功状态与 qc error，强制重跑/放行")
+    r.add_argument("--skip-i18n-en", action="store_true", help="跳过英文原生渲染阶段（先中文上线，英文单独补跑）")
     r.add_argument("--verbose", action="store_true")
     r.set_defaults(func=cmd_run)
 

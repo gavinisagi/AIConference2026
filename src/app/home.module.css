@@ -11,85 +11,85 @@
   gap: var(--space-48);
 }
 
+/* 标题区：粗黑线收底，是档案调的主要「版式锚点」（替代卡片投影分层）。 */
 .hero {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-12);
-  padding-top: var(--space-16);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: var(--space-64);
+  align-items: end;
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: var(--space-24);
 }
 .eyebrow {
   font-family: var(--font-mono);
-  font-size: var(--fs-label);
-  letter-spacing: var(--tracking-label);
-  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.16em;
   color: var(--accent);
-  font-weight: 600;
+  grid-column: 1;
 }
 .h1 {
-  font-family: var(--font-serif);
-  font-size: var(--fs-display);
-  line-height: var(--lh-display);
-  font-weight: var(--fw-display);
-  letter-spacing: var(--tracking-display);
+  font-size: 32px;
+  line-height: 1.35;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   color: var(--ink);
-  margin: 0;
-  text-wrap: balance;
+  margin: var(--space-12) 0 0;
+  grid-column: 1;
+  text-wrap: pretty;
 }
 .lead {
-  font-family: var(--font-serif);
-  font-size: var(--fs-body-l);
-  line-height: var(--lh-body-l);
-  color: var(--ink-secondary);
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--ink-muted);
   margin: 0;
-  max-width: var(--reading-max);
+  grid-column: 2;
+  text-wrap: pretty;
 }
 .lead b { color: var(--ink); font-weight: 600; }
 
-/* 会议卡：一场会议一张，导向该会议的 hub。 */
-.confList {
+/* 会议快捷入口：横向一排，不再是占半屏的卡片墙。 */
+.confRail {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: var(--space-24);
-}
-.confCard {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-12);
+  flex-wrap: wrap;
+  gap: var(--space-8);
+}
+.confLink {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-8);
   text-decoration: none;
   color: inherit;
-  background: var(--surface);
-  border: 1px solid var(--hairline);
-  border-radius: var(--radius-card);
-  padding: var(--space-24);
-  box-shadow: var(--shadow-card);
-  transition: box-shadow var(--motion-base) var(--easing), transform var(--motion-base) var(--easing);
-  height: 100%;
+  border: 1px solid var(--hairline-strong);
+  padding: 7px 12px;
+  transition: background var(--motion-fast) var(--easing);
 }
-.confCard:hover { box-shadow: var(--shadow-card-hover); transform: translateY(-2px); }
+.confLink:hover { background: var(--surface-sunken); }
+.confLink:focus-visible {
+  outline: var(--focus-ring) solid var(--accent);
+  outline-offset: 2px;
+}
+
 .confCount {
   font-family: var(--font-mono);
-  font-size: var(--fs-meta);
+  font-size: 11px;
   color: var(--ink-muted);
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
-.confTeaser {
-  font-family: var(--font-serif);
-  font-size: var(--fs-body-m);
-  line-height: var(--lh-body-m);
-  color: var(--ink-secondary);
-  margin: 0;
-  flex: 1;
-}
-.confCta {
-  font-family: var(--font-mono);
-  font-size: var(--fs-body-s);
-  color: var(--accent);
+
+@media (max-width: 900px) {
+  /* 副标题在窄屏挪到标题下方，不再占右栏。 */
+  .hero {
+    grid-template-columns: 1fr;
+    gap: var(--space-16);
+  }
+  .lead { grid-column: 1; }
 }
 
 @media (max-width: 640px) {
   .page { padding: var(--space-24) var(--page-margin-mobile) var(--space-64); }
-  .confList { grid-template-columns: 1fr; }
+  .h1 { font-size: 24px; }
 }

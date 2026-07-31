@@ -12,54 +12,62 @@
  */
 
 :root {
-  /* ---- 中性 / 纸面（§3.2） ---- */
-  --paper: #FBFAF8;            /* 页面底色（暖白纸面） */
-  --surface: #FFFFFF;          /* 卡片 / 浮层表面 */
-  --surface-sunken: #F4F2ED;   /* 次级块、筛选栏底 */
-  --ink: #1C1B19;              /* 主文本（近黑，微暖） */
-  --ink-secondary: #57534E;    /* 次级文本 */
-  /* 元信息 / 占位。原 #8A857D 在纸面上仅 3.51:1，低于正文 4.5:1 基准；
-     本色大量用于 12–13px 小字，加深到 5.14:1 后满足 WCAG AA。 */
-  --ink-muted: #6F6A62;
-  --hairline: #E7E4DE;         /* 分隔线 / 卡片描边 */
-  --hairline-strong: #D8D4CC;  /* 输入框 / 强分隔 */
+  /* ---- 中性 / 纸面（暖纸档案调；2026-07 改版）----
+     由「暖白 + 墨蓝」改为「米黄纸 + 赭石」：更接近纸质档案，
+     与等宽字标注配合，弱化「又一个 AI 产品站」的默认观感。 */
+  --paper: #E7E4DB;            /* 页面底色（米黄纸） */
+  --surface: #F4F2EC;          /* 卡片 / 浮层表面（米白） */
+  --surface-sunken: #EFEDE5;   /* 次级块、筛选栏底 */
+  --ink: #1A1814;              /* 主文本（墨色，暖偏） */
+  --ink-secondary: #3A3730;    /* 次级文本 */
+  /* 元信息 / 占位：在 --surface 上 4.6:1，满足小字 AA。 */
+  --ink-muted: #6F6A5E;
+  --ink-faint: #8C8676;        /* 等宽标注 / 弱化元信息（仅用于 >=11px 全大写） */
+  --hairline: #DCD8CD;         /* 分隔线 / 卡片描边 */
+  --hairline-strong: #CFCABD;  /* 输入框 / 强分隔 */
 
-  /* ---- 主强调 Editorial Ink Blue（§3.2） ---- */
-  --accent: #1B3A5B;           /* 主 CTA、链接、选中态 */
-  --accent-hover: #142C46;     /* 主色 hover */
-  --accent-tint: #E9EEF4;      /* 主题 chip / 选中背景 */
+  /* ---- 主强调 赭石 Terracotta ---- */
+  --accent: #A9481E;           /* 主 CTA、链接、选中态、必看标记 */
+  --accent-hover: #1A1814;     /* 主色 hover（转墨色，避免同色系悬停无感） */
+  --accent-tint: #F0E7E0;      /* 主题 chip / 选中背景 */
 
   /* ---- 状态色 三态（§3.2） ---- */
-  --status-recommended-ink: #8A5200;   /* 暖金字 */
-  --status-recommended-bg: #FBEFD6;    /* 暖金底 */
-  --status-indexed-ink: #57534E;       /* 中性字 */
-  --status-indexed-bg: #F0EEE9;        /* 中性底 */
-  --status-analyzing-ink: #2F5D50;     /* 深绿字 */
-  --status-analyzing-bg: #E4EFE9;      /* 深绿底 */
+  --status-recommended-ink: #8A4A12;   /* 暖金字 */
+  --status-recommended-bg: #F2E6D8;    /* 暖金底 */
+  --status-indexed-ink: #3A3730;       /* 中性字 */
+  --status-indexed-bg: #E4E1D7;        /* 中性底 */
+  --status-analyzing-ink: #2C6355;     /* 深绿字 */
+  --status-analyzing-bg: #E0E8E2;      /* 深绿底 */
 
   /* ---- 大会色标（§3.2，仅识别，禁止大面积铺色） ---- */
-  --conf-ai-engineer: #2F5D50;    /* AI Engineer World's Fair — 森林绿 */
-  --conf-cursor-compile: #3A3A3A; /* Cursor Compile — 石墨黑 */
-  --conf-figma-config: #6B4E9E;   /* Figma Config — 低饱和紫 */
+  --conf-ai-engineer: #2C6355;    /* AI Engineer World's Fair — 森林绿 */
+  --conf-cursor-compile: #1A1814; /* Cursor Compile — 墨色 */
+  --conf-figma-config: #5B3E8C;   /* Figma Config — 低饱和紫 */
 
   /* ---- 反馈色（§3.2） ---- */
-  --feedback-error-ink: #9B2C2C;
-  --feedback-error-bg: #F7E9E7;
-  --feedback-success-ink: #2F5D50;
-  --feedback-success-bg: #E4EFE9;
+  --feedback-error-ink: #8F2A20;
+  --feedback-error-bg: #F0E2DE;
+  --feedback-success-ink: #2C6355;
+  --feedback-success-bg: #E0E8E2;
 
-  /* ---- 导览观看模式（复用既有色板，不新增色值）：看/略/听 ---- */
-  --mode-watch-ink: var(--accent);           /* 看画面 → 主强调 */
+  /* ---- 导览观看模式：看/略/听 ---- */
+  --mode-watch-ink: var(--accent);           /* 看画面 → 赭石（必看即强调色） */
   --mode-watch-bg: var(--accent-tint);
-  --mode-skim-ink: var(--ink-secondary);     /* 略读 → 中性 */
-  --mode-skim-bg: var(--surface-sunken);
-  --mode-listen-ink: #2F5D50;                /* 听即可 → 深绿（§3.2 已有） */
-  --mode-listen-bg: #E4EFE9;
+  --mode-skim-ink: #6F6A5E;                  /* 略读 → 灰褐 */
+  --mode-skim-bg: #E4E1D7;
+  --mode-listen-ink: #2C6355;                /* 听即可 → 深绿 */
+  --mode-listen-bg: #E0E8E2;
+  /* 分段进度条实心块（三档占比条用，需在浅底上够实） */
+  --mode-watch-solid: #A9481E;
+  --mode-skim-solid: #B9B4A6;
+  --mode-listen-solid: #2C6355;
 
   /* ---- 字族 中英文混排（§3.3） ---- */
+  /* --font-*-loaded 由 next/font 在 layout.tsx 注入（构建期自托管）；
+     未加载时回落系统栈，不影响布局。 */
   --font-serif: "Source Serif 4", "Noto Serif SC", Georgia, "Songti SC", serif;
-  --font-sans: "Inter", "Noto Sans SC", system-ui, -apple-system, "PingFang SC", sans-serif;
-  --font-mono: "IBM Plex Mono", "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+  --font-sans: var(--font-sans-loaded), "Noto Sans SC", system-ui, -apple-system, "PingFang SC", sans-serif;
+  --font-mono: var(--font-mono-loaded), "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
 
   /* ---- 字阶 桌面基准（§3.3，size / line / weight / tracking） ---- */
   --fs-display: 56px;   --lh-display: 1.08;  --fw-display: 600;  --tracking-display: -0.02em;
@@ -82,14 +90,14 @@
   --space-64: 64px;
   --space-96: 96px;
 
-  /* ---- 圆角（4px 刻度，卡片不超 8，§3.5/§3.6/§3.7） ---- */
-  --radius-chip: 4px;   /* 主题 chip / 状态徽章 */
-  --radius-btn: 6px;    /* 按钮 / 输入控件 */
-  --radius-card: 8px;   /* 卡片（上限） */
+  /* ---- 圆角：档案调下全部见方（圆角是「默认 AI 观感」的主要来源之一）---- */
+  --radius-chip: 0px;
+  --radius-btn: 0px;
+  --radius-card: 0px;
 
-  /* ---- 阴影（§3.5） ---- */
-  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-card-hover: 0 6px 20px rgba(0, 0, 0, 0.08);
+  /* ---- 阴影：档案调不用投影，靠 1px 描边与底色分层 ---- */
+  --shadow-card: none;
+  --shadow-card-hover: none;
 
   /* ---- 栅格与阅读列宽（§3.3/§3.4） ---- */
   --content-max: 1200px;   /* 内容最大宽 */

@@ -25,19 +25,20 @@ export type Topic =
   | 'design-to-code'
   | 'ai-product';
 
-/** 颜色 token（镜像 theme.css，§3.2）。 */
+/** 颜色 token（镜像 theme.css，暖纸档案调）。 */
 export const color = {
-  paper: '#FBFAF8',
-  surface: '#FFFFFF',
-  surfaceSunken: '#F4F2ED',
-  ink: '#1C1B19',
-  inkSecondary: '#57534E',
-  inkMuted: '#8A857D',
-  hairline: '#E7E4DE',
-  hairlineStrong: '#D8D4CC',
-  accent: '#1B3A5B',
-  accentHover: '#142C46',
-  accentTint: '#E9EEF4',
+  paper: '#E7E4DB',
+  surface: '#F4F2EC',
+  surfaceSunken: '#EFEDE5',
+  ink: '#1A1814',
+  inkSecondary: '#3A3730',
+  inkMuted: '#6F6A5E',
+  inkFaint: '#8C8676',
+  hairline: '#DCD8CD',
+  hairlineStrong: '#CFCABD',
+  accent: '#A9481E',
+  accentHover: '#1A1814',
+  accentTint: '#F0E7E0',
 } as const;
 
 /** 三态视觉元数据：文案 + 色值（§3.2）。全站 recommended 为视觉锚点。 */
@@ -45,16 +46,16 @@ export const statusMeta: Record<
   VideoStatus,
   { label: string; ink: string; bg: string }
 > = {
-  recommended: { label: '推荐先看', ink: '#8A5200', bg: '#FBEFD6' },
-  indexed: { label: '已收录', ink: '#57534E', bg: '#F0EEE9' },
-  analyzing: { label: '解读中', ink: '#2F5D50', bg: '#E4EFE9' },
+  recommended: { label: '推荐先看', ink: '#8A4A12', bg: '#F2E6D8' },
+  indexed: { label: '已收录', ink: '#3A3730', bg: '#E4E1D7' },
+  analyzing: { label: '解读中', ink: '#2C6355', bg: '#E0E8E2' },
 };
 
-/** 大会元数据：显示名 + 色标（§3.2，仅识别用途）。 */
+/** 大会元数据：显示名 + 色标（仅识别用途，不铺色）。 */
 export const conferenceMeta: Record<Conference, { label: string; dot: string }> = {
-  'ai-engineer': { label: "AI Engineer World's Fair", dot: '#2F5D50' },
-  'cursor-compile': { label: 'Cursor Compile', dot: '#3A3A3A' },
-  'figma-config': { label: 'Figma Config', dot: '#6B4E9E' },
+  'ai-engineer': { label: "AI Engineer World's Fair", dot: '#2C6355' },
+  'cursor-compile': { label: 'Cursor Compile', dot: '#1A1814' },
+  'figma-config': { label: 'Figma Config', dot: '#5B3E8C' },
 };
 
 /** 主题显示名（§2.3 / §4.1 区块 6）。英文专有名词保留原文。 */

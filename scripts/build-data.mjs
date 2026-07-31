@@ -473,10 +473,20 @@ function sanitizeTour(v) {
     });
   }
   if (stops.length === 0) return null; // 无站点不成导览
+  const audience = [];
+  for (const a of Array.isArray(v.audience) ? v.audience : []) {
+    if (!a || !str(a.who) || !str(a.why)) continue;
+    audience.push({
+      who: str(a.who),
+      why: str(a.why),
+      fit: a.fit === 'not_recommended' ? 'not_recommended' : 'recommended',
+    });
+  }
   return {
     hook,
     whoShouldWatch: str(v.whoShouldWatch) ?? '',
     ifShortOnTime: str(v.ifShortOnTime) ?? '',
+    audience,
     mustWatch,
     stops,
   };
@@ -747,6 +757,11 @@ function buildEnDataset(ds, enByVideo) {
           hook: pick(f, 'tour/hook', s.tour.hook),
           whoShouldWatch: pick(f, 'tour/whoShouldWatch', s.tour.whoShouldWatch),
           ifShortOnTime: pick(f, 'tour/ifShortOnTime', s.tour.ifShortOnTime),
+          audience: s.tour.audience.map((a, i) => ({
+            ...a,
+            who: pick(f, `tour/audience/${i}/who`, a.who),
+            why: pick(f, `tour/audience/${i}/why`, a.why),
+          })),
           mustWatch: s.tour.mustWatch.map((m, i) => ({
             ...m,
             label: pick(f, `tour/mustWatch/${i}/label`, m.label),

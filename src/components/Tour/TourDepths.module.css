@@ -1,0 +1,136 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 顶部常驻：无论读哪一档，都能看到必看段落落在全片何处。 */
+.sticky {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--surface-sunken);
+  border-top: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline);
+  padding: 0 var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.tabRow {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: var(--space-24);
+  flex-wrap: wrap;
+}
+.tabs { display: flex; }
+
+.tab,
+.tabActive {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  align-items: flex-start;
+  padding: 13px 20px 12px;
+  cursor: pointer;
+  border: none;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+}
+.tabActive {
+  background: var(--surface);
+  border-bottom-color: var(--accent);
+}
+.tab:hover { background: #EAE7DD; }
+.tab:focus-visible,
+.tabActive:focus-visible {
+  outline: var(--focus-ring) solid var(--accent);
+  outline-offset: -2px;
+}
+.tabLabel {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink-muted);
+}
+.tabActive .tabLabel { color: var(--ink); }
+.tabHint {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-faint);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px var(--space-16);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-muted);
+  padding: 0 var(--space-16);
+}
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.legendItem i {
+  width: 9px;
+  height: 9px;
+  display: block;
+  flex-shrink: 0;
+}
+.swatchWatch { background: var(--mode-watch-solid); }
+.swatchSkim { background: var(--mode-skim-solid); }
+
+/* 分段条：宽度即时长占比，点击跳原片对应时刻。 */
+.bar {
+  display: flex;
+  gap: 2px;
+  height: 22px;
+  margin: 0 var(--space-16) 12px;
+}
+.seg_watch,
+.seg_skim,
+.seg_listen {
+  height: 22px;
+  border: none;
+  padding: 0;
+  flex-basis: 0;
+  min-width: 3px;
+  position: relative;
+  overflow: hidden;
+  transition: opacity var(--motion-fast) var(--easing);
+}
+.seg_watch:hover,
+.seg_skim:hover,
+.seg_listen:hover { opacity: 0.75; }
+.seg_watch { background: var(--mode-watch-solid); }
+.seg_skim { background: var(--mode-skim-solid); }
+.seg_listen { background: var(--mode-listen-solid); }
+.segStart {
+  position: absolute;
+  left: 5px;
+  top: 4px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: #fff;
+  opacity: 0.85;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.panel { padding-top: var(--space-24); }
+
+@media (max-width: 640px) {
+  .tab,
+  .tabActive { padding: 10px 12px; }
+  .tabLabel { font-size: 13px; }
+  /* 窄屏时间轴上的起点标签会互相压叠，隐去只保留色块比例。 */
+  .segStart { display: none; }
+  .legend { font-size: 10px; padding: 0 var(--space-8); }
+  .bar { margin: 0 var(--space-8) 10px; }
+}

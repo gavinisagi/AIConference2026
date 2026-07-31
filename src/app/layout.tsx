@@ -1,6 +1,26 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
+import { IBM_Plex_Mono, Noto_Sans_SC } from 'next/font/google';
 import './globals.css';
+
+/**
+ * 字体：构建期下载并自托管（next/font），无运行时第三方请求、无 FOUT。
+ * 等宽体承担全站标注（时间戳/占比/眼签），是暖纸档案调的骨架，故必须真正加载
+ * ——此前 theme.css 只声明了字族名但从未加载字体文件，实际一直回落系统字体。
+ */
+const mono = IBM_Plex_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  display: 'swap',
+  variable: '--font-mono-loaded',
+});
+
+const sans = Noto_Sans_SC({
+  subsets: ['latin'],
+  weight: ['400', '500', '700'],
+  display: 'swap',
+  variable: '--font-sans-loaded',
+});
 
 /**
  * 站点根布局。
@@ -46,7 +66,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="zh-CN">
+    <html lang="zh-CN" className={`${mono.variable} ${sans.variable}`}>
       <body>{children}</body>
     </html>
   );
