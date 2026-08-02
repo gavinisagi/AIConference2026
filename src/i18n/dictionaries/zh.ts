@@ -45,6 +45,53 @@ export const zh = {
     archiveLine: (month: string) => `档案 · 更新至 ${month}`,
     headline: (n: number) => `${n} 场演讲，逐段标出值得看的那几分钟。`,
     subLead: '每场附逐段导览与必看片段，可直接跳到原片对应时间。',
+    /** 引导页：不直接铺列表，先按「你是谁」或「哪场大会」分流。 */
+    indexHeadline: '同一场大会，工程师、创始人、设计师该看的不是同几场。',
+    indexLead: (confs: number, talks: number) =>
+      `${confs} 场大会 ${talks} 场演讲，逐段读过一遍，按角色标好了谁该看哪几场、其中哪几分钟必须盯屏。`,
+    howToHeading: '怎么用',
+    howTo: [
+      '选一场大会，或直接从下方角色入口进入',
+      '列表按角色、主题、可用时间收窄到几条',
+      '打开单场：读结论、读导览，或只跳看必看片段',
+    ],
+    enter: '进入 →',
+    personaRelated: (n: number) => `${n} 场相关`,
+    personaMins: (m: number) => `· 共 ${m} min 必看`,
+  },
+  /** 角色入口卡 / 角色页的文案（身份与 Role 枚举的映射见 src/lib/personas.ts）。 */
+  personas: {
+    engineer: {
+      who: '应用层工程师',
+      care: '别人在生产环境里踩过的坑，和能直接抄的做法',
+    },
+    founder: {
+      who: '创始人 / 负责人',
+      care: '技术拐点如何改变团队结构与产品判断',
+    },
+    designer: {
+      who: '设计师',
+      care: '生成能力变强之后，设计交付物和工作方式的变化',
+    },
+    trend: {
+      who: '只想跟进趋势',
+      care: '方向性的判断与争论，而不是逐行的实现细节',
+    },
+  },
+  /** 角色浏览页（/for/{persona}）。 */
+  personaPage: {
+    eyebrow: (kicker: string) => `谁该看 · ${kicker}`,
+    lead: (care: string) => `${care}，以下是三场大会里与你直接相关的部分。`,
+    statTalks: '场相关',
+    statMins: '分钟必看',
+    statConfs: '场大会覆盖',
+  },
+  /** 会议页（/c/{id}）头部。 */
+  confPage: {
+    statTalks: '场演讲',
+    statMustWatch: '场推荐必看',
+    statHours: '小时总时长',
+    themesHeading: '这场大会讲了什么',
   },
   /**
    * 首页选片器（facet 筛选 + 排序 + 结果行）。

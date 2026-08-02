@@ -1,17 +1,13 @@
 import type { Metadata } from 'next';
-import { getAllSessions } from '@/lib/loader';
 import { getDictionary } from '@/i18n/getDictionary';
 import { SiteChrome } from '@/components/SiteChrome/SiteChrome';
-import { SessionPicker } from '@/components/SessionPicker/SessionPicker';
-import { buildPickerProps } from '@/components/SessionPicker/buildPickerProps';
-import styles from '../home.module.css';
+import { HomeIndex } from '@/components/HomeIndex/HomeIndex';
 
 /**
- * /en — 英文首页。中文原版见 src/app/page.tsx；两者共享同一份 home.module.css
- * 与组件，只是显式传入 locale='en'（非 [locale] 动态段方案，见 src/i18n/locale.ts）。
+ * /en — 英文首页。中文原版见 src/app/page.tsx；两者共用 HomeIndex，
+ * 只是显式传入 locale='en'（非 [locale] 动态段方案，见 src/i18n/locale.ts）。
  */
 const dict = getDictionary('en');
-const ARCHIVE_MONTH = '2026.07';
 
 export const metadata: Metadata = {
   title: `${dict.site.name} — ${dict.site.tagline}`,
@@ -20,21 +16,9 @@ export const metadata: Metadata = {
 };
 
 export default function HomePageEn() {
-  const sessions = getAllSessions('en');
-
   return (
     <SiteChrome locale="en">
-      <main className={styles.page}>
-        <div className={styles.inner}>
-          <header className={styles.hero}>
-            <span className={styles.eyebrow}>{dict.home.archiveLine(ARCHIVE_MONTH)}</span>
-            <h1 className={styles.h1}>{dict.home.headline(sessions.length)}</h1>
-            <p className={styles.lead}>{dict.home.subLead}</p>
-          </header>
-
-          <SessionPicker {...buildPickerProps(sessions, dict, 'en')} />
-        </div>
-      </main>
+      <HomeIndex locale="en" />
     </SiteChrome>
   );
 }

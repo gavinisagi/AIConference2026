@@ -40,6 +40,49 @@ export const en = {
     archiveLine: (month: string) => `Archive · updated ${month}`,
     headline: (n: number) => `${n} talks, with the minutes worth watching marked segment by segment.`,
     subLead: 'Every talk comes with a segment-by-segment guide and must-watch clips that link straight to the timestamp.',
+    indexHeadline: 'Same conference — but engineers, founders and designers should not be watching the same talks.',
+    indexLead: (confs: number, talks: number) =>
+      `${talks} talks across ${confs} conferences, read through segment by segment and tagged by role: which ones are for you, and which minutes you actually need to watch.`,
+    howToHeading: 'How to use it',
+    howTo: [
+      'Pick a conference, or jump in from a role below',
+      'Narrow the list down by role, topic and the time you have',
+      'Open a talk: read the gist, read the guide, or just skip to the must-watch clips',
+    ],
+    enter: 'Enter →',
+    personaRelated: (n: number) => `${n} relevant`,
+    personaMins: (m: number) => `· ${m} min must-watch`,
+  },
+  personas: {
+    engineer: {
+      who: 'Application engineers',
+      care: 'What other teams hit in production, and the parts you can copy outright',
+    },
+    founder: {
+      who: 'Founders & leads',
+      care: 'How the technical shift changes team structure and product bets',
+    },
+    designer: {
+      who: 'Designers',
+      care: 'What changes about design deliverables and workflow once generation gets good',
+    },
+    trend: {
+      who: 'Following the trend',
+      care: 'The directional arguments, not the line-by-line implementation',
+    },
+  },
+  personaPage: {
+    eyebrow: (kicker: string) => `Who it’s for · ${kicker}`,
+    lead: (care: string) => `${care}. Here is what’s directly relevant to you across the three conferences.`,
+    statTalks: 'relevant',
+    statMins: 'min must-watch',
+    statConfs: 'conferences',
+  },
+  confPage: {
+    statTalks: 'talks',
+    statMustWatch: 'worth watching',
+    statHours: 'hours total',
+    themesHeading: 'What this conference was about',
   },
   picker: {
     facetConference: 'Conference',

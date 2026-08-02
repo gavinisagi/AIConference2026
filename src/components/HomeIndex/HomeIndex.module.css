@@ -1,0 +1,229 @@
+.page {
+  background: var(--paper);
+  min-height: 100vh;
+  padding: var(--space-32) var(--page-margin-desktop) var(--space-96);
+}
+.inner {
+  max-width: 1290px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-32);
+}
+
+/* ---- 标题区：左主张、右「怎么用」三步 ---- */
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: var(--space-64);
+  align-items: end;
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: 30px;
+}
+.heroMain {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--accent);
+}
+.h1 {
+  margin: 0;
+  font-size: 40px;
+  line-height: 1.28;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  text-wrap: pretty;
+}
+.lead {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.75;
+  color: var(--ink-secondary);
+  max-width: 620px;
+  text-wrap: pretty;
+}
+
+.howTo {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  padding-bottom: 4px;
+}
+.howToHead {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.howToRow {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  gap: 10px;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--ink-muted);
+}
+.howToNum {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent);
+  padding-top: 3px;
+}
+
+/* ---- 角色入口：四格，1px 缝隙靠底色透出（不用投影分层）---- */
+.personaGrid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--hairline-strong);
+  border: 1px solid var(--hairline-strong);
+}
+.personaCell { display: flex; }
+.personaCard {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  align-items: flex-start;
+  text-decoration: none;
+  color: inherit;
+  background: var(--surface);
+  padding: 18px 18px 20px;
+  width: 100%;
+  transition: background var(--motion-fast) var(--easing);
+}
+.personaCard:hover { background: var(--surface-sunken); }
+.personaCard:focus-visible {
+  outline: var(--focus-ring) solid var(--accent);
+  outline-offset: -2px;
+}
+.personaKicker {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--ink-faint);
+}
+.personaWho {
+  font-size: 19px;
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1.4;
+}
+.personaCare {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--ink-muted);
+  text-wrap: pretty;
+}
+.personaStats {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 6px;
+  margin-top: auto;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+.personaN { color: var(--accent); }
+.personaMins { color: var(--ink-faint); }
+
+/* ---- 会议大卡 ---- */
+.confGrid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-24);
+}
+.confCard {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+  background: var(--surface);
+  border: 1px solid var(--hairline-strong);
+  transition: background var(--motion-fast) var(--easing);
+}
+.confCard:hover { background: var(--surface-sunken); }
+.confCard:focus-visible {
+  outline: var(--focus-ring) solid var(--accent);
+  outline-offset: 2px;
+}
+.confCover {
+  display: block;
+  width: 100%;
+  height: 240px;
+  background: var(--ink);
+  overflow: hidden;
+}
+.confCoverImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.confBody {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  flex: 1;
+  border-top: 1px solid var(--hairline-strong);
+  padding: 22px 22px 24px;
+}
+.confName {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.confHook {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--ink-muted);
+  text-wrap: pretty;
+  flex: 1;
+}
+.confFoot {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-12);
+  padding-top: 12px;
+  border-top: 1px solid var(--hairline);
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+.confCount { color: var(--ink-muted); }
+.confEnter { color: var(--accent); }
+
+/* ---- 响应式 ---- */
+@media (max-width: 1000px) {
+  .hero {
+    grid-template-columns: 1fr;
+    gap: var(--space-24);
+    align-items: start;
+  }
+  .personaGrid { grid-template-columns: repeat(2, 1fr); }
+  .confGrid { grid-template-columns: 1fr; }
+  .confCover { height: 200px; }
+}
+
+@media (max-width: 640px) {
+  .page { padding: var(--space-24) var(--page-margin-mobile) var(--space-64); }
+  .h1 { font-size: 26px; }
+  .lead { font-size: 15px; }
+  .personaGrid { grid-template-columns: 1fr; }
+  .confName { font-size: 22px; }
+}

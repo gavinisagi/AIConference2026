@@ -1,0 +1,47 @@
+import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+import { getDictionary } from '@/i18n/getDictionary';
+import { PERSONA_SLUGS, isPersonaSlug } from '@/lib/personas';
+import { PersonaView } from '@/components/PersonaView/PersonaView';
+import { SiteChrome } from '@/components/SiteChrome/SiteChrome';
+
+/**
+ * /en/for/{persona} — 英文镜像。中文原版见 src/app/for/[persona]/page.tsx。
+ */
+const dict = getDictionary('en');
+
+export function generateStaticParams(): Array<{ persona: string }> {
+  return PERSONA_SLUGS.map((persona) => ({ persona }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ persona: string }>;
+}): Promise<Metadata> {
+  const { persona } = await params;
+  if (!isPersonaSlug(persona)) return { title: dict.site.name };
+  const p = dict.personas[persona];
+  return {
+    title: `Talks for ${p.who} · ${dict.site.name}`,
+    description: p.care,
+    alternates: {
+      languages: { 'zh-CN': `/for/${persona}/`, en: `/en/for/${persona}/` },
+    },
+  };
+}
+
+export default async function PersonaPageEn({
+  params,
+}: {
+  params: Promise<{ persona: string }>;
+}) {
+  const { persona } = await params;
+  if (!isPersonaSlug(persona)) notFound();
+
+  return (
+    <SiteChrome locale="en">
+      <PersonaView persona={persona} locale="en" />
+    </SiteChrome>
+  );
+}

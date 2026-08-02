@@ -15,14 +15,14 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) 400px;
   gap: var(--space-48);
-  align-items: start;
-  padding-bottom: 14px;
+  align-items: end;
+  padding-bottom: 18px;
   border-bottom: 2px solid var(--ink);
 }
 .headMain {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 .eyebrow {
   font-family: var(--font-mono);
@@ -32,27 +32,28 @@
 }
 .h1 {
   margin: 0;
-  font-size: 44px;
+  font-size: 40px;
   font-weight: 700;
-  line-height: 1.15;
+  line-height: 1.2;
   letter-spacing: -0.02em;
   color: var(--ink);
   text-wrap: pretty;
 }
-.hook {
+.lead {
   margin: 0;
-  font-size: 19px;
-  line-height: 1.7;
+  font-size: 17px;
+  line-height: 1.75;
   color: var(--ink-secondary);
-  max-width: 640px;
+  max-width: 620px;
   text-wrap: pretty;
 }
 
+/* 三个硬数字：等宽体大号，与页头的叙述形成对照。 */
 .stats {
   display: flex;
   flex-wrap: wrap;
   gap: 36px;
-  padding-top: 8px;
+  padding-bottom: 6px;
 }
 .stat {
   display: flex;
@@ -74,48 +75,18 @@
   white-space: nowrap;
 }
 
-/* ---- 这场大会讲了什么：编号 + 信号标题 ---- */
-.themes {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-12);
-}
-.themesHead {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--ink);
-}
-.theme {
-  display: grid;
-  grid-template-columns: 24px minmax(0, 1fr);
-  gap: var(--space-12);
-  padding: 11px 0;
-  border-bottom: 1px solid var(--hairline);
-}
-.themeNum {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--accent);
-  padding-top: 4px;
-}
-.themeText {
-  font-size: 15px;
-  line-height: 1.7;
-  color: var(--ink-secondary);
-  text-wrap: pretty;
-}
-
 @media (max-width: 1000px) {
   .head {
     grid-template-columns: 1fr;
     gap: var(--space-24);
+    align-items: start;
   }
 }
 
 @media (max-width: 640px) {
   .page { padding: var(--space-24) var(--page-margin-mobile) var(--space-64); }
-  .h1 { font-size: 28px; }
-  .hook { font-size: 16px; }
+  .h1 { font-size: 26px; }
+  .lead { font-size: 15px; }
   .stats { gap: var(--space-24); }
   .statNum,
   .statNumAccent { font-size: 22px; }
